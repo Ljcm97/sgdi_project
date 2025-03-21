@@ -1,0 +1,74 @@
+from flask import Blueprint, render_template, redirect, url_for, jsonify
+from flask_login import login_required, current_user
+from app.models.notificacion import Notificacion
+from app.models.documento import Documento
+
+notificaciones_bp = Blueprint('notificaciones', __name__, url_prefix='/notificaciones')
+
+@notificaciones_bp.route('/')
+@login_required
+def index():
+    """Vista para mostrar todas las notificaciones del usuario"""
+    notificaciones = Notificacion.query.filter_by(usuario_id=current_user.id).order_by(Notificacion.creado_en.desc()).all()
+    return render_template('notificaciones/index.html', notificaciones=notificaciones)
+
+
+@notificaciones_bp.route('/marcar-leida/<int:id>')
+@login_required
+def marcar_leida(id):
+    """Vista para marcar una notificación como leída"""
+    notificacion = Notificacion.query.filter_by(id=id, usuario_id=current_user.id).first_or_404()
+    notificacion.marcar_como_leida()
+    
+    # Redirigir al documento si existe
+    if notificacion.documento_id:
+        return redirect(url_for('documentos.detalle', id=notificacion.documento_id))
+    
+    return redirect(url_for('notificaciones.index'))
+
+
+@notificaciones_bp.route('/marcar-todas-leidas')
+@login_required
+def marcar_todas_leidas():
+    """Vista para marcar todas las notificaciones como leídas"""
+    notificaciones = Notificacion.query.filter_by(usuario_id=current_user.id, leida=False).all()
+    
+    for notificacion in notificaciones:
+        notificacion.marcar_como_leida()
+    
+    return redirect(url_for('notificaciones.index'))
+
+
+@notificaciones_bp.route('/no-leidas')
+@login_required
+def no_leidas():
+    """API para obtener el número de notificaciones no leídas"""
+    cantidad = Notificacion.query.filter_by(usuario_id=current_user.id, leida=False).count()
+    return jsonify({'cantidad': cantidad})
+
+
+@notificaciones_bp.route('/recientes')
+@login_required
+def recientes():
+    """API para obtener las notificaciones recientes no leídas"""
+    notificaciones = Notificacion.query.filter_by(usuario_id=current_user.id, leida=False).order_by(Notificacion.creado_en.desc()).limit(5).all()
+    
+    result = []
+    for notif in notificaciones:
+        item = {
+            'id': notif.id,
+            'titulo': notif.titulo,
+            'mensaje': notif.mensaje,
+            'creado_en': notif.creado_en.strftime('%Y-%m-%d %H:%M'),
+            'documento_id': notif.documento_id
+        }
+        
+        # Agregar información del documento si existe
+        if notif.documento_id:
+            doc = Documento.query.get(notif.documento_id)
+            if doc:
+                item['radicado'] = doc.radicado
+        
+        result.append(item)
+    
+    return jsonify(result)

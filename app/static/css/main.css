@@ -1,0 +1,163 @@
+/* Estilos principales para SGDI - Sistema de Gestión Documental Interna */
+
+/* Importar fuentes */
+@font-face {
+    font-family: 'Boris Black Bloxx';
+    src: url('../fonts/BorisBlackBloxx.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Variables de colores corporativos */
+:root {
+    --color-azul: #1D2C96;
+    --color-dorado: #DAA520;
+    --color-rojo: #E20505;
+    --color-verde: #357234;
+    --color-gris: #7f8c8d;
+}
+
+/* Estilos generales */
+body {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+}
+
+/* Estilos de la barra de navegación */
+.navbar-brand {
+    font-family: 'Boris Black Bloxx', sans-serif;
+    font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--color-dorado);
+}
+
+/* Estilos para botones */
+.btn-primary {
+    background-color: var(--color-azul);
+    border-color: var(--color-azul);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #161e6e;
+    border-color: #161e6e;
+}
+
+.btn-dorado {
+    background-color: var(--color-dorado);
+    border-color: var(--color-dorado);
+    color: white;
+}
+
+.btn-dorado:hover, .btn-dorado:focus {
+    background-color: #b8860b;
+    border-color: #b8860b;
+    color: white;
+}
+
+/* Estilos para tarjetas */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+}
+
+/* Estilos para enlaces */
+a {
+    color: var(--color-azul);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--color-dorado);
+}
+
+/* Estilos para las notificaciones */
+#notificaciones-menu {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+#notificaciones-menu .dropdown-item {
+    white-space: normal;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+#notificaciones-menu .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para tablas */
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid var(--color-azul);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(29, 44, 150, 0.05);
+}
+
+/* Estilos para badges/etiquetas */
+.badge {
+    padding: 5px 8px;
+    border-radius: 4px;
+}
+
+/* Estilos para formularios */
+.form-control, .form-select {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-azul);
+    box-shadow: 0 0 0 0.25rem rgba(29, 44, 150, 0.25);
+}
+
+/* Estilos para pie de página */
+footer {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}

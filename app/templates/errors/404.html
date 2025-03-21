@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Página no encontrada - SGDI{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="display-1 text-muted">404</h1>
+                    <h2 class="mb-4">Página no encontrada</h2>
+                    <p class="lead mb-4">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
+                    
+                    <div class="mb-5">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" height="100" class="mb-3">
+                    </div>
+                    
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i> Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

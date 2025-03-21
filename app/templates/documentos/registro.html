@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Documento - SGDI{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-file-plus me-2"></i> Registrar Nuevo Documento
+        </h3>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <!-- Fecha y Hora de Recepción -->
+                <div class="col-md-6 mb-3">
+                    {{ form.fecha_recepcion.label(class="form-label") }}
+                    {{ form.fecha_recepcion(class="form-control", id="fecha_recepcion") }}
+                    {% if form.fecha_recepcion.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.fecha_recepcion.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+    // Inicializar el selector de fecha y hora
+    flatpickr("#fecha_recepcion", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        locale: "es",
+        time_24hr: true
+    });
+    
+    // Cargar personas cuando cambia el área
+    $(document).ready(function() {
+        // Función para cargar personas de un área
+        function cargarPersonas(areaId) {
+            if (!areaId) return;
+            
+            $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
+                var options = '';
+                $.each(data, function(index, persona) {
+                    options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
+                });
+                
+                $("#persona_destino_id").html(options);
+            });
+        }
+        
+        // Evento al cambiar de área
+        $("#area_destino_id").change(function() {
+            cargarPersonas($(this).val());
+        });
+        
+        // Cargar personas inicialmente si hay un área seleccionada
+        var areaInicial = $("#area_destino_id").val();
+        if (areaInicial) {
+            cargarPersonas(areaInicial);
+        }
+    });
+</script>
+{% endblock %}
+                </div>
+                
+                <!-- Transportadora -->
+                <div class="col-md-6 mb-3">
+                    {{ form.transportadora_id.label(class="form-label") }}
+                    {{ form.transportadora_id(class="form-select") }}
+                    {% if form.transportadora_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.transportadora_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Número de Guía -->
+                <div class="col-md-6 mb-3">
+                    {{ form.numero_guia.label(class="form-label") }}
+                    {{ form.numero_guia(class="form-control") }}
+                    {% if form.numero_guia.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.numero_guia.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Remitente -->
+                <div class="col-md-6 mb-3">
+                    {{ form.remitente.label(class="form-label") }}
+                    {{ form.remitente(class="form-control") }}
+                    {% if form.remitente.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.remitente.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Tipo de Documento -->
+                <div class="col-md-6 mb-3">
+                    {{ form.tipo_documento_id.label(class="form-label") }}
+                    {{ form.tipo_documento_id(class="form-select") }}
+                    {% if form.tipo_documento_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.tipo_documento_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Tipo (Entrada/Salida) -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tipo</label>
+                    <div>
+                        {% for subfield in form.tipo %}
+                            <div class="form-check form-check-inline">
+                                {{ subfield(class="form-check-input") }}
+                                {{ subfield.label(class="form-check-label") }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.tipo.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.tipo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Área Destino -->
+                <div class="col-md-6 mb-3">
+                    {{ form.area_destino_id.label(class="form-label") }}
+                    {{ form.area_destino_id(class="form-select", id="area_destino_id") }}
+                    {% if form.area_destino_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.area_destino_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Persona Destino -->
+                <div class="col-md-6 mb-3">
+                    {{ form.persona_destino_id.label(class="form-label") }}
+                    {{ form.persona_destino_id(class="form-select", id="persona_destino_id") }}
+                    {% if form.persona_destino_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.persona_destino_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Contenido -->
+                <div class="col-md-12 mb-3">
+                    {{ form.contenido.label(class="form-label") }}
+                    {{ form.contenido(class="form-control", rows=3) }}
+                    {% if form.contenido.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.contenido.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Observaciones -->
+                <div class="col-md-12 mb-3">
+                    {{ form.observaciones.label(class="form-label") }}
+                    {{ form.observaciones(class="form-control", rows=3) }}
+                    {% if form.observaciones.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.observaciones.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Personas - SGDI{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-users me-2"></i> Gestión de Personas
+        </h3>
+        <div>
+            <a href="{{ url_for('personas.crear') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle"></i> Crear Nueva Persona
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if personas %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombres y Apellidos</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Zona Económica</th>
+                            <th>Unidad</th>
+                            <th>Área</th>
+                            <th>Cargo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for persona in personas %}
+                            <tr>
+                                <td>{{ persona.id }}</td>
+                                <td>{{ persona.nombres_apellidos }}</td>
+                                <td>{{ persona.email or 'N/A' }}</td>
+                                <td>{{ persona.telefono or 'N/A' }}</td>
+                                <td>{{ persona.zona_economica.nombre }}</td>
+                                <td>{{ persona.unidad.nombre }}</td>
+                                <td>{{ persona.area.nombre }}</td>
+                                <td>{{ persona.cargo.nombre }}</td>
+                                <td>
+                                    {% if persona.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('personas.editar', id=persona.id) }}" class="btn btn-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('personas.toggle_estado', id=persona.id) }}" class="btn btn-warning" title="Cambiar estado" onclick="return confirm('¿Estás seguro de cambiar el estado de esta persona?')">
+                                            {% if persona.activo %}
+                                                <i class="fas fa-ban"></i>
+                                            {% else %}
+                                                <i class="fas fa-check"></i>
+                                            {% endif %}
+                                        </a>
+                                        <a href="{{ url_for('personas.eliminar', id=persona.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta persona? Esta acción no se puede deshacer.')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No hay personas registradas en el sistema.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

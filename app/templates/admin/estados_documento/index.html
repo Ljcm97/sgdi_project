@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Estados de Documento - SGDI{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-tasks me-2"></i> Gestión de Estados de Documento
+        </h3>
+    </div>
+    <div class="card-body">
+        <!-- Formulario de creación -->
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Crear Nuevo Estado de Documento</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('estados_documento.crear') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.nombre.label(class="form-label") }}
+                                    {{ form.nombre(class="form-control") }}
+                                    {% if form.nombre.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.nombre.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    {{ form.color.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.color(class="form-control", type="color") }}
+                                        {{ form.color(class="form-control", id="colorHex", placeholder="#RRGGBB") }}
+                                    </div>
+                                    {% if form.color.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.color.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-12 mb-3">
+                                    {{ form.descripcion.label(class="form-label") }}
+                                    {{ form.descripcion(class="form-control", rows=3) }}
+                                    {% if form.descripcion.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.descripcion.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i> Crear Estado
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Listado de estados -->
+        {% if estados %}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Color</th>
+                            <th>Descripción</th>
+                            <th>Fecha de Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estado in estados %}
+                            <tr>
+                                <td>{{ estado.id }}</td>
+                                <td>{{ estado.nombre }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ estado.color }}; color: #fff;">
+                                        {{ estado.color }}
+                                    </span>
+                                </td>
+                                <td>{{ estado.descripcion }}</td>
+                                <td>{{ estado.creado_en.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('estados_documento.editar', id=estado.id) }}" class="btn btn-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('estados_documento.eliminar', id=estado.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este estado? Esta acción no se puede deshacer.')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No hay estados de documento registrados en el sistema.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Sincronizar el campo de color con el input de texto
+    document.addEventListener('DOMContentLoaded', function() {
+        const colorInput = document.querySelector('input[type="color"]');
+        const colorHex = document.getElementById('colorHex');
+        
+        colorInput.addEventListener('input', function() {
+            colorHex.value = this.value;
+        });
+        
+        colorHex.addEventListener('input', function() {
+            colorInput.value = this.value;
+        });
+    });
+</script>
+{% endblock %}

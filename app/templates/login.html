@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - SGDI</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logoazul.png') }}" type="image/x-icon">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        .login-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-left {
+            background-color: #1D2C96;
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-right {
+            background-color: white;
+            padding: 40px;
+        }
+        
+        .logo-img {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        
+        .company-name {
+            font-family: 'Boris Black Bloxx', sans-serif;
+            color: #DAA520;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .system-name {
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .login-title {
+            font-size: 28px;
+            color: #DAA520;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #1D2C96;
+            border-color: #1D2C96;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #DAA520;
+            border-color: #DAA520;
+        }
+        
+        .form-control {
+            border-radius: 5px;
+            padding: 12px;
+        }
+        
+        .eye-icon {
+            cursor: pointer;
+        }
+        
+        .forgot-link {
+            color: #1D2C96;
+            text-decoration: none;
+        }
+        
+        .forgot-link:hover {
+            color: #DAA520;
+        }
+    </style>
+</head>
+<body>
+    <div class="container login-container">
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card login-card">
+            <div class="row g-0">
+                <!-- Lado izquierdo -->
+                <div class="col-md-5 login-left">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-img">
+                    <div class="company-name">Agroindustrial Molino Sonora AP S.A.S.</div>
+                    <div class="system-name">SGDI - Sistema de Gestión Documental Interna</div>
+                </div>
+                
+                <!-- Lado derecho -->
+                <div class="col-md-7 login-right">
+                    <h2 class="login-title">¡Iniciar Sesión!</h2>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control", placeholder="Ingrese su nombre de usuario") }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.password(class="form-control", placeholder="Ingrese su contraseña", id="password-field") }}
+                                <span class="input-group-text eye-icon" onclick="togglePasswordVisibility()">
+                                    <i class="fas fa-eye" id="eye-icon"></i>
+                                </span>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    {{ form.remember(class="form-check-input") }}
+                                    {{ form.remember.label(class="form-check-label") }}
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-4 text-muted">
+            © {{ get_year() }} Agroindustrial Molino Sonora AP S.A.S. Todos los derechos reservados
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    
+    <script>
+        function togglePasswordVisibility() {
+            var passwordField = document.getElementById('password-field');
+            var eyeIcon = document.getElementById('eye-icon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

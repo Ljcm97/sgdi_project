@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Documentos por Estado - SGDI{% endblock %}
+
+{% block styles %}
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-tasks me-2"></i> Reporte de Documentos por Estado
+        </h3>
+        <div>
+            <a href="{{ url_for('reportes.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver a Reportes
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Gráfico general -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Distribución de Documentos por Estado</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chartEstados"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detalle por estado -->
+        {% if resultados %}
+            {% for resultado in resultados %}
+                <div class="card mb-4">
+                    <div class="card-header" style="background-color: {{ resultado.color }}; color: white;">
+                        <h5 class="card-title mb-0">{{ resultado.estado }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total de documentos</h6>
+                                        <p class="display-4">{{ resultado.cantidad }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <h6 class="border-bottom pb-2 mb-3">Documentos recientes</h6>
+                                {% if resultado.documentos %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Radicado</th>
+                                                    <th>Fecha</th>
+                                                    <th>Tipo</th>
+                                                    <th>Área Actual</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for documento in resultado.documentos %}
+                                                    <tr>
+                                                        <td>{{ documento.radicado }}</td>
+                                                        <td>{{ documento.fecha_recepcion.strftime('%d/%m/%Y %H:%M') }}</td>
+                                                        <td>{{ documento.tipo_documento.nombre }}</td>
+                                                        <td>{{ documento.area_destino.nombre }}</td>
+                                                        <td>
+                                                            <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-sm btn-primary">
+                                                                <i class="fas fa-eye"></i> Ver
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i> No hay documentos en este estado.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No hay datos disponibles para este reporte.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos para el gráfico
+        const resultados = {{ resultados|tojson }};
+        
+        if (resultados.length > 0) {
+            const labels = resultados.map(r => r.estado);
+            const data = resultados.map(r => r.cantidad);
+            const colors = resultados.map(r => r.color);
+            
+            new Chart(document.getElementById('chartEstados'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución de Documentos por Estado'
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Persona - SGDI{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-user-plus me-2"></i> Crear Nueva Persona
+        </h3>
+        <div>
+            <a href="{{ url_for('personas.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver a la lista
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <!-- Nombres y Apellidos -->
+                <div class="col-md-6 mb-3">
+                    {{ form.nombres_apellidos.label(class="form-label") }}
+                    {{ form.nombres_apellidos(class="form-control") }}
+                    {% if form.nombres_apellidos.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.nombres_apellidos.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.email.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Teléfono -->
+                <div class="col-md-6 mb-3">
+                    {{ form.telefono.label(class="form-label") }}
+                    {{ form.telefono(class="form-control") }}
+                    {% if form.telefono.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.telefono.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Zona Económica -->
+                <div class="col-md-6 mb-3">
+                    {{ form.zona_economica_id.label(class="form-label") }}
+                    {{ form.zona_economica_id(class="form-select") }}
+                    {% if form.zona_economica_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.zona_economica_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Unidad -->
+                <div class="col-md-6 mb-3">
+                    {{ form.unidad_id.label(class="form-label") }}
+                    {{ form.unidad_id(class="form-select") }}
+                    {% if form.unidad_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.unidad_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Área -->
+                <div class="col-md-6 mb-3">
+                    {{ form.area_id.label(class="form-label") }}
+                    {{ form.area_id(class="form-select") }}
+                    {% if form.area_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.area_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Cargo -->
+                <div class="col-md-6 mb-3">
+                    {{ form.cargo_id.label(class="form-label") }}
+                    {{ form.cargo_id(class="form-select") }}
+                    {% if form.cargo_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.cargo_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Activo -->
+                <div class="col-md-6 mb-3">
+                    <div class="form-check mt-4">
+                        {{ form.activo(class="form-check-input") }}
+                        {{ form.activo.label(class="form-check-label") }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('personas.index') }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

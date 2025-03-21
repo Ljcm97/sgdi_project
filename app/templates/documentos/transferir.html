@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Transferir Documento - SGDI{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-exchange-alt me-2"></i> Transferir Documento
+        </h3>
+        <div>
+            <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver al Documento
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <!-- Información del documento -->
+            <div class="col-md-12">
+                <div class="card border-secondary">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Información del Documento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <span class="fw-bold">Radicado:</span> {{ documento.radicado }}
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <span class="fw-bold">Tipo:</span> {{ documento.tipo_documento.nombre }}
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <span class="fw-bold">Remitente:</span> {{ documento.remitente }}
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <span class="fw-bold">Estado Actual:</span>
+                                <span class="badge" style="background-color: {{ documento.estado_actual.color }};">
+                                    {{ documento.estado_actual.nombre }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulario de transferencia -->
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <!-- Área Destino -->
+                <div class="col-md-6 mb-3">
+                    {{ form.area_destino_id.label(class="form-label") }}
+                    {{ form.area_destino_id(class="form-select", id="area_destino_id") }}
+                    {% if form.area_destino_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.area_destino_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Persona Destino -->
+                <div class="col-md-6 mb-3">
+                    {{ form.persona_destino_id.label(class="form-label") }}
+                    {{ form.persona_destino_id(class="form-select", id="persona_destino_id") }}
+                    {% if form.persona_destino_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.persona_destino_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Estado -->
+                <div class="col-md-12 mb-3">
+                    {{ form.estado_id.label(class="form-label") }}
+                    {{ form.estado_id(class="form-select", id="estado_id") }}
+                    {% if form.estado_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.estado_id.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Observaciones -->
+                <div class="col-md-12 mb-3">
+                    {{ form.observaciones.label(class="form-label") }}
+                    {{ form.observaciones(class="form-control", rows=3) }}
+                    {% if form.observaciones.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.observaciones.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary" id="btn-action">
+                    <i class="fas fa-exchange-alt me-1"></i> <span id="btn-text">Transferir Documento</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Función para cargar personas de un área
+        function cargarPersonas(areaId) {
+            if (!areaId) return;
+            
+            $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
+                var options = '';
+                $.each(data, function(index, persona) {
+                    options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
+                });
+                
+                $("#persona_destino_id").html(options);
+            });
+        }
+        
+        // Evento al cambiar de área
+        $("#area_destino_id").change(function() {
+            cargarPersonas($(this).val());
+        });
+        
+        // Cargar personas inicialmente si hay un área seleccionada
+        var areaInicial = $("#area_destino_id").val();
+        if (areaInicial) {
+            cargarPersonas(areaInicial);
+        }
+        
+        // Cambiar texto del botón según el estado seleccionado
+        $("#estado_id").change(function() {
+            var estadoTexto = $("#estado_id option:selected").text();
+            
+            if (estadoTexto === "Recibido") {
+                $("#btn-text").text("Recibir Documento");
+            } else {
+                $("#btn-text").text("Transferir Documento");
+            }
+        });
+        
+        // Inicializar el texto del botón
+        $("#estado_id").trigger("change");
+    });
+</script>
+{% endblock %}

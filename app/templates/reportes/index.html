@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes - SGDI{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-chart-bar me-2"></i> Reportes y Estadísticas
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Reporte por Área -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-building me-2"></i> Documentos por Área
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Este reporte muestra la cantidad de documentos asignados a cada área, clasificados por estado.</p>
+                        <p>Te permite ver qué áreas tienen mayor carga documental y cómo se distribuye el trabajo.</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="{{ url_for('reportes.por_area') }}" class="btn btn-info">
+                            <i class="fas fa-eye me-1"></i> Ver Reporte
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reporte por Estado -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tasks me-2"></i> Documentos por Estado
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Este reporte muestra la cantidad de documentos en cada estado de procesamiento.</p>
+                        <p>Te permite ver la distribución general de documentos según su etapa actual en el flujo de trabajo.</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="{{ url_for('reportes.por_estado') }}" class="btn btn-warning text-dark">
+                            <i class="fas fa-eye me-1"></i> Ver Reporte
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reporte de Tiempo de Procesamiento -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i> Tiempo de Procesamiento
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Este reporte muestra estadísticas sobre el tiempo que toma procesar documentos desde su recepción hasta su finalización.</p>
+                        <p>Te permite identificar posibles cuellos de botella en el flujo documental.</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="{{ url_for('reportes.tiempo_procesamiento') }}" class="btn btn-success">
+                            <i class="fas fa-eye me-1"></i> Ver Reporte
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        <h4 class="card-title mb-0">
+            <i class="fas fa-search me-2"></i> Consultas Específicas
+        </h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="text-center mb-4">
+                            <i class="fas fa-file-alt fa-3x text-primary"></i>
+                        </p>
+                        <p class="text-center">
+                            Para consultas más específicas sobre documentos, utilice el buscador avanzado.
+                        </p>
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('documentos.buscar') }}" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Ir al Buscador Avanzado
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Documento - SGDI{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-file-alt me-2"></i> Información del Documento
+        </h3>
+        <div>
+            <a href="{{ url_for('documentos.buscar') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-search"></i> Volver a Búsqueda
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Información principal -->
+            <div class="col-md-6">
+                <h4 class="border-bottom pb-2 mb-3">Información General</h4>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Radicado:</label>
+                    <div class="col-sm-8">{{ documento.radicado }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Fecha de Recepción:</label>
+                    <div class="col-sm-8">{{ documento.fecha_recepcion.strftime('%d/%m/%Y %H:%M') }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Transportadora:</label>
+                    <div class="col-sm-8">{{ documento.transportadora.nombre }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Número de Guía:</label>
+                    <div class="col-sm-8">{{ documento.numero_guia or 'N/A' }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Remitente:</label>
+                    <div class="col-sm-8">{{ documento.remitente }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Tipo de Documento:</label>
+                    <div class="col-sm-8">{{ documento.tipo_documento.nombre }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Estado:</label>
+                    <div class="col-sm-8">
+                        <span class="badge" style="background-color: {{ documento.estado_actual.color }};">
+                            {{ documento.estado_actual.nombre }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Tipo:</label>
+                    <div class="col-sm-8">{{ documento.tipo }}</div>
+                </div>
+            </div>
+            
+            <!-- Asignación y contenido -->
+            <div class="col-md-6">
+                <h4 class="border-bottom pb-2 mb-3">Asignación y Contenido</h4>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Área Actual:</label>
+                    <div class="col-sm-8">{{ documento.area_destino.nombre }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Persona Actual:</label>
+                    <div class="col-sm-8">{{ documento.persona_destino.nombre_completo }}</div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Contenido:</label>
+                    <div class="col-sm-8">
+                        {% if documento.contenido %}
+                            {{ documento.contenido }}
+                        {% else %}
+                            <em>No se ha especificado</em>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Observaciones:</label>
+                    <div class="col-sm-8">
+                        {% if documento.observaciones %}
+                            {{ documento.observaciones }}
+                        {% else %}
+                            <em>No hay observaciones</em>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label class="col-sm-4 fw-bold">Registrado por:</label>
+                    <div class="col-sm-8">
+                        {{ documento.registrado_por.username }} ({{ documento.creado_en.strftime('%d/%m/%Y %H:%M') }})
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-center">
+            {% if documento.persona_destino_id == current_user.persona_id and documento.estado_actual.nombre == 'Recibido' %}
+                <!-- Opciones para aceptar/rechazar si está asignado al usuario actual y está pendiente -->
+                <a href="{{ url_for('documentos.aceptar', id=documento.id) }}" class="btn btn-success me-2">
+                    <i class="fas fa-check-circle"></i> Aceptar Documento
+                </a>
+                <a href="{{ url_for('documentos.rechazar', id=documento.id) }}" class="btn btn-danger me-2" 
+                   onclick="return confirm('¿Estás seguro de rechazar este documento?');">
+                    <i class="fas fa-times-circle"></i> Rechazar Documento
+                </a>
+            {% endif %}
+            
+            {% if check_permission('transferir_documento') %}
+                <!-- Opción para transferir -->
+                <a href="{{ url_for('documentos.transferir', id=documento.id) }}" class="btn btn-primary me-2">
+                    <i class="fas fa-exchange-alt"></i> Transferir Documento
+                </a>
+            {% endif %}
+            
+            {% if check_permission('transferir_documento') and documento.estado_actual.nombre == 'En proceso' %}
+                <!-- Opción para finalizar si está en proceso -->
+                <a href="{{ url_for('documentos.finalizar', id=documento.id) }}" class="btn btn-info me-2"
+                   onclick="return confirm('¿Estás seguro de finalizar este documento?');">
+                    <i class="fas fa-check-double"></i> Finalizar
+                </a>
+            {% endif %}
+            
+            {% if check_permission('transferir_documento') and documento.estado_actual.nombre == 'Finalizado' %}
+                <!-- Opción para archivar si está finalizado -->
+                <a href="{{ url_for('documentos.archivar', id=documento.id) }}" class="btn btn-secondary me-2"
+                   onclick="return confirm('¿Estás seguro de archivar este documento?');">
+                    <i class="fas fa-archive"></i> Archivar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Historial de Movimientos -->
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        <h4 class="card-title mb-0">
+            <i class="fas fa-history me-2"></i> Historial de Movimientos
+        </h4>
+    </div>
+    <div class="card-body">
+        {% if movimientos %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Usuario</th>
+                            <th>Origen</th>
+                            <th>Destino</th>
+                            <th>Estado</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movimiento in movimientos %}
+                            <tr>
+                                <td>{{ movimiento.fecha_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ movimiento.usuario_origen.username }}</td>
+                                <td>{{ movimiento.area_origen.nombre }} - {{ movimiento.persona_origen.nombre_completo }}</td>
+                                <td>{{ movimiento.area_destino.nombre }} - {{ movimiento.persona_destino.nombre_completo }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ movimiento.estado_documento.color }};">
+                                        {{ movimiento.estado_documento.nombre }}
+                                    </span>
+                                </td>
+                                <td>{{ movimiento.observaciones or 'N/A' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No hay movimientos registrados para este documento.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

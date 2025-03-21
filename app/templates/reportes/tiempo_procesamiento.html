@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Tiempo de Procesamiento - SGDI{% endblock %}
+
+{% block styles %}
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-clock me-2"></i> Reporte de Tiempo de Procesamiento
+        </h3>
+        <div>
+            <a href="{{ url_for('reportes.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver a Reportes
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <div class="row mb-4">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Filtrar por período</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="row g-3">
+                            <div class="col-md-8">
+                                <label for="dias" class="form-label">Mostrar documentos finalizados en los últimos:</label>
+                                <select class="form-select" id="dias" name="dias">
+                                    <option value="7" {% if dias == 7 %}selected{% endif %}>7 días</option>
+                                    <option value="15" {% if dias == 15 %}selected{% endif %}>15 días</option>
+                                    <option value="30" {% if dias == 30 %}selected{% endif %}>30 días</option>
+                                    <option value="90" {% if dias == 90 %}selected{% endif %}>90 días</option>
+                                    <option value="180" {% if dias == 180 %}selected{% endif %}>6 meses</option>
+                                    <option value="365" {% if dias == 365 %}selected{% endif %}>1 año</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-1"></i> Filtrar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if mensaje %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> {{ mensaje }}
+            </div>
+        {% else %}
+            <!-- Gráfico de tiempos promedio -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Tiempos de Procesamiento</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="chartTiempos"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla de documentos -->
+            {% if resultados %}
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Detalle de Documentos Finalizados</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Radicado</th>
+                                        <th>Tipo</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Duración</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for resultado in resultados %}
+                                        <tr>
+                                            <td>{{ resultado.documento.radicado }}</td>
+                                            <td>{{ resultado.documento.tipo_documento.nombre }}</td>
+                                            <td>{{ resultado.inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                                            <td>{{ resultado.fin.strftime('%d/%m/%Y %H:%M') }}</td>
+                                            <td>
+                                                {% if resultado.duracion_horas < 24 %}
+                                                    {{ resultado.duracion_horas }} horas
+                                                {% else %}
+                                                    {{ resultado.duracion_dias }} días
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('documentos.detalle', id=resultado.documento.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No hay documentos finalizados en el período seleccionado.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos para el gráfico
+        const resultados = {{ resultados|tojson }};
+        
+        if (resultados && resultados.length > 0) {
+            // Agrupar por rangos de tiempo
+            const rangos = [
+                { label: 'Menos de 1 día', count: 0, color: '#28a745' },
+                { label: 'Entre 1 y 3 días', count: 0, color: '#17a2b8' },
+                { label: 'Entre 3 y 7 días', count: 0, color: '#ffc107' },
+                { label: 'Más de 7 días', count: 0, color: '#dc3545' }
+            ];
+            
+            // Clasificar documentos por rango
+            resultados.forEach(resultado => {
+                const dias = resultado.duracion_dias;
+                
+                if (dias < 1) {
+                    rangos[0].count++;
+                } else if (dias <= 3) {
+                    rangos[1].count++;
+                } else if (dias <= 7) {
+                    rangos[2].count++;
+                } else {
+                    rangos[3].count++;
+                }
+            });
+            
+            // Crear el gráfico
+            new Chart(document.getElementById('chartTiempos'), {
+                type: 'bar',
+                data: {
+                    labels: rangos.map(r => r.label),
+                    datasets: [{
+                        label: 'Cantidad de documentos',
+                        data: rangos.map(r => r.count),
+                        backgroundColor: rangos.map(r => r.color),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución por Tiempo de Procesamiento'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
