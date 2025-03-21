@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from flask_login import login_user, logout_user, current_user, login_required
 from app import db
 from app.models.usuario import Usuario
-from app.forms.auth import LoginForm, ChangePasswordForm
+from app.forms.auth import LoginForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.utils.helpers import flash_errors, enviar_email_reset_password
+import secrets
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -26,8 +28,9 @@ def login():
                 flash('Tu cuenta está desactivada. Contacta al administrador.', 'danger')
                 return render_template('login.html', form=form)
             
-            # Autenticar al usuario
-            login_user(usuario, remember=form.remember.data)
+            # Autenticar al usuario y configurar "recordar sesión"
+            remember = form.remember.data if 'remember' in form else False
+            login_user(usuario, remember=remember)
             
             # Registrar acceso
             usuario.registrar_acceso()
@@ -68,3 +71,70 @@ def cambiar_password():
             flash('La contraseña actual es incorrecta.', 'danger')
     
     return render_template('perfil/cambiar_password.html', form=form)
+
+
+@auth_bp.route('/olvido-password', methods=['GET', 'POST'])
+def olvido_password():
+    """Vista para solicitar restablecimiento de contraseña"""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard.index'))
+    
+    form = ResetPasswordRequestForm()
+    
+    if form.validate_on_submit():
+        usuario = Usuario.query.join(Usuario.persona).filter(
+            Usuario.persona.has(email=form.email.data)
+        ).first()
+        
+        if usuario:
+            # Generar token
+            token = secrets.token_urlsafe(32)
+            
+            # Guardar token en la sesión (en producción se guardaría en la base de datos)
+            session[f'reset_token_{token}'] = usuario.id
+            session.permanent = True  # El token dura lo que dure la sesión
+            
+            # Enviar email con token (simulado)
+            reset_url = url_for('auth.reset_password', token=token, _external=True)
+            enviar_email_reset_password(usuario.persona.email, reset_url)
+            
+            flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
+            return redirect(url_for('auth.login'))
+        else:
+            # Por seguridad, no indicamos si el email existe o no
+            flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
+            return redirect(url_for('auth.login'))
+    
+    return render_template('auth/olvido_password.html', form=form)
+
+
+@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Vista para restablecer contraseña con token"""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard.index'))
+    
+    # Verificar token
+    user_id = session.get(f'reset_token_{token}')
+    if not user_id:
+        flash('El enlace para restablecer la contraseña es inválido o ha expirado.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    usuario = Usuario.query.get(user_id)
+    if not usuario:
+        flash('Usuario no encontrado.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    form = ResetPasswordForm()
+    
+    if form.validate_on_submit():
+        # Actualizar contraseña
+        usuario.actualizar_password(form.password.data)
+        
+        # Eliminar token
+        session.pop(f'reset_token_{token}', None)
+        
+        flash('Tu contraseña ha sido restablecida. Ahora puedes iniciar sesión.', 'success')
+        return redirect(url_for('auth.login'))
+    
+    return render_template('auth/reset_password.html', form=form)
