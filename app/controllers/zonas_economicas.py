@@ -7,6 +7,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Formulario simple para zonas económicas
 class ZonaEconomicaForm(FlaskForm):
@@ -22,7 +23,8 @@ zonas_economicas_bp = Blueprint('zonas_economicas', __name__, url_prefix='/zonas
 @admin_required
 def index():
     """Vista para listar todas las zonas económicas"""
-    zonas = ZonaEconomica.query.all()
+    # Obtener zonas ordenadas alfabéticamente por nombre
+    zonas = ZonaEconomica.query.order_by(ZonaEconomica.nombre).all()
     form = ZonaEconomicaForm()
     return render_template('admin/zonas_economicas/index.html', zonas=zonas, form=form)
 
@@ -34,14 +36,17 @@ def crear():
     form = ZonaEconomicaForm()
     
     if form.validate_on_submit():
+        # Normalizar el nombre (convertir a mayúsculas para comparación)
+        nombre_normalizado = form.nombre.data.strip().upper()
+        
         # Verificar si ya existe una zona con el mismo nombre
-        existente = ZonaEconomica.query.filter_by(nombre=form.nombre.data).first()
+        existente = ZonaEconomica.query.filter(func.upper(ZonaEconomica.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe una zona económica con este nombre.', 'danger')
             return redirect(url_for('zonas_economicas.index'))
         
         # Crear la zona económica
-        zona = ZonaEconomica(nombre=form.nombre.data)
+        zona = ZonaEconomica(nombre=nombre_normalizado)
         db.session.add(zona)
         db.session.commit()
         
@@ -61,14 +66,17 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            # Normalizar el nombre (convertir a mayúsculas para comparación)
+            nombre_normalizado = form.nombre.data.strip().upper()
+            
             # Verificar si ya existe otra zona con el mismo nombre
-            existente = ZonaEconomica.query.filter(ZonaEconomica.nombre == form.nombre.data, ZonaEconomica.id != id).first()
+            existente = ZonaEconomica.query.filter(func.upper(ZonaEconomica.nombre) == nombre_normalizado, ZonaEconomica.id != id).first()
             if existente:
                 flash('Ya existe otra zona económica con este nombre.', 'danger')
                 return redirect(url_for('zonas_economicas.index'))
             
             # Actualizar la zona económica
-            form.populate_obj(zona)
+            zona.nombre = nombre_normalizado
             db.session.commit()
             
             flash('Zona económica actualizada exitosamente.', 'success')

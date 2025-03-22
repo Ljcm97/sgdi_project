@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Gestión de Unidades - SGDI{% endblock %}
+{% block title %}Gestión de Transportadoras - SGDI{% endblock %}
 
 {% block content %}
 <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-sitemap me-2"></i> Gestión de Unidades
+            <i class="fas fa-truck me-2"></i> Gestión de Transportadoras
         </h3>
     </div>
     <div class="card-body">
@@ -15,10 +15,10 @@
             <div class="col-md-6 mx-auto">
                 <div class="card">
                     <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Crear Nueva Unidad</h5>
+                        <h5 class="mb-0">Crear Nueva Transportadora</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('unidades.crear') }}">
+                        <form method="POST" action="{{ url_for('transportadoras.crear') }}">
                             {{ form.hidden_tag() }}
                             
                             <div class="mb-3">
@@ -35,7 +35,7 @@
                             
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle me-1"></i> Crear Unidad
+                                    <i class="fas fa-plus-circle me-1"></i> Crear Transportadora
                                 </button>
                             </div>
                         </form>
@@ -44,30 +44,26 @@
             </div>
         </div>
         
-        <!-- Listado de unidades -->
-        {% if unidades %}
+        <!-- Listado de transportadoras -->
+        {% if transportadoras %}
             <div class="table-responsive">
                 <table class="table table-hover table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Nombre</th>
-                            <th>Fecha de Creación</th>
-                            <th>Acciones</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for unidad in unidades %}
+                        {% for transportadora in transportadoras %}
                             <tr>
-                                <td>{{ unidad.id }}</td>
-                                <td>{{ unidad.nombre }}</td>
-                                <td>{{ unidad.creado_en.strftime('%d/%m/%Y %H:%M') }}</td>
-                                <td>
+                                <td>{{ transportadora.nombre }}</td>
+                                <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ url_for('unidades.editar', id=unidad.id) }}" class="btn btn-primary" title="Editar">
+                                        <a href="{{ url_for('transportadoras.editar', id=transportadora.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ url_for('unidades.eliminar', id=unidad.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta unidad? Esta acción no se puede deshacer.')">
+                                        <a href="{{ url_for('transportadoras.eliminar', id=transportadora.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta transportadora? Esta acción no se puede deshacer.')">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -79,7 +75,7 @@
             </div>
         {% else %}
             <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No hay unidades registradas en el sistema.
+                <i class="fas fa-info-circle me-2"></i> No hay transportadoras registradas en el sistema.
             </div>
         {% endif %}
     </div>

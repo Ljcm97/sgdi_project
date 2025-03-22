@@ -7,6 +7,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Formulario simple para áreas
 class AreaForm(FlaskForm):
@@ -22,7 +23,8 @@ areas_bp = Blueprint('areas', __name__, url_prefix='/areas')
 @admin_required
 def index():
     """Vista para listar todas las áreas"""
-    areas = Area.query.all()
+    # Obtener áreas ordenadas alfabéticamente por nombre
+    areas = Area.query.order_by(Area.nombre).all()
     form = AreaForm()
     return render_template('admin/areas/index.html', areas=areas, form=form)
 
@@ -34,14 +36,17 @@ def crear():
     form = AreaForm()
     
     if form.validate_on_submit():
+        # Normalizar el nombre (convertir a mayúsculas)
+        nombre_normalizado = form.nombre.data.strip().upper()
+        
         # Verificar si ya existe un área con el mismo nombre
-        existente = Area.query.filter_by(nombre=form.nombre.data).first()
+        existente = Area.query.filter(func.upper(Area.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe un área con este nombre.', 'danger')
             return redirect(url_for('areas.index'))
         
         # Crear el área
-        area = Area(nombre=form.nombre.data)
+        area = Area(nombre=nombre_normalizado)
         db.session.add(area)
         db.session.commit()
         
@@ -61,14 +66,17 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            # Normalizar el nombre (convertir a mayúsculas)
+            nombre_normalizado = form.nombre.data.strip().upper()
+            
             # Verificar si ya existe otra área con el mismo nombre
-            existente = Area.query.filter(Area.nombre == form.nombre.data, Area.id != id).first()
+            existente = Area.query.filter(func.upper(Area.nombre) == nombre_normalizado, Area.id != id).first()
             if existente:
                 flash('Ya existe otra área con este nombre.', 'danger')
                 return redirect(url_for('areas.index'))
             
             # Actualizar el área
-            form.populate_obj(area)
+            area.nombre = nombre_normalizado
             db.session.commit()
             
             flash('Área actualizada exitosamente.', 'success')

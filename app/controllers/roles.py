@@ -8,6 +8,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField, TextAreaField, SelectMultipleField, widgets, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Widget personalizado para selección múltiple con checkboxes
 class MultiCheckboxField(SelectMultipleField):
@@ -37,7 +38,8 @@ roles_bp = Blueprint('roles', __name__, url_prefix='/roles')
 @admin_required
 def index():
     """Vista para listar todos los roles"""
-    roles = Rol.query.all()
+    # Ordenar alfabéticamente
+    roles = Rol.query.order_by(Rol.nombre).all()
     return render_template('admin/roles/index.html', roles=roles)
 
 @roles_bp.route('/crear', methods=['GET', 'POST'])
@@ -48,16 +50,19 @@ def crear():
     form = RolForm()
     
     if form.validate_on_submit():
-        # Verificar si ya existe un rol con el mismo nombre
-        existente = Rol.query.filter_by(nombre=form.nombre.data).first()
+        # Normalizar nombre (trim y pasar a mayúsculas para comparar)
+        nombre_normalizado = form.nombre.data.strip()
+        
+        # Verificar si ya existe un rol con el mismo nombre (case insensitive)
+        existente = Rol.query.filter(func.upper(Rol.nombre) == nombre_normalizado.upper()).first()
         if existente:
             flash('Ya existe un rol con este nombre.', 'danger')
             return redirect(url_for('roles.crear'))
         
         # Crear el rol
         rol = Rol(
-            nombre=form.nombre.data,
-            descripcion=form.descripcion.data
+            nombre=nombre_normalizado,
+            descripcion=form.descripcion.data.strip() if form.descripcion.data else None
         )
         db.session.add(rol)
         db.session.commit()
@@ -97,15 +102,22 @@ def editar(id):
     form.permisos.data = permiso_ids
     
     if form.validate_on_submit():
+        # Normalizar nombre (trim y pasar a mayúsculas para comparar)
+        nombre_normalizado = form.nombre.data.strip()
+        
         # Verificar si ya existe otro rol con el mismo nombre
-        existente = Rol.query.filter(Rol.nombre == form.nombre.data, Rol.id != id).first()
+        existente = Rol.query.filter(
+            func.upper(Rol.nombre) == nombre_normalizado.upper(), 
+            Rol.id != id
+        ).first()
+        
         if existente:
             flash('Ya existe otro rol con este nombre.', 'danger')
             return redirect(url_for('roles.editar', id=id))
         
         # Actualizar el rol
-        rol.nombre = form.nombre.data
-        rol.descripcion = form.descripcion.data
+        rol.nombre = nombre_normalizado
+        rol.descripcion = form.descripcion.data.strip() if form.descripcion.data else None
         
         # Actualizar permisos
         rol.permisos = []

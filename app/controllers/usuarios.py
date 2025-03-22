@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from flask_wtf import FlaskForm
 from app import db
 from app.models.usuario import Usuario
 from app.models.persona import Persona
@@ -8,6 +7,7 @@ from app.models.rol import Rol
 from app.forms.usuario import UsuarioForm
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from sqlalchemy import func
 
 usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/usuarios')
 
@@ -16,7 +16,8 @@ usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/usuarios')
 @admin_required
 def index():
     """Vista para listar todos los usuarios"""
-    usuarios = Usuario.query.all()
+    # Obtener usuarios ordenados alfabéticamente por nombre de usuario
+    usuarios = Usuario.query.order_by(Usuario.username).all()
     return render_template('admin/usuarios/index.html', usuarios=usuarios)
 
 @usuarios_bp.route('/crear', methods=['GET', 'POST'])
@@ -27,8 +28,11 @@ def crear():
     form = UsuarioForm()
     
     if form.validate_on_submit():
+        # Normalizar nombre de usuario (convertir a minúsculas)
+        username_normalizado = form.username.data.strip().lower()
+        
         # Verificar si ya existe un usuario con el mismo username
-        existente = Usuario.query.filter_by(username=form.username.data).first()
+        existente = Usuario.query.filter(func.lower(Usuario.username) == username_normalizado).first()
         if existente:
             flash('Ya existe un usuario con este nombre de usuario.', 'danger')
             return redirect(url_for('usuarios.crear'))
@@ -42,7 +46,7 @@ def crear():
         # Crear el usuario
         if form.password.data:
             usuario = Usuario.crear_usuario(
-                username=form.username.data,
+                username=username_normalizado,
                 password=form.password.data,
                 persona_id=form.persona_id.data,
                 rol_id=form.rol_id.data
@@ -73,21 +77,24 @@ def editar(id):
     form.password.validators = []
     
     if form.validate_on_submit():
+        # Normalizar nombre de usuario (convertir a minúsculas)
+        username_normalizado = form.username.data.strip().lower()
+        
         # Verificar si ya existe otro usuario con el mismo username
-        existente = Usuario.query.filter(Usuario.username == form.username.data, Usuario.id != id).first()
+        existente = Usuario.query.filter(func.lower(Usuario.username) == username_normalizado, Usuario.id != id).first()
         if existente:
             flash('Ya existe otro usuario con este nombre de usuario.', 'danger')
             return redirect(url_for('usuarios.editar', id=id))
         
         # Actualizar los datos básicos del usuario
-        usuario.username = form.username.data
+        usuario.username = username_normalizado
         usuario.persona_id = form.persona_id.data
         usuario.rol_id = form.rol_id.data
         usuario.activo = form.activo.data
         
         # Actualizar la contraseña solo si se proporciona una nueva
         if form.password.data:
-            usuario.password = usuario.actualizar_password(form.password.data)
+            usuario.actualizar_password(form.password.data)
         
         db.session.commit()
         
@@ -158,6 +165,7 @@ def cambiar_password(id):
     
     from wtforms import PasswordField, SubmitField
     from wtforms.validators import DataRequired, Length, EqualTo
+    from flask_wtf import FlaskForm
     
     class CambiarPasswordForm(FlaskForm):
         password = PasswordField('Nueva contraseña', validators=[

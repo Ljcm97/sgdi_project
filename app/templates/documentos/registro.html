@@ -30,61 +30,6 @@
                         </div>
                     {% endif %}
                 </div>
-            </div>
-            
-            <div class="text-center mt-4">
-                <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary me-2">
-                    <i class="fas fa-times"></i> Cancelar
-                </a>
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </form>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-<script>
-    // Inicializar el selector de fecha y hora
-    flatpickr("#fecha_recepcion", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        locale: "es",
-        time_24hr: true
-    });
-    
-    // Cargar personas cuando cambia el área
-    $(document).ready(function() {
-        // Función para cargar personas de un área
-        function cargarPersonas(areaId) {
-            if (!areaId) return;
-            
-            $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
-                var options = '';
-                $.each(data, function(index, persona) {
-                    options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
-                });
-                
-                $("#persona_destino_id").html(options);
-            });
-        }
-        
-        // Evento al cambiar de área
-        $("#area_destino_id").change(function() {
-            cargarPersonas($(this).val());
-        });
-        
-        // Cargar personas inicialmente si hay un área seleccionada
-        var areaInicial = $("#area_destino_id").val();
-        if (areaInicial) {
-            cargarPersonas(areaInicial);
-        }
-    });
-</script>
-{% endblock %}
-                </div>
                 
                 <!-- Transportadora -->
                 <div class="col-md-6 mb-3">
@@ -208,3 +153,58 @@
                             {% endfor %}
                         </div>
                     {% endif %}
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+    // Inicializar el selector de fecha y hora
+    flatpickr("#fecha_recepcion", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        locale: "es",
+        time_24hr: true
+    });
+    
+    // Cargar personas cuando cambia el área
+    $(document).ready(function() {
+        // Función para cargar personas de un área
+        function cargarPersonas(areaId) {
+            if (!areaId) return;
+            
+            $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
+                var options = '';
+                $.each(data, function(index, persona) {
+                    options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
+                });
+                
+                $("#persona_destino_id").html(options);
+            });
+        }
+        
+        // Evento al cambiar de área
+        $("#area_destino_id").change(function() {
+            cargarPersonas($(this).val());
+        });
+        
+        // Cargar personas inicialmente si hay un área seleccionada
+        var areaInicial = $("#area_destino_id").val();
+        if (areaInicial) {
+            cargarPersonas(areaInicial);
+        }
+    });
+</script>
+{% endblock %}

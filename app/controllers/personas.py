@@ -10,6 +10,7 @@ from app.forms.persona import PersonaForm
 from app.utils.auth import permission_required
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from sqlalchemy import func
 
 personas_bp = Blueprint('personas', __name__, url_prefix='/personas')
 
@@ -18,7 +19,8 @@ personas_bp = Blueprint('personas', __name__, url_prefix='/personas')
 @admin_required
 def index():
     """Vista para listar todas las personas"""
-    personas = Persona.query.all()
+    # Ordenar alfabéticamente por nombre
+    personas = Persona.query.order_by(Persona.nombres_apellidos).all()
     return render_template('admin/personas/index.html', personas=personas)
 
 @personas_bp.route('/crear', methods=['GET', 'POST'])
@@ -29,11 +31,32 @@ def crear():
     form = PersonaForm()
     
     if form.validate_on_submit():
+        # Normalizar correo electrónico
+        email = form.email.data.strip().lower() if form.email.data else None
+        
+        # Normalizar nombre (trim)
+        nombres_apellidos = form.nombres_apellidos.data.strip()
+        
+        # Verificar si el correo ya existe (si se proporciona)
+        if email:
+            existente_email = Persona.query.filter(func.lower(Persona.email) == email).first()
+            if existente_email:
+                flash(f'Ya existe una persona con el correo {email}.', 'danger')
+                return render_template('admin/personas/crear.html', form=form)
+        
+        # Verificar si el nombre y apellido ya existe
+        existente_nombre = Persona.query.filter(
+            func.lower(Persona.nombres_apellidos) == nombres_apellidos.lower()
+        ).first()
+        if existente_nombre:
+            flash(f'Ya existe una persona con el nombre {nombres_apellidos}.', 'danger')
+            return render_template('admin/personas/crear.html', form=form)
+        
         # Crear la persona
         persona = Persona(
-            nombres_apellidos=form.nombres_apellidos.data,
-            email=form.email.data,
-            telefono=form.telefono.data,
+            nombres_apellidos=nombres_apellidos,
+            email=email,
+            telefono=form.telefono.data.strip() if form.telefono.data else None,
             zona_economica_id=form.zona_economica_id.data,
             unidad_id=form.unidad_id.data,
             area_id=form.area_id.data,
@@ -61,8 +84,40 @@ def editar(id):
     form = PersonaForm(obj=persona)
     
     if form.validate_on_submit():
+        # Normalizar correo electrónico
+        email = form.email.data.strip().lower() if form.email.data else None
+        
+        # Normalizar nombre (trim)
+        nombres_apellidos = form.nombres_apellidos.data.strip()
+        
+        # Verificar si el correo ya existe (si se proporciona)
+        if email:
+            existente_email = Persona.query.filter(
+                func.lower(Persona.email) == email,
+                Persona.id != id
+            ).first()
+            if existente_email:
+                flash(f'Ya existe otra persona con el correo {email}.', 'danger')
+                return render_template('admin/personas/editar.html', form=form, persona=persona)
+        
+        # Verificar si el nombre y apellido ya existe
+        existente_nombre = Persona.query.filter(
+            func.lower(Persona.nombres_apellidos) == nombres_apellidos.lower(),
+            Persona.id != id
+        ).first()
+        if existente_nombre:
+            flash(f'Ya existe otra persona con el nombre {nombres_apellidos}.', 'danger')
+            return render_template('admin/personas/editar.html', form=form, persona=persona)
+        
         # Actualizar la persona
-        form.populate_obj(persona)
+        persona.nombres_apellidos = nombres_apellidos
+        persona.email = email
+        persona.telefono = form.telefono.data.strip() if form.telefono.data else None
+        persona.zona_economica_id = form.zona_economica_id.data
+        persona.unidad_id = form.unidad_id.data
+        persona.area_id = form.area_id.data
+        persona.cargo_id = form.cargo_id.data
+        persona.activo = form.activo.data
         db.session.commit()
         
         flash('Persona actualizada exitosamente.', 'success')

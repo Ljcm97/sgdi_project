@@ -7,6 +7,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField, TextAreaField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Formulario para estados de documento
 class EstadoDocumentoForm(FlaskForm):
@@ -29,7 +30,8 @@ estados_documento_bp = Blueprint('estados_documento', __name__, url_prefix='/est
 @admin_required
 def index():
     """Vista para listar todos los estados de documento"""
-    estados = EstadoDocumento.query.all()
+    # Obtener estados ordenados alfabéticamente por nombre
+    estados = EstadoDocumento.query.order_by(EstadoDocumento.nombre).all()
     form = EstadoDocumentoForm()
     return render_template('admin/estados_documento/index.html', estados=estados, form=form)
 
@@ -41,15 +43,18 @@ def crear():
     form = EstadoDocumentoForm()
     
     if form.validate_on_submit():
+        # Normalizar el nombre (convertir a mayúsculas)
+        nombre_normalizado = form.nombre.data.strip().title()
+        
         # Verificar si ya existe un estado con el mismo nombre
-        existente = EstadoDocumento.query.filter_by(nombre=form.nombre.data).first()
+        existente = EstadoDocumento.query.filter(func.upper(EstadoDocumento.nombre) == nombre_normalizado.upper()).first()
         if existente:
             flash('Ya existe un estado de documento con este nombre.', 'danger')
             return redirect(url_for('estados_documento.index'))
         
         # Crear el estado de documento
         estado = EstadoDocumento(
-            nombre=form.nombre.data,
+            nombre=nombre_normalizado,
             descripcion=form.descripcion.data,
             color=form.color.data
         )
@@ -72,14 +77,22 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            # Normalizar el nombre (convertir a mayúsculas)
+            nombre_normalizado = form.nombre.data.strip().title()
+            
             # Verificar si ya existe otro estado con el mismo nombre
-            existente = EstadoDocumento.query.filter(EstadoDocumento.nombre == form.nombre.data, EstadoDocumento.id != id).first()
+            existente = EstadoDocumento.query.filter(
+                func.upper(EstadoDocumento.nombre) == nombre_normalizado.upper(), 
+                EstadoDocumento.id != id
+            ).first()
             if existente:
                 flash('Ya existe otro estado de documento con este nombre.', 'danger')
                 return redirect(url_for('estados_documento.index'))
             
             # Actualizar el estado de documento
-            form.populate_obj(estado)
+            estado.nombre = nombre_normalizado
+            estado.descripcion = form.descripcion.data
+            estado.color = form.color.data
             db.session.commit()
             
             flash('Estado de documento actualizado exitosamente.', 'success')

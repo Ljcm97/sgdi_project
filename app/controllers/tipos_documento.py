@@ -7,6 +7,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Formulario simple para tipos de documento
 class TipoDocumentoForm(FlaskForm):
@@ -22,7 +23,8 @@ tipos_documento_bp = Blueprint('tipos_documento', __name__, url_prefix='/tipos-d
 @admin_required
 def index():
     """Vista para listar todos los tipos de documento"""
-    tipos = TipoDocumento.query.all()
+    # Obtener tipos ordenados alfabéticamente por nombre
+    tipos = TipoDocumento.query.order_by(TipoDocumento.nombre).all()
     form = TipoDocumentoForm()
     return render_template('admin/tipos_documento/index.html', tipos=tipos, form=form)
 
@@ -34,14 +36,17 @@ def crear():
     form = TipoDocumentoForm()
     
     if form.validate_on_submit():
+        # Normalizar el nombre (convertir a mayúsculas para comparación)
+        nombre_normalizado = form.nombre.data.strip().title()
+        
         # Verificar si ya existe un tipo con el mismo nombre
-        existente = TipoDocumento.query.filter_by(nombre=form.nombre.data).first()
+        existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado.upper()).first()
         if existente:
             flash('Ya existe un tipo de documento con este nombre.', 'danger')
             return redirect(url_for('tipos_documento.index'))
         
         # Crear el tipo de documento
-        tipo = TipoDocumento(nombre=form.nombre.data)
+        tipo = TipoDocumento(nombre=nombre_normalizado)
         db.session.add(tipo)
         db.session.commit()
         
@@ -61,14 +66,20 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            # Normalizar el nombre (convertir a mayúsculas para comparación)
+            nombre_normalizado = form.nombre.data.strip().title()
+            
             # Verificar si ya existe otro tipo con el mismo nombre
-            existente = TipoDocumento.query.filter(TipoDocumento.nombre == form.nombre.data, TipoDocumento.id != id).first()
+            existente = TipoDocumento.query.filter(
+                func.upper(TipoDocumento.nombre) == nombre_normalizado.upper(), 
+                TipoDocumento.id != id
+            ).first()
             if existente:
                 flash('Ya existe otro tipo de documento con este nombre.', 'danger')
                 return redirect(url_for('tipos_documento.index'))
             
             # Actualizar el tipo de documento
-            form.populate_obj(tipo)
+            tipo.nombre = nombre_normalizado
             db.session.commit()
             
             flash('Tipo de documento actualizado exitosamente.', 'success')

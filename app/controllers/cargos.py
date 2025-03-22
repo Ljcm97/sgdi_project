@@ -5,32 +5,16 @@ from app.models.cargo import Cargo
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
 from wtforms import StringField
-from wtforms.validators import DataRequired, Length, ValidationError
+from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
-# Formulario simple para cargos con validación personalizada
+# Formulario simple para cargos
 class CargoForm(FlaskForm):
     nombre = StringField('Nombre', validators=[
         DataRequired(message='Nombre de cargo obligatorio'),
         Length(max=100, message='Nombre demasiado largo')
     ])
-
-    def validate_nombre(self, field):
-        """
-        Validación personalizada para evitar cargos duplicados
-        Ignorando mayúsculas, minúsculas y espacios en blanco
-        """
-        # Normalizar el nombre (eliminar espacios extra, convertir a minúsculas)
-        nombre_normalizado = field.data.strip().lower()
-        
-        # Buscar cargo existente ignorando mayúsculas/minúsculas
-        cargo_existente = Cargo.query.filter(
-            db.func.lower(db.func.trim(Cargo.nombre)) == nombre_normalizado
-        ).first()
-        
-        # Si existe un cargo con el mismo nombre (ignorando mayúsculas/minúsculas), lanzar error
-        if cargo_existente:
-            raise ValidationError('Ya existe un cargo con este nombre.')
 
 cargos_bp = Blueprint('cargos', __name__, url_prefix='/cargos')
 
@@ -39,7 +23,8 @@ cargos_bp = Blueprint('cargos', __name__, url_prefix='/cargos')
 @admin_required
 def index():
     """Vista para listar todos los cargos"""
-    cargos = Cargo.query.all()
+    # Obtener cargos ordenados alfabéticamente por nombre
+    cargos = Cargo.query.order_by(Cargo.nombre).all()
     form = CargoForm()
     return render_template('admin/cargos/index.html', cargos=cargos, form=form)
 
@@ -51,8 +36,17 @@ def crear():
     form = CargoForm()
     
     if form.validate_on_submit():
-        # Crear el cargo (la validación personalizada ya se encargó de prevenir duplicados)
-        cargo = Cargo(nombre=form.nombre.data.strip())
+        # Normalizar el nombre (convertir a mayúsculas)
+        nombre_normalizado = form.nombre.data.strip().upper()
+        
+        # Verificar si ya existe un cargo con el mismo nombre
+        existente = Cargo.query.filter(func.upper(Cargo.nombre) == nombre_normalizado).first()
+        if existente:
+            flash('Ya existe un cargo con este nombre.', 'danger')
+            return redirect(url_for('cargos.index'))
+        
+        # Crear el cargo
+        cargo = Cargo(nombre=nombre_normalizado)
         db.session.add(cargo)
         db.session.commit()
         
@@ -72,21 +66,17 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
-            # Normalizar el nombre del cargo
-            nombre_normalizado = form.nombre.data.strip().lower()
+            # Normalizar el nombre (convertir a mayúsculas)
+            nombre_normalizado = form.nombre.data.strip().upper()
             
             # Verificar si ya existe otro cargo con el mismo nombre
-            existente = Cargo.query.filter(
-                db.func.lower(db.func.trim(Cargo.nombre)) == nombre_normalizado,
-                Cargo.id != id
-            ).first()
-            
+            existente = Cargo.query.filter(func.upper(Cargo.nombre) == nombre_normalizado, Cargo.id != id).first()
             if existente:
                 flash('Ya existe otro cargo con este nombre.', 'danger')
                 return redirect(url_for('cargos.index'))
             
             # Actualizar el cargo
-            cargo.nombre = form.nombre.data.strip()
+            cargo.nombre = nombre_normalizado
             db.session.commit()
             
             flash('Cargo actualizado exitosamente.', 'success')

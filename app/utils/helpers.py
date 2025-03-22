@@ -1,9 +1,10 @@
 import datetime
 import random
 import string
-from flask import flash, current_app
+from flask import flash, current_app, render_template
 from app.models.notificacion import Notificacion
-from app import db
+from app import db, mail
+from flask_mail import Message
 
 def generate_radicado():
     """
@@ -96,3 +97,45 @@ def get_personas_por_area(area_id):
     """
     from app.models.persona import Persona
     return Persona.query.filter_by(area_id=area_id, activo=True).all()
+
+def enviar_email_reset_password(email, reset_url):
+    """
+    Envía un correo electrónico con el enlace para restablecer la contraseña.
+    
+    Args:
+        email (str): Dirección de correo electrónico del destinatario.
+        reset_url (str): URL para restablecer la contraseña.
+    """
+    try:
+        # Crear el mensaje
+        msg = Message(
+            'SGDI - Restablecer Contraseña',
+            recipients=[email]
+        )
+        
+        # Configurar el contenido del mensaje
+        msg.body = f"""Para restablecer tu contraseña, visita el siguiente enlace:
+
+{reset_url}
+
+Si no solicitaste el restablecimiento de contraseña, ignora este mensaje.
+
+Este enlace expirará en 24 horas.
+
+Saludos,
+SGDI - Sistema de Gestión Documental Interna
+Agroindustrial Molino Sonora AP S.A.S
+"""
+        
+        # Enviar el correo electrónico
+        mail.send(msg)
+        
+        return True
+    except Exception as e:
+        # En un entorno de producción, registra el error en un archivo de registro
+        print(f"Error al enviar correo: {str(e)}")
+        
+        # Para desarrollo, simplemente imprime el enlace en la consola
+        print(f"Enlace de restablecimiento (simulado): {reset_url}")
+        
+        return False

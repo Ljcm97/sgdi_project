@@ -7,6 +7,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Formulario simple para transportadoras
 class TransportadoraForm(FlaskForm):
@@ -22,7 +23,8 @@ transportadoras_bp = Blueprint('transportadoras', __name__, url_prefix='/transpo
 @admin_required
 def index():
     """Vista para listar todas las transportadoras"""
-    transportadoras = Transportadora.query.all()
+    # Obtener transportadoras ordenadas alfabéticamente por nombre
+    transportadoras = Transportadora.query.order_by(Transportadora.nombre).all()
     form = TransportadoraForm()
     return render_template('admin/transportadoras/index.html', transportadoras=transportadoras, form=form)
 
@@ -34,14 +36,17 @@ def crear():
     form = TransportadoraForm()
     
     if form.validate_on_submit():
+        # Normalizar el nombre (convertir a mayúsculas para comparación)
+        nombre_normalizado = form.nombre.data.strip().upper()
+        
         # Verificar si ya existe una transportadora con el mismo nombre
-        existente = Transportadora.query.filter_by(nombre=form.nombre.data).first()
+        existente = Transportadora.query.filter(func.upper(Transportadora.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe una transportadora con este nombre.', 'danger')
             return redirect(url_for('transportadoras.index'))
         
         # Crear la transportadora
-        transportadora = Transportadora(nombre=form.nombre.data)
+        transportadora = Transportadora(nombre=nombre_normalizado)
         db.session.add(transportadora)
         db.session.commit()
         
@@ -61,14 +66,17 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            # Normalizar el nombre (convertir a mayúsculas para comparación)
+            nombre_normalizado = form.nombre.data.strip().upper()
+            
             # Verificar si ya existe otra transportadora con el mismo nombre
-            existente = Transportadora.query.filter(Transportadora.nombre == form.nombre.data, Transportadora.id != id).first()
+            existente = Transportadora.query.filter(func.upper(Transportadora.nombre) == nombre_normalizado, Transportadora.id != id).first()
             if existente:
                 flash('Ya existe otra transportadora con este nombre.', 'danger')
                 return redirect(url_for('transportadoras.index'))
             
             # Actualizar la transportadora
-            form.populate_obj(transportadora)
+            transportadora.nombre = nombre_normalizado
             db.session.commit()
             
             flash('Transportadora actualizada exitosamente.', 'success')

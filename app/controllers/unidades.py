@@ -7,6 +7,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Formulario simple para unidades
 class UnidadForm(FlaskForm):
@@ -22,7 +23,8 @@ unidades_bp = Blueprint('unidades', __name__, url_prefix='/unidades')
 @admin_required
 def index():
     """Vista para listar todas las unidades"""
-    unidades = Unidad.query.all()
+    # Obtener unidades ordenadas alfabéticamente por nombre
+    unidades = Unidad.query.order_by(Unidad.nombre).all()
     form = UnidadForm()
     return render_template('admin/unidades/index.html', unidades=unidades, form=form)
 
@@ -34,14 +36,17 @@ def crear():
     form = UnidadForm()
     
     if form.validate_on_submit():
+        # Normalizar el nombre (convertir a mayúsculas para comparación)
+        nombre_normalizado = form.nombre.data.strip().upper()
+        
         # Verificar si ya existe una unidad con el mismo nombre
-        existente = Unidad.query.filter_by(nombre=form.nombre.data).first()
+        existente = Unidad.query.filter(func.upper(Unidad.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe una unidad con este nombre.', 'danger')
             return redirect(url_for('unidades.index'))
         
         # Crear la unidad
-        unidad = Unidad(nombre=form.nombre.data)
+        unidad = Unidad(nombre=nombre_normalizado)
         db.session.add(unidad)
         db.session.commit()
         
@@ -61,14 +66,17 @@ def editar(id):
     
     if request.method == 'POST':
         if form.validate_on_submit():
+            # Normalizar el nombre (convertir a mayúsculas para comparación)
+            nombre_normalizado = form.nombre.data.strip().upper()
+            
             # Verificar si ya existe otra unidad con el mismo nombre
-            existente = Unidad.query.filter(Unidad.nombre == form.nombre.data, Unidad.id != id).first()
+            existente = Unidad.query.filter(func.upper(Unidad.nombre) == nombre_normalizado, Unidad.id != id).first()
             if existente:
                 flash('Ya existe otra unidad con este nombre.', 'danger')
                 return redirect(url_for('unidades.index'))
             
             # Actualizar la unidad
-            form.populate_obj(unidad)
+            unidad.nombre = nombre_normalizado
             db.session.commit()
             
             flash('Unidad actualizada exitosamente.', 'success')
