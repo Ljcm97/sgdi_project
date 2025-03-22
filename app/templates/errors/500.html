@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Página No Encontrada - SGDI{% endblock %}
+{% block title %}Error del Servidor - SGDI{% endblock %}
 
 {% block content %}
 <div class="container text-center py-5">
     <div class="error-container mb-4">
-        <h1 class="display-1 text-primary">404</h1>
-        <p class="display-4">Página No Encontrada</p>
+        <h1 class="display-1 text-danger">500</h1>
+        <p class="display-4">Error del Servidor</p>
     </div>
     <div class="card">
         <div class="card-body">
-            <p class="lead mb-4">La página que estás buscando no existe o ha sido movida.</p>
+            <p class="lead mb-4">Ha ocurrido un error en el servidor. Por favor, intenta de nuevo más tarde.</p>
+            <p>Si el problema persiste, contacta al administrador del sistema.</p>
             <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-3">
                 <i class="fas fa-home me-2"></i> Volver al Dashboard
             </a>

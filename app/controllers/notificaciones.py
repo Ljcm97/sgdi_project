@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, jsonify
+from flask import Blueprint, render_template, redirect, url_for, jsonify, flash
 from flask_login import login_required, current_user
 from app.models.notificacion import Notificacion
 from app.models.documento import Documento
+from app.utils.decorators import has_document_access
 
 notificaciones_bp = Blueprint('notificaciones', __name__, url_prefix='/notificaciones')
 
@@ -22,7 +23,18 @@ def marcar_leida(id):
     
     # Redirigir al documento si existe
     if notificacion.documento_id:
-        return redirect(url_for('documentos.detalle', id=notificacion.documento_id))
+        try:
+            documento = Documento.query.get(notificacion.documento_id)
+            
+            # Verificar si el documento existe y si el usuario tiene acceso
+            if documento and has_document_access(documento):
+                return redirect(url_for('documentos.detalle', id=notificacion.documento_id))
+            else:
+                flash('No tienes acceso al documento relacionado.', 'warning')
+                return redirect(url_for('notificaciones.index'))
+        except Exception as e:
+            flash('Error al acceder al documento: ' + str(e), 'danger')
+            return redirect(url_for('notificaciones.index'))
     
     return redirect(url_for('notificaciones.index'))
 
@@ -51,10 +63,21 @@ def no_leidas():
 @login_required
 def recientes():
     """API para obtener las notificaciones recientes no leídas"""
-    notificaciones = Notificacion.query.filter_by(usuario_id=current_user.id, leida=False).order_by(Notificacion.creado_en.desc()).limit(5).all()
+    notificaciones = Notificacion.query.filter_by(
+        usuario_id=current_user.id, 
+        leida=False
+    ).order_by(
+        Notificacion.creado_en.desc()
+    ).limit(5).all()
+    
+    # Asegúrate de que no haya duplicados por ID
+    unique_notifs = {}
+    for notif in notificaciones:
+        if notif.id not in unique_notifs:
+            unique_notifs[notif.id] = notif
     
     result = []
-    for notif in notificaciones:
+    for notif_id, notif in unique_notifs.items():
         item = {
             'id': notif.id,
             'titulo': notif.titulo,

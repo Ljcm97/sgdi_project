@@ -3,10 +3,10 @@
 {% block title %}Notificaciones - SGDI{% endblock %}
 
 {% block content %}
-<div class="card mb-4">
+<div class="card">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-bell me-2"></i> Notificaciones
+            <i class="fas fa-bell me-2"></i> Mis Notificaciones
         </h3>
         <div>
             {% if notificaciones %}
@@ -18,61 +18,32 @@
     </div>
     <div class="card-body">
         {% if notificaciones %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Título</th>
-                            <th>Mensaje</th>
-                            <th>Documento</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for notif in notificaciones %}
-                            <tr {% if not notif.leida %}class="table-warning"{% endif %}>
-                                <td>{{ notif.creado_en.strftime('%d/%m/%Y %H:%M') }}</td>
-                                <td>{{ notif.titulo }}</td>
-                                <td>{{ notif.mensaje }}</td>
-                                <td>
-                                    {% if notif.documento %}
-                                        <a href="{{ url_for('documentos.detalle', id=notif.documento.id) }}">
-                                            {{ notif.documento.radicado }}
-                                        </a>
-                                    {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if notif.leida %}
-                                        <span class="badge bg-secondary">Leída</span>
-                                    {% else %}
-                                        <span class="badge bg-warning text-dark">No leída</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if not notif.leida %}
-                                        <a href="{{ url_for('notificaciones.marcar_leida', id=notif.id) }}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-check"></i> Marcar como leída
-                                        </a>
-                                    {% endif %}
-                                    
-                                    {% if notif.documento %}
-                                        <a href="{{ url_for('documentos.detalle', id=notif.documento.id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i> Ver Documento
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="list-group">
+                {% for notificacion in notificaciones %}
+                    <a href="{{ url_for('notificaciones.marcar_leida', id=notificacion.id) }}" 
+                       class="list-group-item list-group-item-action {% if not notificacion.leida %}list-group-item-primary{% endif %}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                {% if not notificacion.leida %}<i class="fas fa-circle text-primary me-2" style="font-size: 0.6rem; vertical-align: middle;"></i>{% endif %}
+                                {{ notificacion.titulo }}
+                            </h5>
+                            <small class="text-muted">{{ notificacion.creado_en.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1">{{ notificacion.mensaje }}</p>
+                        <small class="text-muted">
+                            {% if notificacion.documento_id %}
+                                <i class="fas fa-file-alt me-1"></i> Documento relacionado
+                            {% endif %}
+                            {% if notificacion.leida %}
+                                <span class="float-end"><i class="fas fa-check me-1"></i> Leída</span>
+                            {% endif %}
+                        </small>
+                    </a>
+                {% endfor %}
             </div>
         {% else %}
             <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No tienes notificaciones para mostrar.
+                <i class="fas fa-info-circle me-2"></i> No tienes notificaciones.
             </div>
         {% endif %}
     </div>

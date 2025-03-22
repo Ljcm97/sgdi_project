@@ -91,8 +91,20 @@ def document_access_required(f):
         from app.models.documento import Documento
         documento = Documento.query.get_or_404(document_id)
         
-        if not has_document_access(documento):
-            abort(403)
+        # Superadministrador siempre tiene acceso
+        if current_user.rol.nombre == 'Superadministrador':
+            return f(*args, **kwargs)
+            
+        # Recepción tiene acceso a todos los documentos que registró
+        if current_user.rol.nombre == 'Recepción' and documento.registrado_por_id == current_user.id:
+            return f(*args, **kwargs)
+            
+        # Verificar acceso para usuarios normales
+        if documento.area_destino_id == current_user.persona.area_id or documento.persona_destino_id == current_user.persona_id:
+            return f(*args, **kwargs)
+            
+        # Si no tiene acceso, redirigir al dashboard con mensaje
+        flash('No tienes permiso para acceder a este documento.', 'danger')
+        return redirect(url_for('dashboard.index'))
         
-        return f(*args, **kwargs)
     return decorated_function

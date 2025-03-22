@@ -97,7 +97,7 @@
                                 <a class="dropdown-item" href="{{ url_for('areas.index') }}">
                                     <i class="fas fa-building"></i> Áreas
                                 </a>
-                            </li>
+                            </li>    
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('cargos.index') }}">
                                     <i class="fas fa-id-card"></i> Cargos
@@ -127,12 +127,12 @@
                                 <a class="dropdown-item" href="{{ url_for('unidades.index') }}">
                                     <i class="fas fa-sitemap"></i> Unidades
                                 </a>
-                            </li>
+                            </li>   
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('zonas_economicas.index') }}">
                                     <i class="fas fa-map-marker-alt"></i> Zonas Económicas
                                 </a>
-                            </li>                                                   
+                            </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -158,14 +158,17 @@
                             <i class="fas fa-bell"></i>
                             <span class="badge bg-danger rounded-pill" id="notificaciones-count">0</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navNotificaciones" id="notificaciones-menu" style="width: 300px;">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navNotificaciones" id="notificaciones-menu" style="width: 300px; max-height: 500px; overflow-y: auto;">
                             <li class="text-center p-2 notificaciones-vacio">
                                 <i class="fas fa-bell-slash"></i> No hay notificaciones nuevas
                             </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li class="text-center">
-                                <a class="dropdown-item" href="{{ url_for('notificaciones.index') }}">
-                                    Ver todas las notificaciones
+                            <!-- Las notificaciones se insertarán aquí dinámicamente -->
+                            <li class="dropdown-divider-container d-none">
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li class="ver-todas">
+                                <a class="dropdown-item text-center" href="{{ url_for('notificaciones.index') }}">
+                                    <i class="fas fa-list"></i> Ver todas las notificaciones
                                 </a>
                             </li>
                         </ul>
@@ -237,47 +240,100 @@
     <script>
         // Función para cargar notificaciones no leídas
         function cargarNotificaciones() {
-            $.getJSON("{{ url_for('notificaciones.no_leidas') }}", function(data) {
+            // Hacer petición para obtener la cantidad de notificaciones no leídas
+            $.ajax({
+                url: "{{ url_for('notificaciones.no_leidas') }}",
+                type: "GET",
+                dataType: "json",
+                cache: false
+            })
+            .done(function(data) {
+                // Actualizar contador de notificaciones
                 $("#notificaciones-count").text(data.cantidad);
                 
+                // Si hay notificaciones, cargar el detalle
                 if (data.cantidad > 0) {
-                    $.getJSON("{{ url_for('notificaciones.recientes') }}", function(notifs) {
-                        if (notifs.length > 0) {
-                            $("#notificaciones-menu .notificaciones-vacio").hide();
-                            
-                            // Limpiar notificaciones anteriores
-                            $("#notificaciones-menu li:not(:last-child):not(.notificaciones-vacio)").remove();
-                            
-                            // Agregar nuevas notificaciones
-                            $.each(notifs, function(i, notif) {
-                                let notifUrl = "{{ url_for('notificaciones.marcar_leida', id=0) }}".replace("0", notif.id);
-                                let notifHtml = `
-                                    <li>
-                                        <a class="dropdown-item" href="${notifUrl}">
-                                            <strong>${notif.titulo}</strong><br>
-                                            <small>${notif.mensaje}</small><br>
-                                            <small class="text-muted">${notif.creado_en}</small>
-                                        </a>
-                                    </li>
-                                `;
-                                $(notifHtml).insertBefore("#notificaciones-menu hr");
-                            });
-                        } else {
-                            $("#notificaciones-menu .notificaciones-vacio").show();
-                        }
-                    });
+                    cargarNotificacionesRecientes();
                 } else {
-                    $("#notificaciones-menu .notificaciones-vacio").show();
+                    resetearMenuNotificaciones();
                 }
+            })
+            .fail(function(xhr, status, error) {
+                console.error("Error al cargar contador de notificaciones:", error);
             });
         }
         
-        // Cargar notificaciones al inicio
+        // Función para cargar las notificaciones recientes
+        function cargarNotificacionesRecientes() {
+            $.ajax({
+                url: "{{ url_for('notificaciones.recientes') }}",
+                type: "GET",
+                dataType: "json",
+                cache: false
+            })
+            .done(function(notificaciones) {
+                // Limpiar notificaciones existentes
+                $(".notificacion-item").remove();
+                
+                if (notificaciones && notificaciones.length > 0) {
+                    // Ocultar mensaje vacío
+                    $(".notificaciones-vacio").hide();
+                    
+                    // Mostrar separador
+                    $(".dropdown-divider-container").removeClass("d-none");
+                    
+                    // Agregar cada notificación
+                    notificaciones.forEach(function(notif) {
+                        var url = "{{ url_for('notificaciones.marcar_leida', id=0) }}".replace('0', notif.id);
+                        
+                        var notifElement = $(
+                            '<li class="notificacion-item">' +
+                            '  <a class="dropdown-item" href="' + url + '">' +
+                            '    <div class="d-flex flex-column">' +
+                            '      <strong>' + notif.titulo + '</strong>' +
+                            '      <small>' + notif.mensaje + '</small>' +
+                            '      <small class="text-muted mt-1">' + notif.creado_en + '</small>' +
+                            '    </div>' +
+                            '  </a>' +
+                            '</li>'
+                        );
+                        
+                        // Insertar antes del separador
+                        notifElement.insertBefore(".dropdown-divider-container");
+                    });
+                } else {
+                    resetearMenuNotificaciones();
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.error("Error al cargar notificaciones recientes:", error);
+            });
+        }
+        
+        // Función para resetear el menú de notificaciones a su estado vacío
+        function resetearMenuNotificaciones() {
+            // Eliminar notificaciones existentes
+            $(".notificacion-item").remove();
+            
+            // Ocultar separador
+            $(".dropdown-divider-container").addClass("d-none");
+            
+            // Mostrar mensaje vacío
+            $(".notificaciones-vacio").show();
+        }
+        
+        // Inicializar cuando el documento esté listo
         $(document).ready(function() {
+            // Cargar notificaciones al inicio
             cargarNotificaciones();
             
-            // Recargar notificaciones cada 60 segundos
-            setInterval(cargarNotificaciones, 60000);
+            // Recargar cada 30 segundos
+            setInterval(cargarNotificaciones, 30000);
+            
+            // Recargar al hacer clic en el menú de notificaciones
+            $("#navNotificaciones").on("click", function() {
+                cargarNotificaciones();
+            });
         });
     </script>
     {% endif %}

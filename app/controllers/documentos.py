@@ -213,15 +213,19 @@ def rechazar(id):
         flash('No se pudo encontrar el área o persona de recepción.', 'danger')
         return redirect(url_for('documentos.detalle', id=documento.id))
     
-    # Obtener el estado "Recibido"
-    estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+    # Obtener el estado "Rechazado" (si existe) o "Recibido" (como fallback)
+    estado_rechazado = EstadoDocumento.query.filter_by(nombre='Rechazado').first()
+    
+    # Si no existe el estado "Rechazado", usar "Recibido"
+    if not estado_rechazado:
+        estado_rechazado = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     
     # Transferir el documento
     documento.transferir(
         usuario_origen=current_user,
         area_destino=area_recepcion,
         persona_destino=persona_recepcion,
-        estado_nuevo=estado_recibido,
+        estado_nuevo=estado_rechazado,
         observaciones=f'Documento rechazado por {current_user.persona.nombre_completo}'
     )
     
