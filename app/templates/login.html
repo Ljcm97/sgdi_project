@@ -17,182 +17,270 @@
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     
+    <!-- Importar fuentes locales -->
     <style>
-        body {
-            background-color: #f8f9fa;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @font-face {
+            font-family: 'Boris Black Bloxx';
+            src: url("{{ url_for('static', filename='fonts/BorisBlackBloxx.ttf') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
         
-        .login-container {
-            max-width: 900px;
+        @font-face {
+            font-family: 'Roboto';
+            src: url("{{ url_for('static', filename='fonts/Roboto-Regular.ttf') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
             width: 100%;
-            padding: 20px;
+            height: 100%;
+            background: #1D2C96;
+            font-family: 'Roboto', sans-serif;
         }
         
-        .login-card {
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .login-left {
-            background-color: #1D2C96;
-            color: white;
-            padding: 40px;
+        .login-main {
+            min-height: 100vh;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding-bottom: 60px; /* Espacio para el footer */
         }
         
-        .login-right {
-            background-color: white;
-            padding: 40px;
+        .login-container {
+            max-width: 800px;
+            width: 100%;
+            padding: 0 15px;
         }
         
-        .logo-img {
+        .login-middle {
+            display: flex;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .login-logo {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #0A1D6B; /* Color original */
+            padding: 30px;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .login-logo img {
             max-width: 150px;
+            height: auto;
             margin-bottom: 20px;
         }
         
-        .company-name {
+        .login-logo h1 {
             font-family: 'Boris Black Bloxx', sans-serif;
-            color: #DAA520;
             font-size: 18px;
-            margin-bottom: 10px;
-            text-align: center;
+            font-weight: normal;
+            margin-top: 10px;
+            color: #FFFFFF;
         }
         
-        .system-name {
+        .login-logo p {
             font-family: 'Roboto', sans-serif;
+            margin-top: 10px;
             font-size: 16px;
-            margin-bottom: 20px;
-            text-align: center;
         }
         
-        .login-title {
-            font-size: 28px;
-            color: #DAA520;
+        .login-form {
+            width: 60%;
+            padding: 40px;
+            background-color: #fff;
+        }
+        
+        .login-form h2 {
+            font-family: 'Boris Black Bloxx', sans-serif;
             margin-bottom: 30px;
+            color: #000000;
             text-align: center;
+            font-weight: normal;
         }
         
-        .btn-primary {
-            background-color: #1D2C96;
-            border-color: #1D2C96;
-            transition: all 0.3s;
+        .login-input-group {
+            position: relative;
+            margin-bottom: 25px;
         }
         
-        .btn-primary:hover {
-            background-color: #DAA520;
-            border-color: #DAA520;
+        .login-input-group span.icon-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 50px;
+            width: 50px;
+            background-color: #DAA520; 
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px 0 0 3px;
         }
         
-        .form-control {
-            border-radius: 5px;
-            padding: 12px;
+        .login-input-group input {
+            height: 50px;
+            padding-left: 60px;
+            width: 100%;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            font-family: 'Roboto', sans-serif;
         }
         
-        .eye-icon {
+        .login-input-group .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 15px;
             cursor: pointer;
+            color: #6c757d;
+        }
+        
+        .login-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .login-remember {
+            display: flex;
+            align-items: center;
+        }
+        
+        .login-remember input {
+            margin-right: 5px;
         }
         
         .forgot-link {
             color: #1D2C96;
             text-decoration: none;
+            font-size: 14px;
         }
         
         .forgot-link:hover {
             color: #DAA520;
         }
+        
+        .login-submit {
+            width: 100%;
+            background-color: #1D2C96;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            border-radius: 3px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        .login-submit:hover {
+            background-color: #DAA520;
+        }
+        
+        .login-page-footer {
+            background-color: white;
+            color: #1D2C96;
+            text-align: center;
+            padding: 15px 0;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            border-top: 4px solid #DAA520;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .login-middle {
+                flex-direction: column;
+            }
+            .login-logo, .login-form {
+                width: 100%;
+            }
+            .login-logo {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container login-container">
-        <!-- Mensajes flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="card login-card">
-            <div class="row g-0">
-                <!-- Lado izquierdo -->
-                <div class="col-md-5 login-left">
-                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-img">
-                    <div class="company-name">Agroindustrial Molino Sonora AP S.A.S.</div>
-                    <div class="system-name">SGDI - Sistema de Gestión Documental Interna</div>
+    <div class="login-main">
+        <div class="login-container">
+            <!-- Mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="login-middle">
+                <!-- Logo a la izquierda -->
+                <div class="login-logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+                    <h1>Agroindustrial Molino Sonora AP S.A.S.</h1>
+                    <p>SGDI - Sistema de Gestión Documental Interna</p>
                 </div>
-                
-                <!-- Lado derecho -->
-                <div class="col-md-7 login-right">
-                    <h2 class="login-title">¡Iniciar Sesión!</h2>
-                    
+
+                <!-- Formulario a la derecha -->
+                <div class="login-form">
+                    <h2>¡Iniciar Sesión!</h2>
                     <form method="POST">
                         {{ form.hidden_tag() }}
-                        
-                        <div class="mb-3">
-                            {{ form.username.label(class="form-label") }}
-                            {{ form.username(class="form-control", placeholder="Ingrese su nombre de usuario") }}
-                            {% if form.username.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.username.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+
+                        <div class="login-input-group">
+                            <span class="icon-container">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            {{ form.username(id="username", placeholder="Nombre de usuario") }}
                         </div>
-                        
-                        <div class="mb-3">
-                            {{ form.password.label(class="form-label") }}
-                            <div class="input-group">
-                                {{ form.password(class="form-control", placeholder="Ingrese su contraseña", id="password-field", type="password") }}
-                                <span class="input-group-text eye-icon">
-                                    <i class="fas fa-eye" id="eye-icon"></i>
-                                </span>
+
+                        <div class="login-input-group">
+                            <span class="icon-container">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            {{ form.password(id="password", placeholder="Contraseña") }}
+                            <i id="togglePassword" class="fa fa-eye password-toggle"></i>
+                        </div>
+
+                        <div class="login-actions">
+                            <div class="login-remember">
+                                {{ form.remember(id="remember") }}
+                                {{ form.remember.label(for="remember") }}
                             </div>
-                            {% if form.password.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.password.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+                            <a href="{{ url_for('auth.olvido_password') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
                         </div>
                         
-                        <div class="row mb-4">
-                            <div class="col-6">
-                                <div class="form-check">
-                                    {{ form.remember(class="form-check-input") }}
-                                    {{ form.remember.label(class="form-check-label") }}
-                                </div>
-                            </div>
-                            <div class="col-6 text-end">
-                                <a href="{{ url_for('auth.olvido_password') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid">
-                            {{ form.submit(class="btn btn-primary btn-lg") }}
-                        </div>
+                        {{ form.submit(class="login-submit") }}
                     </form>
                 </div>
             </div>
         </div>
-        
-        <!-- Footer -->
-        <div class="text-center mt-4 text-muted">
-            © {{ get_year() }} Agroindustrial Molino Sonora AP S.A.S. Todos los derechos reservados
-        </div>
+    </div>
+
+    <!-- Footer para la página de login -->
+    <div class="login-page-footer">
+        © 2025 Agroindustrial Molino Sonora AP S.A.S. Todos los derechos reservados.
     </div>
     
     <!-- jQuery -->
@@ -204,35 +292,28 @@
     <!-- Script para manejar la visibilidad de la contraseña -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var passwordField = document.getElementById('password-field');
-            var eyeIcon = document.getElementById('eye-icon');
+            var passwordField = document.getElementById('password');
+            var toggleIcon = document.getElementById('togglePassword');
             
-            // Función para alternar visibilidad de la contraseña
-            function togglePasswordVisibility() {
+            toggleIcon.addEventListener('click', function() {
                 if (passwordField.type === 'password') {
                     passwordField.type = 'text';
-                    eyeIcon.classList.remove('fa-eye-slash');
-                    eyeIcon.classList.add('fa-eye');
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
                 } else {
                     passwordField.type = 'password';
-                    eyeIcon.classList.remove('fa-eye');
-                    eyeIcon.classList.add('fa-eye-slash');
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
                 }
-            }
+            });
             
-            // Asignar función al clic del ícono
-            document.querySelector('.eye-icon').addEventListener('click', togglePasswordVisibility);
-            
-            // Cambiar al ojo tachado cuando se ingresa texto
             passwordField.addEventListener('input', function() {
                 if (this.value.length > 0) {
-                    // Si hay texto, mostrar el ojo tachado
-                    eyeIcon.classList.remove('fa-eye');
-                    eyeIcon.classList.add('fa-eye-slash');
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
                 } else {
-                    // Si está vacío, mostrar el ojo normal
-                    eyeIcon.classList.remove('fa-eye-slash');
-                    eyeIcon.classList.add('fa-eye');
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
                 }
             });
         });
