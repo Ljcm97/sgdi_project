@@ -117,6 +117,11 @@
                                     <i class="fas fa-id-card"></i> Cargos
                                 </a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('area_cargos.index') }}">
+                                    <i class="fas fa-sitemap"></i> Cargos por Área
+                                </a>
+                            </li>
                             {% endif %}
                             {% if check_permission('administrar_estados') or check_permission('Administrar estados') %}
                             <li>

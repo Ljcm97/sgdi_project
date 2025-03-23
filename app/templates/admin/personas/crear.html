@@ -149,3 +149,8 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<!-- Incluir script para cargar cargos según el área -->
+<script src="{{ url_for('static', filename='js/area-cargo.js') }}"></script>
+{% endblock %}

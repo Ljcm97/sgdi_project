@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required
 from app import db
 from app.models.persona import Persona
@@ -175,3 +175,32 @@ def get_by_area(area_id):
     personas = Persona.query.filter_by(area_id=area_id, activo=True).all()
     personas_json = [{'id': p.id, 'nombre': p.nombre_completo} for p in personas]
     return jsonify(personas_json)
+
+@personas_bp.route('/get_cargos_por_area/<int:area_id>')
+@login_required
+def get_cargos_por_area(area_id):
+    """API para obtener los cargos asociados a un área específica, incluyendo el cargo APRENDIZ SENA"""
+    # Buscar el área para verificar si existe
+    area = Area.query.get_or_404(area_id)
+    
+    # Obtener personas con el área seleccionada
+    personas_area = Persona.query.filter_by(area_id=area_id).all()
+    
+    # Extraer los cargos asociados a estas personas
+    cargos_ids = [p.cargo_id for p in personas_area]
+    
+    # Obtener cargos únicos para esta área
+    cargos = Cargo.query.filter(Cargo.id.in_(cargos_ids)).all()
+    
+    # Añadir el cargo "APRENDIZ SENA" si no está ya incluido
+    aprendiz_sena = Cargo.query.filter_by(nombre='APRENDIZ SENA').first()
+    if aprendiz_sena and aprendiz_sena.id not in cargos_ids:
+        cargos.append(aprendiz_sena)
+    
+    # Ordenar alfabéticamente
+    cargos = sorted(cargos, key=lambda c: c.nombre)
+    
+    # Crear lista JSON
+    cargos_json = [{'id': c.id, 'nombre': c.nombre} for c in cargos]
+    
+    return jsonify(cargos_json)
