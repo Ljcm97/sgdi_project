@@ -8,7 +8,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField, TextAreaField, SelectMultipleField, widgets, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
-from sqlalchemy import func
+from sqlalchemy import func, text  # Se importa 'text' de sqlalchemy para consultas directas
 
 # Widget personalizado para selección múltiple con checkboxes
 class MultiCheckboxField(SelectMultipleField):
@@ -99,7 +99,10 @@ def editar(id):
     # Prepopular los permisos seleccionados
     permiso_ids = [p.id for p in rol.permisos]
     form = RolForm(obj=rol)
-    form.permisos.data = permiso_ids
+    
+    # Solo establecer los datos de permisos en GET, no en POST
+    if request.method == 'GET':
+        form.permisos.data = permiso_ids
     
     if form.validate_on_submit():
         # Normalizar nombre (trim y pasar a mayúsculas para comparar)
@@ -115,21 +118,31 @@ def editar(id):
             flash('Ya existe otro rol con este nombre.', 'danger')
             return redirect(url_for('roles.editar', id=id))
         
-        # Actualizar el rol
-        rol.nombre = nombre_normalizado
-        rol.descripcion = form.descripcion.data.strip() if form.descripcion.data else None
-        
-        # Actualizar permisos
-        rol.permisos = []
-        for permiso_id in form.permisos.data:
-            permiso = Permiso.query.get(permiso_id)
-            if permiso:
-                rol.permisos.append(permiso)
-        
-        db.session.commit()
-        
-        flash('Rol actualizado exitosamente.', 'success')
-        return redirect(url_for('roles.index'))
+        try:
+            # Actualizar el rol
+            rol.nombre = nombre_normalizado
+            rol.descripcion = form.descripcion.data.strip() if form.descripcion.data else None
+            
+            # Limpiar y recrear permisos usando el ORM
+            # Primero, eliminamos todos los permisos existentes
+            rol.permisos = []
+            db.session.flush()
+            
+            # Luego, agregamos los nuevos permisos seleccionados
+            for permiso_id in form.permisos.data:
+                permiso = Permiso.query.get(permiso_id)
+                if permiso:
+                    rol.permisos.append(permiso)
+            
+            # Guardar los cambios
+            db.session.commit()
+            
+            flash('Rol actualizado exitosamente.', 'success')
+            return redirect(url_for('roles.index'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar el rol: {str(e)}', 'danger')
+            return redirect(url_for('roles.editar', id=id))
     
     # Si hay errores de validación, mostrarlos
     if form.errors:

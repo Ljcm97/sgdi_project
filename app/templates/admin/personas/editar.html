@@ -61,7 +61,12 @@
                 <!-- Zona Económica -->
                 <div class="col-md-6 mb-3">
                     {{ form.zona_economica_id.label(class="form-label") }}
-                    {{ form.zona_economica_id(class="form-select") }}
+                    <select class="form-select" id="zona_economica_id" name="zona_economica_id" required>
+                        <option value="">Seleccione zona económica</option>
+                        {% for value, label in form.zona_economica_id.choices %}
+                            <option value="{{ value }}" {% if form.zona_economica_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.zona_economica_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.zona_economica_id.errors %}
@@ -74,7 +79,12 @@
                 <!-- Unidad -->
                 <div class="col-md-6 mb-3">
                     {{ form.unidad_id.label(class="form-label") }}
-                    {{ form.unidad_id(class="form-select") }}
+                    <select class="form-select" id="unidad_id" name="unidad_id" required>
+                        <option value="">Seleccione unidad</option>
+                        {% for value, label in form.unidad_id.choices %}
+                            <option value="{{ value }}" {% if form.unidad_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.unidad_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.unidad_id.errors %}
@@ -87,7 +97,12 @@
                 <!-- Área -->
                 <div class="col-md-6 mb-3">
                     {{ form.area_id.label(class="form-label") }}
-                    {{ form.area_id(class="form-select") }}
+                    <select class="form-select" id="area_id" name="area_id" required>
+                        <option value="">Seleccione área</option>
+                        {% for value, label in form.area_id.choices %}
+                            <option value="{{ value }}" {% if form.area_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.area_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.area_id.errors %}
@@ -100,7 +115,12 @@
                 <!-- Cargo -->
                 <div class="col-md-6 mb-3">
                     {{ form.cargo_id.label(class="form-label") }}
-                    {{ form.cargo_id(class="form-select") }}
+                    <select class="form-select" id="cargo_id" name="cargo_id" required>
+                        <option value="">Seleccione cargo</option>
+                        {% for value, label in form.cargo_id.choices %}
+                            <option value="{{ value }}" {% if form.cargo_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.cargo_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.cargo_id.errors %}

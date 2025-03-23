@@ -22,12 +22,12 @@ class UsuarioForm(FlaskForm):
     ])
     
     persona_id = SelectField('Persona', 
-                           coerce=int,
-                           validators=[DataRequired(message='Persona obligatoria')])
+                            coerce=int,
+                            validators=[DataRequired(message='Persona obligatoria')])
     
     rol_id = SelectField('Rol', 
-                        coerce=int,
-                        validators=[DataRequired(message='Rol obligatorio')])
+                         coerce=int,
+                         validators=[DataRequired(message='Rol obligatorio')])
     
     activo = BooleanField('Activo', default=True)
     
@@ -36,6 +36,6 @@ class UsuarioForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(UsuarioForm, self).__init__(*args, **kwargs)
         
-        # Cargar opciones para los selectores
-        self.persona_id.choices = [(p.id, p.nombre_completo) for p in Persona.query.filter_by(activo=True).all()]
-        self.rol_id.choices = [(r.id, r.nombre) for r in Rol.query.all()]
+        # Cargar opciones para los selectores sin incluir opción vacía
+        self.persona_id.choices = [(p.id, p.nombre_completo) for p in Persona.query.filter_by(activo=True).order_by(Persona.nombres_apellidos).all()]
+        self.rol_id.choices = [(r.id, r.nombre) for r in Rol.query.order_by(Rol.nombre).all()]

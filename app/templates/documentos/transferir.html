@@ -121,10 +121,20 @@
     $(document).ready(function() {
         // Función para cargar personas de un área
         function cargarPersonas(areaId) {
-            if (!areaId) return;
+            if (!areaId) {
+                // Si no hay área seleccionada o se selecciona "Seleccione área", mostrar solo la opción por defecto
+                $("#persona_destino_id").html('<option value="">Seleccione persona</option>');
+                return;
+            }
             
             $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
-                var options = '';
+                var options = '<option value="">Seleccione persona</option>';
+                
+                // Ordenar datos alfabéticamente
+                data.sort(function(a, b) {
+                    return a.nombre.localeCompare(b.nombre);
+                });
+                
                 $.each(data, function(index, persona) {
                     options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
                 });

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
--- Host: localhost    Database: sgdi_db
+-- Host: 127.0.0.1    Database: sgdi_db
 -- ------------------------------------------------------
 -- Server version	8.0.41
 
@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `alembic_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `alembic_version` (
-  `version_num` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `version_num` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`version_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -47,10 +47,10 @@ DROP TABLE IF EXISTS `areas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `areas` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,10 +72,10 @@ DROP TABLE IF EXISTS `cargos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cargos` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=233 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=235 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,18 +97,18 @@ DROP TABLE IF EXISTS `documentos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `documentos` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `radicado` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `radicado` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `fecha_recepcion` datetime NOT NULL,
   `transportadora_id` int NOT NULL,
-  `numero_guia` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remitente` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `numero_guia` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remitente` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tipo_documento_id` int NOT NULL,
-  `contenido` text COLLATE utf8mb4_unicode_ci,
-  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `contenido` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `area_destino_id` int NOT NULL,
   `persona_destino_id` int NOT NULL,
   `estado_actual_id` int NOT NULL,
-  `tipo` enum('ENTRADA','SALIDA') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tipo` enum('ENTRADA','SALIDA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `registrado_por_id` int NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -125,7 +125,7 @@ CREATE TABLE `documentos` (
   CONSTRAINT `documentos_ibfk_4` FOREIGN KEY (`persona_destino_id`) REFERENCES `personas` (`id`),
   CONSTRAINT `documentos_ibfk_5` FOREIGN KEY (`estado_actual_id`) REFERENCES `estados_documento` (`id`),
   CONSTRAINT `documentos_ibfk_6` FOREIGN KEY (`registrado_por_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,6 +134,7 @@ CREATE TABLE `documentos` (
 
 LOCK TABLES `documentos` WRITE;
 /*!40000 ALTER TABLE `documentos` DISABLE KEYS */;
+INSERT INTO `documentos` VALUES (2,'20250322-8332','2025-03-22 10:14:00',3,'0123456789','Lina',5,'Se entregan 20 tiquetes de aguazul N° ....... etc','Sin novedades ',3,28,5,'ENTRADA',2,'2025-03-22 15:16:58'),(3,'20250322-2381','2025-03-22 12:39:00',4,'741258','Albertano',1,'Factura de celsia','Sin novedades ',17,4,7,'ENTRADA',2,'2025-03-22 17:58:36'),(4,'20250322-8960','2025-03-22 13:00:00',6,'159753','Planta aguazul',4,'Informes de Planta aguazul','Sin novedad',17,4,7,'ENTRADA',2,'2025-03-22 18:14:54');
 /*!40000 ALTER TABLE `documentos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -146,12 +147,12 @@ DROP TABLE IF EXISTS `estados_documento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estados_documento` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
-  `color` varchar(7) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `color` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -160,7 +161,7 @@ CREATE TABLE `estados_documento` (
 
 LOCK TABLES `estados_documento` WRITE;
 /*!40000 ALTER TABLE `estados_documento` DISABLE KEYS */;
-INSERT INTO `estados_documento` VALUES (1,'Recibido','Documento recibido en recepción','#3498db','2025-03-20 12:08:58'),(2,'En proceso','Documento en proceso de revisión','#f39c12','2025-03-20 12:08:58'),(3,'Transferido','Documento transferido a otra área','#9b59b6','2025-03-20 12:08:58'),(4,'Finalizado','Proceso completado','#2ecc71','2025-03-20 12:08:58'),(5,'Archivado','Documento archivado','#7f8c8d','2025-03-20 12:08:58');
+INSERT INTO `estados_documento` VALUES (1,'Recibido','Documento recibido en recepción','#1d2c96','2025-03-20 12:08:58'),(2,'En proceso','Documento en proceso de revisión','#f39c12','2025-03-20 12:08:58'),(3,'Transferido','Documento transferido a otra área','#9b59b6','2025-03-20 12:08:58'),(4,'Finalizado','Proceso completado','#357234','2025-03-20 12:08:58'),(5,'Archivado','Documento archivado','#c1c2c2','2025-03-20 12:08:58'),(7,'Rechazado','Documento rechazado por el destinatario','#e20505','2025-03-22 10:04:38');
 /*!40000 ALTER TABLE `estados_documento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,7 +182,7 @@ CREATE TABLE `movimientos` (
   `area_destino_id` int NOT NULL,
   `persona_destino_id` int NOT NULL,
   `estado_documento_id` int NOT NULL,
-  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `usuario_origen_id` (`usuario_origen_id`),
@@ -198,7 +199,7 @@ CREATE TABLE `movimientos` (
   CONSTRAINT `movimientos_ibfk_6` FOREIGN KEY (`persona_destino_id`) REFERENCES `personas` (`id`),
   CONSTRAINT `movimientos_ibfk_7` FOREIGN KEY (`estado_documento_id`) REFERENCES `estados_documento` (`id`),
   CONSTRAINT `movimientos_ibfk_8` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -207,6 +208,7 @@ CREATE TABLE `movimientos` (
 
 LOCK TABLES `movimientos` WRITE;
 /*!40000 ALTER TABLE `movimientos` DISABLE KEYS */;
+INSERT INTO `movimientos` VALUES (4,2,'2025-03-22 10:14:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-22 15:16:58'),(5,2,'2025-03-22 15:36:57',9,7,21,7,21,2,'Documento aceptado para procesamiento','2025-03-22 15:36:57'),(6,2,'2025-03-22 15:38:27',9,7,21,3,28,1,'Se pasa al área de auditoria los fletes para ser auditados ','2025-03-22 15:38:27'),(7,2,'2025-03-22 15:43:12',8,3,28,3,28,2,'Documento aceptado para procesamiento','2025-03-22 15:43:12'),(8,2,'2025-03-22 15:43:16',8,3,28,3,28,4,'Documento finalizado','2025-03-22 15:43:16'),(9,2,'2025-03-22 15:43:36',8,3,28,3,28,5,'Documento archivado','2025-03-22 15:43:36'),(10,3,'2025-03-22 12:39:00',2,17,4,3,28,1,'Documento registrado en recepción','2025-03-22 17:58:36'),(11,4,'2025-03-22 13:00:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-22 18:14:54'),(12,4,'2025-03-22 18:15:36',9,7,21,17,4,7,'Documento rechazado por Maria Paula Lozano Lozano','2025-03-22 18:15:36'),(13,3,'2025-03-22 20:29:46',8,3,28,17,4,7,'Documento rechazado por Nataly Tatiana Puentes Sierra','2025-03-22 20:29:46');
 /*!40000 ALTER TABLE `movimientos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -220,8 +222,8 @@ DROP TABLE IF EXISTS `notificaciones`;
 CREATE TABLE `notificaciones` (
   `id` int NOT NULL AUTO_INCREMENT,
   `usuario_id` int NOT NULL,
-  `titulo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mensaje` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `titulo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mensaje` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `documento_id` int DEFAULT NULL,
   `leida` tinyint(1) DEFAULT '0',
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -230,7 +232,7 @@ CREATE TABLE `notificaciones` (
   KEY `documento_id` (`documento_id`),
   CONSTRAINT `notificaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `notificaciones_ibfk_2` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -239,6 +241,7 @@ CREATE TABLE `notificaciones` (
 
 LOCK TABLES `notificaciones` WRITE;
 /*!40000 ALTER TABLE `notificaciones` DISABLE KEYS */;
+INSERT INTO `notificaciones` VALUES (4,9,'Nuevo documento asignado - 20250322-8332','Se te ha asignado un nuevo documento de tipo Tiquetes.',2,1,'2025-03-22 15:16:58'),(5,2,'Documento aceptado - 20250322-8332','El documento ha sido aceptado por Maria Paula Lozano Lozano.',2,0,'2025-03-22 15:36:57'),(6,8,'Documento transferido - 20250322-8332','Se te ha transferido un documento de tipo Tiquetes.',2,1,'2025-03-22 15:38:27'),(7,2,'Documento aceptado - 20250322-8332','El documento ha sido aceptado por Nataly Tatiana Puentes Sierra.',2,0,'2025-03-22 15:43:12'),(8,8,'Nuevo documento asignado - 20250322-2381','Se te ha asignado un nuevo documento de tipo Facturas.',3,1,'2025-03-22 17:58:36'),(9,9,'Nuevo documento asignado - 20250322-8960','Se te ha asignado un nuevo documento de tipo Correspondencia.',4,1,'2025-03-22 18:14:54'),(10,2,'Documento rechazado - 20250322-8960','El documento ha sido rechazado por Maria Paula Lozano Lozano.',4,0,'2025-03-22 18:15:36'),(11,2,'Documento rechazado - 20250322-2381','El documento ha sido rechazado por Nataly Tatiana Puentes Sierra.',3,0,'2025-03-22 20:29:46');
 /*!40000 ALTER TABLE `notificaciones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -251,8 +254,8 @@ DROP TABLE IF EXISTS `permisos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permisos` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -264,7 +267,7 @@ CREATE TABLE `permisos` (
 
 LOCK TABLES `permisos` WRITE;
 /*!40000 ALTER TABLE `permisos` DISABLE KEYS */;
-INSERT INTO `permisos` VALUES (1,'crear_documento','Puede crear documentos','2025-03-20 12:08:58'),(2,'ver_documento','Puede ver documentos','2025-03-20 12:08:58'),(3,'editar_documento','Puede editar documentos','2025-03-20 12:08:58'),(4,'eliminar_documento','Puede eliminar documentos','2025-03-20 12:08:58'),(5,'transferir_documento','Puede transferir documentos','2025-03-20 12:08:58'),(6,'aceptar_documento','Puede aceptar documentos','2025-03-20 12:08:58'),(7,'rechazar_documento','Puede rechazar documentos','2025-03-20 12:08:58'),(8,'ver_historial','Puede ver el historial de documentos','2025-03-20 12:08:58'),(9,'ver_reportes','Puede ver reportes','2025-03-20 12:08:58'),(10,'administrar_usuarios','Puede administrar usuarios','2025-03-20 12:08:58'),(11,'administrar_roles','Puede administrar roles','2025-03-20 12:08:58'),(12,'administrar_personas','Puede administrar personas','2025-03-20 12:08:58'),(13,'administrar_areas','Puede administrar áreas','2025-03-20 12:08:58'),(14,'administrar_unidades','Puede administrar unidades','2025-03-20 12:08:58'),(15,'administrar_cargos','Puede administrar cargos','2025-03-20 12:08:58'),(16,'administrar_zonas','Puede administrar zonas económicas','2025-03-20 12:08:58'),(17,'administrar_transportadoras','Puede administrar transportadoras','2025-03-20 12:08:58'),(18,'administrar_tipos_documento','Puede administrar tipos de documento','2025-03-20 12:08:58'),(19,'administrar_estados','Puede administrar estados de documento','2025-03-20 12:08:58'),(20,'cambiar_contraseña','Puede cambiar su contraseña','2025-03-20 12:08:58'),(21,'cambiar_contraseña_otros','Puede cambiar la contraseña de otros usuarios','2025-03-20 12:08:58');
+INSERT INTO `permisos` VALUES (1,'Crear documento','Puede crear documentos','2025-03-20 12:08:58'),(2,'Ver documento','Puede ver documentos','2025-03-20 12:08:58'),(3,'Editar documento','Puede editar documentos','2025-03-20 12:08:58'),(4,'Eliminar documento','Puede eliminar documentos','2025-03-20 12:08:58'),(5,'Transferir documento','Puede transferir documentos','2025-03-20 12:08:58'),(6,'Aceptar documento','Puede aceptar documentos','2025-03-20 12:08:58'),(7,'Rechazar documento','Puede rechazar documentos','2025-03-20 12:08:58'),(8,'Ver historial','Puede ver el historial de documentos','2025-03-20 12:08:58'),(9,'Ver reportes','Puede ver reportes','2025-03-20 12:08:58'),(10,'Administrar usuarios','Puede administrar usuarios','2025-03-20 12:08:58'),(11,'Administrar roles','Puede administrar roles','2025-03-20 12:08:58'),(12,'Administrar personas','Puede administrar personas','2025-03-20 12:08:58'),(13,'Administrar areas','Puede administrar áreas','2025-03-20 12:08:58'),(14,'Administrar unidades','Puede administrar unidades','2025-03-20 12:08:58'),(15,'Administrar cargos','Puede administrar cargos','2025-03-20 12:08:58'),(16,'Administrar zonas','Puede administrar zonas económicas','2025-03-20 12:08:58'),(17,'Administrar transportadoras','Puede administrar transportadoras','2025-03-20 12:08:58'),(18,'Administrar tipos de documento','Puede administrar tipos de documento','2025-03-20 12:08:58'),(19,'Administrar estados','Puede administrar estados de documento','2025-03-20 12:08:58'),(20,'Cambiar contraseña','Puede cambiar su contraseña','2025-03-20 12:08:58'),(21,'Cambiar contraseña de otros','Puede cambiar la contraseña de otros usuarios','2025-03-20 12:08:58');
 /*!40000 ALTER TABLE `permisos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -277,9 +280,9 @@ DROP TABLE IF EXISTS `personas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `personas` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombres_apellidos` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `telefono` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombres_apellidos` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `zona_economica_id` int NOT NULL,
   `unidad_id` int NOT NULL,
   `area_id` int NOT NULL,
@@ -295,7 +298,7 @@ CREATE TABLE `personas` (
   CONSTRAINT `personas_ibfk_2` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`),
   CONSTRAINT `personas_ibfk_3` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`),
   CONSTRAINT `personas_ibfk_4` FOREIGN KEY (`cargo_id`) REFERENCES `cargos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -304,7 +307,7 @@ CREATE TABLE `personas` (
 
 LOCK TABLES `personas` WRITE;
 /*!40000 ALTER TABLE `personas` DISABLE KEYS */;
-INSERT INTO `personas` VALUES (1,'Ricardo Alexander Bohórquez Méndez','rbohorquez@arrozsonora.com.co','3112815201',1,1,19,3,1,'2025-03-20 12:08:58'),(2,'Jairo Antonio Lozano Vargas','sst@arrozsonora.com.co','3102118013',1,2,20,45,1,'2025-03-20 12:08:58'),(3,'Olga Patricia Ortiz Rivas','oortiz@arrozsonora.com.co','',1,3,6,40,1,'2025-03-20 12:08:58'),(4,'Yazmina Lorena Fayad Gutierrez','recepcion@arrozsonora.com.co','3104567890',1,1,17,48,1,'2025-03-20 12:08:58'),(5,'Jairo Sedan Murra','jsedan@arrozsonora.com.co','',1,1,13,36,1,'2025-03-21 09:11:56'),(6,'Julio Cesar Cepeda Rodríguez','jcepeda@arrozsonora.com.co','',1,1,14,37,1,'2025-03-21 09:11:56'),(7,'Yuly Slendy Castillo Robayo','ycastillo@arrozsonora.com.co','',1,1,12,35,1,'2025-03-21 09:11:56'),(8,'Myriam Rodríguez Arciniegas','mrodriguez@arrozsonora.com.co','',1,1,8,33,1,'2025-03-21 09:11:56'),(9,'Brayan Santick Quintero Cordoba','bquintero@arrozsonora.com.co','',1,1,2,5,1,'2025-03-21 09:11:56'),(10,'Viviana Caycedo Bocanegra','vcaycedo@arrozsonora.com.co','',1,1,21,49,1,'2025-03-21 09:11:56'),(11,'Martha Yaneth Diaz Trigueros','mdiaz@arrozsonora.com.co','',1,1,22,52,1,'2025-03-21 09:11:56'),(12,'Sandra Bibiana Laverde Parra','slaverde@arrozsonora.com.co','',1,1,22,20,1,'2025-03-21 09:11:56'),(13,'Juan David Lozano Guzman','jlozano@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(14,'Diana Marcela Bocanegra Tovar','dbocanegra@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(15,'Teresa Tovar Rivera','ttovar@arrozsonora.com.co','',1,1,5,9,1,'2025-03-21 09:11:56'),(16,'Angy Yulitza Vargas Padilla','avargas@arrozsonora.com.co','',1,1,5,18,1,'2025-03-21 09:11:56'),(17,'Ximena Paola Bocanegra Ortiz','xbocanegra@arrozsonora.com.co','',1,1,7,41,1,'2025-03-21 09:11:56'),(18,'Joan Jair Rodriguez Portela','jrodriguez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(19,'Adriana Lucia Gonzalez Serrano','agonzalez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(20,'Lizeth Daniela Melo Olis','lmelo@arrozsonora.com.co','',1,1,7,8,1,'2025-03-21 09:11:56'),(21,'Maria Paula Lozano Lozano','mlozano@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(22,'Silvia Patricia Rivera Zabala','srivera@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(23,'Andres Felipe Arias Vargas','aarias@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(24,'Laura Maria Rodriguez Cuervo','lrodriguez@arrozsonora.com.co','',1,1,11,19,1,'2025-03-21 09:11:56'),(25,'Andrea Del Pilar Morales Trujillo','amorales@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(26,'Karen Nureidys Carcamo Londono','kcarcamo@arrozsonora.com.co','',1,1,9,42,1,'2025-03-21 09:11:56'),(27,'Julian Andres Molina Avila','jmolina@arrozsonora.com.co','',1,1,9,10,1,'2025-03-21 09:11:56'),(28,'Nataly Tatiana Puentes Sierra','npuentes@arrozsonora.com.co','',1,1,3,38,1,'2025-03-21 09:11:56'),(29,'Adriana del Pilar Lopez Bustos','alopez@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(30,'Lina Fernanda Fierro Fierro','lfierro@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(31,'Leidy Johana Avila Gonzalez','lavila@arrozsonora.com.co','',1,1,4,39,1,'2025-03-21 09:11:56'),(32,'Julieth Paola Gonzalez Onatra','jgonzalez@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(33,'Jonathan Fabian Manrique Rodriguez','jmanrique@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(34,'Angie Katherine Zamora Cordoba','azamora@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(35,'Luana Simona Sendoya Echeverry','lsendoya@arrozsonora.com.co','',1,1,23,30,1,'2025-03-21 09:11:56'),(36,'Angi Xiomara Ramirez Ortiz','aramirez@arrozsonora.com.co','',1,1,23,21,1,'2025-03-21 09:11:56'),(37,'Juan Jose Cote Hernandez','jcote@arrozsonora.com.co','',1,1,15,32,1,'2025-03-21 09:11:56'),(38,'Angela Maria Zartha Leal','azartha@arrozsonora.com.co','',1,1,15,22,1,'2025-03-21 09:11:56'),(39,'Juan Pablo Celis Castillo','jcelis@arrozsonora.com.co','',1,1,15,31,1,'2025-03-21 09:11:56'),(40,'Ana Maria Rodriguez Mora','arodriguez@arrozsonora.com.co','',1,1,18,44,1,'2025-03-21 09:11:56'),(41,'Sandra Milena Garcia Gonzalez','sgarcia@arrozsonora.com.co','',1,1,18,11,1,'2025-03-21 09:11:56'),(42,'Yendy Fannory Bravo Gutierrez','ybravo@arrozsonora.com.co','',1,2,10,34,1,'2025-03-21 09:11:56'),(43,'Kelly Johanna Gomez Lozano','kgomez@arrozsonora.com.co','',1,2,20,232,1,'2025-03-21 09:11:56'),(44,'Sandra Milena Villa Rojas','smvilla@arrozsonora.com.co','',1,2,88,1,1,'2025-03-21 09:11:56'),(45,'Diana Alejandra Ortiz Jara','dortiz@arrozsonora.com.co','',1,2,88,27,1,'2025-03-21 09:11:56'),(46,'James Eduardo Rueda Trujillo','jrueda@arrozsonora.com.co','',1,2,16,43,1,'2025-03-21 09:11:56'),(47,'Luis Alberto Barreto Guzman','lbarreto@arrozsonora.com.co','',1,3,6,1,1,'2025-03-21 09:11:56'),(48,'Luis Alejandro Oliveros','','',1,3,6,15,1,'2025-03-21 09:11:56'),(49,'Jaime Vargas Ramirez','jvargas@arrozsonora.com.co','',1,3,1,28,1,'2025-03-21 09:11:58'),(95,'Lina Julieth Carvajal Mendoza','','',1,1,19,4,1,'2025-03-21 20:01:07');
+INSERT INTO `personas` VALUES (1,'Ricardo Alexander Bohórquez Méndez','rbohorquez@arrozsonora.com.co','3112815201',1,1,19,3,1,'2025-03-20 12:08:58'),(2,'Jairo Antonio Lozano Vargas','sst@arrozsonora.com.co','3102118013',1,2,20,45,1,'2025-03-20 12:08:58'),(3,'Olga Patricia Ortiz Rivas','oortiz@arrozsonora.com.co','',1,3,6,40,1,'2025-03-20 12:08:58'),(4,'Yazmina Lorena Fayad Gutierrez','recepcion@arrozsonora.com.co','3104567890',1,1,17,48,1,'2025-03-20 12:08:58'),(5,'Jairo Sedan Murra','jsedan@arrozsonora.com.co','',1,1,13,36,1,'2025-03-21 09:11:56'),(6,'Julio Cesar Cepeda Rodríguez','jcepeda@arrozsonora.com.co','',1,1,14,37,1,'2025-03-21 09:11:56'),(7,'Yuly Slendy Castillo Robayo','ycastillo@arrozsonora.com.co','',1,1,12,35,1,'2025-03-21 09:11:56'),(8,'Myriam Rodríguez Arciniegas','mrodriguez@arrozsonora.com.co','',1,1,8,33,1,'2025-03-21 09:11:56'),(9,'Brayan Santick Quintero Cordoba','bquintero@arrozsonora.com.co','',1,1,2,5,1,'2025-03-21 09:11:56'),(10,'Viviana Caycedo Bocanegra','vcaycedo@arrozsonora.com.co','',1,1,21,49,1,'2025-03-21 09:11:56'),(11,'Martha Yaneth Diaz Trigueros','mdiaz@arrozsonora.com.co','',1,1,22,52,1,'2025-03-21 09:11:56'),(12,'Sandra Bibiana Laverde Parra','slaverde@arrozsonora.com.co','',1,1,22,20,1,'2025-03-21 09:11:56'),(13,'Juan David Lozano Guzman','jlozano@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(14,'Diana Marcela Bocanegra Tovar','dbocanegra@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(15,'Teresa Tovar Rivera','ttovar@arrozsonora.com.co','',1,1,5,9,1,'2025-03-21 09:11:56'),(16,'Angy Yulitza Vargas Padilla','avargas@arrozsonora.com.co','',1,1,5,18,1,'2025-03-21 09:11:56'),(17,'Ximena Paola Bocanegra Ortiz','xbocanegra@arrozsonora.com.co','',1,1,7,41,1,'2025-03-21 09:11:56'),(18,'Joan Jair Rodriguez Portela','jrodriguez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(19,'Adriana Lucia Gonzalez Serrano','agonzalez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(20,'Lizeth Daniela Melo Olis','lmelo@arrozsonora.com.co',NULL,1,1,7,8,1,'2025-03-21 09:11:56'),(21,'Maria Paula Lozano Lozano','mlozano@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(22,'Silvia Patricia Rivera Zabala','srivera@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(23,'Andres Felipe Arias Vargas','aarias@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(24,'Laura Maria Rodriguez Cuervo','lrodriguez@arrozsonora.com.co','',1,1,11,19,1,'2025-03-21 09:11:56'),(25,'Andrea Del Pilar Morales Trujillo','amorales@arrozsonora.com.co',NULL,1,1,7,7,1,'2025-03-21 09:11:56'),(26,'Karen Nureidys Carcamo Londono','kcarcamo@arrozsonora.com.co','',1,1,9,42,1,'2025-03-21 09:11:56'),(27,'Julian Andres Molina Avila','jmolina@arrozsonora.com.co','',1,1,9,10,1,'2025-03-21 09:11:56'),(28,'Nataly Tatiana Puentes Sierra','npuentes@arrozsonora.com.co','',1,1,3,38,1,'2025-03-21 09:11:56'),(29,'Adriana del Pilar Lopez Bustos','alopez@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(30,'Lina Fernanda Fierro Fierro','lfierro@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(31,'Leidy Johana Avila Gonzalez','lavila@arrozsonora.com.co','',1,1,4,39,1,'2025-03-21 09:11:56'),(32,'Julieth Paola Gonzalez Onatra','jgonzalez@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(33,'Jonathan Fabian Manrique Rodriguez','jmanrique@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(34,'Angie Katherine Zamora Cordoba','azamora@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(35,'Luana Simona Sendoya Echeverry','lsendoya@arrozsonora.com.co','',1,1,23,30,1,'2025-03-21 09:11:56'),(36,'Angi Xiomara Ramirez Ortiz','aramirez@arrozsonora.com.co','',1,1,23,21,1,'2025-03-21 09:11:56'),(37,'Juan Jose Cote Hernandez','jcote@arrozsonora.com.co','',1,1,15,32,1,'2025-03-21 09:11:56'),(38,'Angela Maria Zartha Leal','azartha@arrozsonora.com.co','',1,1,15,22,1,'2025-03-21 09:11:56'),(39,'Juan Pablo Celis Castillo','jcelis@arrozsonora.com.co','',1,1,15,31,1,'2025-03-21 09:11:56'),(40,'Ana Maria Rodriguez Mora','arodriguez@arrozsonora.com.co','',1,1,18,44,1,'2025-03-21 09:11:56'),(41,'Sandra Milena Garcia Gonzalez','sgarcia@arrozsonora.com.co','',1,1,18,11,1,'2025-03-21 09:11:56'),(42,'Yendy Fannory Bravo Gutierrez','ybravo@arrozsonora.com.co','',1,2,10,34,1,'2025-03-21 09:11:56'),(43,'Kelly Johanna Gomez Lozano','kgomez@arrozsonora.com.co','',1,2,20,232,1,'2025-03-21 09:11:56'),(44,'Sandra Milena Villa Rojas','smvilla@arrozsonora.com.co','',1,2,88,1,1,'2025-03-21 09:11:56'),(45,'Diana Alejandra Ortiz Jara','dortiz@arrozsonora.com.co','',1,2,88,27,1,'2025-03-21 09:11:56'),(46,'James Eduardo Rueda Trujillo','jrueda@arrozsonora.com.co','',1,2,16,43,1,'2025-03-21 09:11:56'),(47,'Luis Alberto Barreto Guzman','lbarreto@arrozsonora.com.co','',1,3,6,1,1,'2025-03-21 09:11:56'),(48,'Luis Alejandro Oliveros','','',1,3,6,15,1,'2025-03-21 09:11:56'),(49,'Jaime Vargas Ramirez','jvargas@arrozsonora.com.co','',1,3,1,28,1,'2025-03-21 09:11:58'),(95,'Lina Julieth Carvajal Mendoza','','',1,1,19,4,1,'2025-03-21 20:01:07');
 /*!40000 ALTER TABLE `personas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -317,11 +320,11 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -351,7 +354,7 @@ CREATE TABLE `roles_permisos` (
   KEY `permiso_id` (`permiso_id`),
   CONSTRAINT `roles_permisos_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`),
   CONSTRAINT `roles_permisos_ibfk_2` FOREIGN KEY (`permiso_id`) REFERENCES `permisos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=162 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -360,7 +363,7 @@ CREATE TABLE `roles_permisos` (
 
 LOCK TABLES `roles_permisos` WRITE;
 /*!40000 ALTER TABLE `roles_permisos` DISABLE KEYS */;
-INSERT INTO `roles_permisos` VALUES (1,1,1,'2025-03-20 12:08:58'),(2,1,2,'2025-03-20 12:08:58'),(3,1,3,'2025-03-20 12:08:58'),(4,1,4,'2025-03-20 12:08:58'),(5,1,5,'2025-03-20 12:08:58'),(6,1,6,'2025-03-20 12:08:58'),(7,1,7,'2025-03-20 12:08:58'),(8,1,8,'2025-03-20 12:08:58'),(9,1,9,'2025-03-20 12:08:58'),(10,1,10,'2025-03-20 12:08:58'),(11,1,11,'2025-03-20 12:08:58'),(12,1,12,'2025-03-20 12:08:58'),(13,1,13,'2025-03-20 12:08:58'),(14,1,14,'2025-03-20 12:08:58'),(15,1,15,'2025-03-20 12:08:58'),(16,1,16,'2025-03-20 12:08:58'),(17,1,17,'2025-03-20 12:08:58'),(18,1,18,'2025-03-20 12:08:58'),(19,1,19,'2025-03-20 12:08:58'),(20,1,20,'2025-03-20 12:08:58'),(21,1,21,'2025-03-20 12:08:58'),(32,2,1,'2025-03-20 12:08:58'),(33,2,2,'2025-03-20 12:08:58'),(34,2,3,'2025-03-20 12:08:58'),(35,2,5,'2025-03-20 12:08:58'),(36,2,8,'2025-03-20 12:08:58'),(37,2,9,'2025-03-20 12:08:58'),(38,2,20,'2025-03-20 12:08:58'),(39,3,2,'2025-03-20 12:08:58'),(40,3,5,'2025-03-20 12:08:58'),(41,3,6,'2025-03-20 12:08:58'),(42,3,7,'2025-03-20 12:08:58'),(43,3,20,'2025-03-20 12:08:58');
+INSERT INTO `roles_permisos` VALUES (1,1,1,'2025-03-20 12:08:58'),(2,1,2,'2025-03-20 12:08:58'),(3,1,3,'2025-03-20 12:08:58'),(4,1,4,'2025-03-20 12:08:58'),(5,1,5,'2025-03-20 12:08:58'),(6,1,6,'2025-03-20 12:08:58'),(7,1,7,'2025-03-20 12:08:58'),(8,1,8,'2025-03-20 12:08:58'),(9,1,9,'2025-03-20 12:08:58'),(10,1,10,'2025-03-20 12:08:58'),(11,1,11,'2025-03-20 12:08:58'),(12,1,12,'2025-03-20 12:08:58'),(13,1,13,'2025-03-20 12:08:58'),(14,1,14,'2025-03-20 12:08:58'),(15,1,15,'2025-03-20 12:08:58'),(16,1,16,'2025-03-20 12:08:58'),(17,1,17,'2025-03-20 12:08:58'),(18,1,18,'2025-03-20 12:08:58'),(19,1,19,'2025-03-20 12:08:58'),(20,1,20,'2025-03-20 12:08:58'),(21,1,21,'2025-03-20 12:08:58'),(128,2,20,'2025-03-22 20:27:53'),(129,2,9,'2025-03-22 20:27:53'),(130,2,3,'2025-03-22 20:27:53'),(131,2,8,'2025-03-22 20:27:53'),(132,2,2,'2025-03-22 20:27:53'),(133,2,5,'2025-03-22 20:27:53'),(134,2,1,'2025-03-22 20:27:53'),(156,3,2,'2025-03-23 02:26:49'),(157,3,5,'2025-03-23 02:26:49'),(158,3,7,'2025-03-23 02:26:49'),(159,3,6,'2025-03-23 02:26:49'),(160,3,8,'2025-03-23 02:26:49'),(161,3,20,'2025-03-23 02:26:49');
 /*!40000 ALTER TABLE `roles_permisos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -373,10 +376,10 @@ DROP TABLE IF EXISTS `tipos_documento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipos_documento` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -398,10 +401,10 @@ DROP TABLE IF EXISTS `transportadoras`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transportadoras` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -423,10 +426,10 @@ DROP TABLE IF EXISTS `unidades`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `unidades` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -448,8 +451,8 @@ DROP TABLE IF EXISTS `usuarios`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `persona_id` int NOT NULL,
   `rol_id` int NOT NULL,
   `ultimo_acceso` datetime DEFAULT NULL,
@@ -461,7 +464,7 @@ CREATE TABLE `usuarios` (
   KEY `persona_id` (`persona_id`),
   CONSTRAINT `usuarios_ibfk_2` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`),
   CONSTRAINT `usuarios_ibfk_3` FOREIGN KEY (`persona_id`) REFERENCES `personas` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -470,7 +473,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'rbohorquez','$2b$12$2NvqP3CVtXmJ5IHbpqXTqetvYRA95bp3wdVwOGoGF6qXwVqjCKEEW',1,1,'2025-03-21 21:53:19',1,'2025-03-20 21:18:20'),(2,'yfayad','$2b$12$.Vsma9zYL6ivAOrfzNbN2uO8tw7.21nUBONXcUzOyHWPOrR82AdUq',4,2,'2025-03-21 12:50:21',1,'2025-03-21 12:39:04'),(7,'oortiz','$2b$12$WBhCFj5H6sueT67mHQUndux/X8CSuPMs/sU/au.Dhqp2RlJU8X3Di',3,3,NULL,1,'2025-03-21 13:51:26');
+INSERT INTO `usuarios` VALUES (1,'rbohorquez','$2b$12$h8H9COaJrgpqyE9sQewA7.bMWNcJk1eIJcOKInxqTrcOtuWmji77i',1,1,'2025-03-23 02:23:19',1,'2025-03-20 21:18:20'),(2,'yfayad','$2b$12$.Vsma9zYL6ivAOrfzNbN2uO8tw7.21nUBONXcUzOyHWPOrR82AdUq',4,2,'2025-03-22 17:39:29',1,'2025-03-21 12:39:04'),(8,'npuentes','$2b$12$2Q44xvcj0xIBIL4R6nty2uMMOLTFFU4d3UiW1F.ZaGi9a9WcH.syK',28,3,'2025-03-22 20:29:35',1,'2025-03-22 05:06:01'),(9,'mlozano','$2b$12$ZDiZDmGcldxaGx1FIM13cOV2qk7DVCdgnD4.1ZKBRMd7QaP201ege',21,3,'2025-03-22 18:15:19',1,'2025-03-22 05:06:52'),(10,'lcarvajal','$2b$12$nlV/o7UKblD7DYbux5PBr.SQGbFC2sqmiLrbmEvVxa7oirshtdP6u',95,1,NULL,1,'2025-03-22 19:10:49');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -483,10 +486,10 @@ DROP TABLE IF EXISTS `zonas_economicas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `zonas_economicas` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -508,4 +511,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-21 17:27:18
+-- Dump completed on 2025-03-22 21:45:11

@@ -26,20 +26,20 @@ class PersonaForm(FlaskForm):
     ])
     
     zona_economica_id = SelectField('Zona Económica', 
-                                  coerce=int,
-                                  validators=[DataRequired(message='Zona económica obligatoria')])
+                                    coerce=int,
+                                    validators=[DataRequired(message='Zona económica obligatoria')])
     
     unidad_id = SelectField('Nombre de Unidad', 
-                          coerce=int,
-                          validators=[DataRequired(message='Unidad obligatoria')])
+                            coerce=int,
+                            validators=[DataRequired(message='Unidad obligatoria')])
     
     area_id = SelectField('Área', 
-                        coerce=int,
-                        validators=[DataRequired(message='Área obligatoria')])
+                          coerce=int,
+                          validators=[DataRequired(message='Área obligatoria')])
     
     cargo_id = SelectField('Cargo', 
-                         coerce=int,
-                         validators=[DataRequired(message='Cargo obligatorio')])
+                           coerce=int,
+                           validators=[DataRequired(message='Cargo obligatorio')])
     
     activo = BooleanField('Activo', default=True)
     
@@ -48,8 +48,8 @@ class PersonaForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(PersonaForm, self).__init__(*args, **kwargs)
         
-        # Cargar opciones para los selectores
-        self.zona_economica_id.choices = [(z.id, z.nombre) for z in ZonaEconomica.query.all()]
-        self.unidad_id.choices = [(u.id, u.nombre) for u in Unidad.query.all()]
-        self.area_id.choices = [(a.id, a.nombre) for a in Area.query.all()]
-        self.cargo_id.choices = [(c.id, c.nombre) for c in Cargo.query.all()]
+        # Cargar opciones para los selectores sin opciones vacías
+        self.zona_economica_id.choices = [(z.id, z.nombre) for z in ZonaEconomica.query.order_by(ZonaEconomica.nombre).all()]
+        self.unidad_id.choices = [(u.id, u.nombre) for u in Unidad.query.order_by(Unidad.nombre).all()]
+        self.area_id.choices = [(a.id, a.nombre) for a in Area.query.order_by(Area.nombre).all()]
+        self.cargo_id.choices = [(c.id, c.nombre) for c in Cargo.query.order_by(Cargo.nombre).all()]

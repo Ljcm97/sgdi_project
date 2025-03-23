@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Rol - SGDI{% endblock %}
+
+{% block styles %}
+<style>
+    .permissions-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 15px;
+    }
+    
+    .permission-group {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+    
+    .permission-group h5 {
+        color: #1D2C96;
+        margin-bottom: 10px;
+    }
+    
+    .permission-item {
+        display: flex;
+        margin-bottom: 8px;
+    }
+    
+    .permission-description {
+        margin-left: 10px;
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-plus-circle me-2"></i> Crear Nuevo Rol
+        </h3>
+        <div>
+            <a href="{{ url_for('roles.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver a la lista
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.nombre.label(class="form-label") }}
+                        {{ form.nombre(class="form-control") }}
+                        {% if form.nombre.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nombre.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.descripcion.label(class="form-label") }}
+                        {{ form.descripcion(class="form-control", rows=3) }}
+                        {% if form.descripcion.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.descripcion.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5 class="mb-3">Permisos</h5>
+                    <div class="permissions-container">
+                        <div class="permission-group">
+                            <h5>Documentos</h5>
+                            {% for subfield in form.permisos if 'documento' in subfield.label.text %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="permission-group">
+                            <h5>Administración</h5>
+                            {% for subfield in form.permisos if 'administrar' in subfield.label.text %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="permission-group">
+                            <h5>Otros Permisos</h5>
+                            {% for subfield in form.permisos if 'documento' not in subfield.label.text and 'administrar' not in subfield.label.text %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('roles.index') }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

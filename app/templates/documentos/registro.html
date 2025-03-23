@@ -34,7 +34,12 @@
                 <!-- Transportadora -->
                 <div class="col-md-6 mb-3">
                     {{ form.transportadora_id.label(class="form-label") }}
-                    {{ form.transportadora_id(class="form-select") }}
+                    <select class="form-select" id="transportadora_id" name="transportadora_id" required>
+                        <option value="">Seleccione transportadora</option>
+                        {% for value, label in form.transportadora_id.choices %}
+                            <option value="{{ value }}" {% if form.transportadora_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.transportadora_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.transportadora_id.errors %}
@@ -73,7 +78,12 @@
                 <!-- Tipo de Documento -->
                 <div class="col-md-6 mb-3">
                     {{ form.tipo_documento_id.label(class="form-label") }}
-                    {{ form.tipo_documento_id(class="form-select") }}
+                    <select class="form-select" id="tipo_documento_id" name="tipo_documento_id" required>
+                        <option value="">Seleccione tipo de documento</option>
+                        {% for value, label in form.tipo_documento_id.choices %}
+                            <option value="{{ value }}" {% if form.tipo_documento_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.tipo_documento_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.tipo_documento_id.errors %}
@@ -106,7 +116,12 @@
                 <!-- Área Destino -->
                 <div class="col-md-6 mb-3">
                     {{ form.area_destino_id.label(class="form-label") }}
-                    {{ form.area_destino_id(class="form-select", id="area_destino_id") }}
+                    <select class="form-select" id="area_destino_id" name="area_destino_id" required>
+                        <option value="">Seleccione área</option>
+                        {% for value, label in form.area_destino_id.choices %}
+                            <option value="{{ value }}" {% if form.area_destino_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.area_destino_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.area_destino_id.errors %}
@@ -119,7 +134,12 @@
                 <!-- Persona Destino -->
                 <div class="col-md-6 mb-3">
                     {{ form.persona_destino_id.label(class="form-label") }}
-                    {{ form.persona_destino_id(class="form-select", id="persona_destino_id") }}
+                    <select class="form-select" id="persona_destino_id" name="persona_destino_id" required>
+                        <option value="">Seleccione persona</option>
+                        {% for value, label in form.persona_destino_id.choices %}
+                            <option value="{{ value }}" {% if form.persona_destino_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.persona_destino_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.persona_destino_id.errors %}
@@ -178,28 +198,37 @@
         locale: "es",
         time_24hr: true
     });
-    
-    // Cargar personas cuando cambia el área
-    $(document).ready(function() {
-        // Función para cargar personas de un área
-        function cargarPersonas(areaId) {
-            if (!areaId) return;
-            
-            $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
-                var options = '';
-                $.each(data, function(index, persona) {
-                    options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
-                });
-                
-                $("#persona_destino_id").html(options);
-            });
+
+    // Función para cargar personas de un área
+    function cargarPersonas(areaId) {
+        if (!areaId) {
+            // Si no hay área seleccionada o se selecciona "Seleccione área", mostrar solo la opción por defecto
+            $("#persona_destino_id").html('<option value="">Seleccione persona</option>');
+            return;
         }
-        
+
+        $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
+            var options = '<option value="">Seleccione persona</option>';
+
+            // Ordenar datos alfabéticamente
+            data.sort(function(a, b) {
+                return a.nombre.localeCompare(b.nombre);
+            });
+
+            $.each(data, function(index, persona) {
+                options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
+            });
+
+            $("#persona_destino_id").html(options);
+        });
+    }
+
+    $(document).ready(function() {
         // Evento al cambiar de área
         $("#area_destino_id").change(function() {
             cargarPersonas($(this).val());
         });
-        
+
         // Cargar personas inicialmente si hay un área seleccionada
         var areaInicial = $("#area_destino_id").val();
         if (areaInicial) {

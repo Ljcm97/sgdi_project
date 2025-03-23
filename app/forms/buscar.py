@@ -15,17 +15,14 @@ class BuscarDocumentoForm(FlaskForm):
     fecha_hasta = DateField('Fecha Hasta', format='%Y-%m-%d', validators=[Optional()])
     
     transportadora_id = SelectField('Transportadora', 
-                                  coerce=int,
                                   validators=[Optional()],
                                   default=0)
     
     tipo_documento_id = SelectField('Tipo de Documento', 
-                                  coerce=int,
                                   validators=[Optional()],
                                   default=0)
     
     estado_id = SelectField('Estado', 
-                          coerce=int,
                           validators=[Optional()],
                           default=0)
     
@@ -45,13 +42,13 @@ class BuscarDocumentoForm(FlaskForm):
         
         # Cargar opciones para los selectores
         self.transportadora_id.choices = [(0, 'Todas')] + [
-            (t.id, t.nombre) for t in Transportadora.query.all()
+            (t.id, t.nombre) for t in Transportadora.query.order_by(Transportadora.nombre).all()
         ]
         
         self.tipo_documento_id.choices = [(0, 'Todos')] + [
-            (t.id, t.nombre) for t in TipoDocumento.query.all()
+            (t.id, t.nombre) for t in TipoDocumento.query.order_by(TipoDocumento.nombre).all()
         ]
         
         self.estado_id.choices = [(0, 'Todos')] + [
-            (e.id, e.nombre) for e in EstadoDocumento.query.all()
+            (e.id, e.nombre) for e in EstadoDocumento.query.order_by(EstadoDocumento.nombre).all()
         ]

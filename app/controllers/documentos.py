@@ -338,6 +338,6 @@ def buscar():
 @login_required
 def get_personas(area_id):
     """API para obtener las personas de un área específica"""
-    personas = Persona.query.filter_by(area_id=area_id, activo=True).all()
-    personas_json = [{'id': p.id, 'nombre': p.nombre_completo} for p in personas]
+    personas = Persona.query.filter_by(area_id=area_id, activo=True).order_by(Persona.nombres_apellidos).all()
+    personas_json = [{'id': p.id, 'nombre': p.nombre_completo, 'nombres_apellidos': p.nombres_apellidos} for p in personas]
     return jsonify(personas_json)

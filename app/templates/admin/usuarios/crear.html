@@ -35,7 +35,12 @@
                 <!-- Persona -->
                 <div class="col-md-6 mb-3">
                     {{ form.persona_id.label(class="form-label") }}
-                    {{ form.persona_id(class="form-select") }}
+                    <select class="form-select" id="persona_id" name="persona_id" required>
+                        <option value="">Seleccione persona</option>
+                        {% for value, label in form.persona_id.choices %}
+                            <option value="{{ value }}" {% if form.persona_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.persona_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.persona_id.errors %}
@@ -84,7 +89,12 @@
                 <!-- Rol -->
                 <div class="col-md-6 mb-3">
                     {{ form.rol_id.label(class="form-label") }}
-                    {{ form.rol_id(class="form-select") }}
+                    <select class="form-select" id="rol_id" name="rol_id" required>
+                        <option value="">Seleccione rol</option>
+                        {% for value, label in form.rol_id.choices %}
+                            <option value="{{ value }}" {% if form.rol_id.data == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                     {% if form.rol_id.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.rol_id.errors %}
