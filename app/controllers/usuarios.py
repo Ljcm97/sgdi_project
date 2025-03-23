@@ -28,10 +28,10 @@ def crear():
     form = UsuarioForm()
     
     if form.validate_on_submit():
-        # Normalizar nombre de usuario (convertir a minúsculas)
+        # Normalizar nombre de usuario (convertir siempre a minúsculas)
         username_normalizado = form.username.data.strip().lower()
         
-        # Verificar si ya existe un usuario con el mismo username
+        # Verificar si ya existe un usuario con el mismo username (insensible a mayúsculas/minúsculas)
         existente = Usuario.query.filter(func.lower(Usuario.username) == username_normalizado).first()
         if existente:
             flash('Ya existe un usuario con este nombre de usuario.', 'danger')
@@ -46,7 +46,7 @@ def crear():
         # Crear el usuario
         if form.password.data:
             usuario = Usuario.crear_usuario(
-                username=username_normalizado,
+                username=username_normalizado,  # Siempre guardamos en minúsculas
                 password=form.password.data,
                 persona_id=form.persona_id.data,
                 rol_id=form.rol_id.data
@@ -77,17 +77,20 @@ def editar(id):
     form.password.validators = []
     
     if form.validate_on_submit():
-        # Normalizar nombre de usuario (convertir a minúsculas)
+        # Normalizar nombre de usuario (convertir siempre a minúsculas)
         username_normalizado = form.username.data.strip().lower()
         
-        # Verificar si ya existe otro usuario con el mismo username
-        existente = Usuario.query.filter(func.lower(Usuario.username) == username_normalizado, Usuario.id != id).first()
+        # Verificar si ya existe otro usuario con el mismo username (insensible a mayúsculas/minúsculas)
+        existente = Usuario.query.filter(
+            func.lower(Usuario.username) == username_normalizado, 
+            Usuario.id != id
+        ).first()
         if existente:
             flash('Ya existe otro usuario con este nombre de usuario.', 'danger')
             return redirect(url_for('usuarios.editar', id=id))
         
         # Actualizar los datos básicos del usuario
-        usuario.username = username_normalizado
+        usuario.username = username_normalizado  # Siempre guardamos en minúsculas
         usuario.persona_id = form.persona_id.data
         usuario.rol_id = form.rol_id.data
         usuario.activo = form.activo.data
@@ -172,7 +175,7 @@ def cambiar_password(id):
             DataRequired(message='La nueva contraseña es obligatoria'),
             Length(min=6, message='La contraseña debe tener al menos 6 caracteres')
         ])
-        confirm_password = PasswordField('Confirmar contraseña', validators=[
+        confirm_password = PasswordField('Confirmar contraseña', validators=[ 
             DataRequired(message='Debe confirmar la contraseña'),
             EqualTo('password', message='Las contraseñas no coinciden')
         ])

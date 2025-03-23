@@ -155,8 +155,8 @@
                         <div class="mb-3">
                             {{ form.password.label(class="form-label") }}
                             <div class="input-group">
-                                {{ form.password(class="form-control", placeholder="Ingrese su contraseña", id="password-field") }}
-                                <span class="input-group-text eye-icon" onclick="togglePasswordVisibility()">
+                                {{ form.password(class="form-control", placeholder="Ingrese su contraseña", id="password-field", type="password") }}
+                                <span class="input-group-text eye-icon">
                                     <i class="fas fa-eye" id="eye-icon"></i>
                                 </span>
                             </div>
@@ -201,21 +201,43 @@
     <!-- Bootstrap JS -->
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     
+    <!-- Script para manejar la visibilidad de la contraseña -->
     <script>
-        function togglePasswordVisibility() {
+        document.addEventListener('DOMContentLoaded', function() {
             var passwordField = document.getElementById('password-field');
             var eyeIcon = document.getElementById('eye-icon');
             
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
+            // Función para alternar visibilidad de la contraseña
+            function togglePasswordVisibility() {
+                if (passwordField.type === 'password') {
+                    // Mostrar contraseña
+                    passwordField.type = 'text';
+                    eyeIcon.classList.remove('fa-eye-slash');
+                    eyeIcon.classList.add('fa-eye');
+                } else {
+                    // Ocultar contraseña
+                    passwordField.type = 'password';
+                    eyeIcon.classList.remove('fa-eye');
+                    eyeIcon.classList.add('fa-eye-slash');
+                }
             }
-        }
+            
+            // Asignar función al clic del ícono
+            document.querySelector('.eye-icon').onclick = togglePasswordVisibility;
+            
+            // Cambiar al ojo tachado cuando se ingresa texto
+            passwordField.addEventListener('input', function() {
+                if (this.value.length > 0 && this.type === 'password') {
+                    // Si hay texto y la contraseña está oculta, mostrar el ojo tachado
+                    eyeIcon.classList.remove('fa-eye');
+                    eyeIcon.classList.add('fa-eye-slash');
+                } else if (this.value.length === 0 && this.type === 'password') {
+                    // Si no hay texto y la contraseña está oculta, mostrar el ojo normal
+                    eyeIcon.classList.remove('fa-eye-slash');
+                    eyeIcon.classList.add('fa-eye');
+                }
+            });
+        });
     </script>
 </body>
 </html>

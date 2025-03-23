@@ -19,7 +19,7 @@ documentos_bp = Blueprint('documentos', __name__, url_prefix='/documentos')
 
 @documentos_bp.route('/registrar', methods=['GET', 'POST'])
 @login_required
-@permission_required('crear_documento')
+@permission_required('Crear documento')
 def registrar():
     """Vista para registrar un nuevo documento"""
     form = DocumentoForm()
@@ -109,7 +109,7 @@ def detalle(id):
 @documentos_bp.route('/transferir/<int:id>', methods=['GET', 'POST'])
 @login_required
 @document_access_required
-@permission_required('transferir_documento')
+@permission_required('Transferir documento')  # Corregido para usar el formato correcto
 def transferir(id):
     """Vista para transferir un documento"""
     documento = Documento.query.get_or_404(id)
@@ -156,7 +156,7 @@ def transferir(id):
 @documentos_bp.route('/aceptar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('aceptar_documento')
+@permission_required('Aceptar documento')  # Corregido para usar el formato correcto
 def aceptar(id):
     """Vista para aceptar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -195,7 +195,7 @@ def aceptar(id):
 @documentos_bp.route('/rechazar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('rechazar_documento')
+@permission_required('Rechazar documento')  # Corregido para usar el formato correcto
 def rechazar(id):
     """Vista para rechazar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -247,7 +247,7 @@ def rechazar(id):
 @documentos_bp.route('/finalizar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('transferir_documento')
+@permission_required('Transferir documento')  # Este permiso se utiliza para finalizar también
 def finalizar(id):
     """Vista para finalizar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -262,7 +262,7 @@ def finalizar(id):
 @documentos_bp.route('/archivar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('transferir_documento')
+@permission_required('Transferir documento')  # Este permiso se utiliza para archivar también
 def archivar(id):
     """Vista para archivar un documento"""
     documento = Documento.query.get_or_404(id)

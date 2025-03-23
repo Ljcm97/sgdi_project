@@ -8,7 +8,7 @@ from app.utils.helpers import flash_errors
 from wtforms import StringField, TextAreaField, SelectMultipleField, widgets, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
-from sqlalchemy import func, text  # Se importa 'text' de sqlalchemy para consultas directas
+from sqlalchemy import func, text
 
 # Widget personalizado para selección múltiple con checkboxes
 class MultiCheckboxField(SelectMultipleField):
@@ -17,19 +17,29 @@ class MultiCheckboxField(SelectMultipleField):
 
 # Formulario para roles
 class RolForm(FlaskForm):
-    nombre = StringField('Nombre', validators=[
-        DataRequired(message='Nombre de rol obligatorio'),
-        Length(max=100, message='Nombre demasiado largo')
+    nombre = StringField('Nombre', validators=[ 
+        DataRequired(message='Nombre de rol obligatorio'), 
+        Length(max=100, message='Nombre demasiado largo') 
     ])
-    descripcion = TextAreaField('Descripción', validators=[
-        Length(max=500, message='Descripción demasiado larga')
+    descripcion = TextAreaField('Descripción', validators=[ 
+        Length(max=500, message='Descripción demasiado larga') 
     ])
     permisos = MultiCheckboxField('Permisos', coerce=int)
     submit = SubmitField('Guardar')
     
     def __init__(self, *args, **kwargs):
         super(RolForm, self).__init__(*args, **kwargs)
-        self.permisos.choices = [(p.id, p.nombre) for p in Permiso.query.all()]
+        
+        # Obtener todos los permisos y ordenarlos por nombre
+        permisos = Permiso.query.order_by(Permiso.nombre).all()
+        
+        # Asignar las opciones al campo de permisos
+        self.permisos.choices = [(p.id, f"{p.nombre} - {p.descripcion}" if p.descripcion else p.nombre) for p in permisos]
+        
+        # Organizar los permisos por categorías para usarlos en la plantilla
+        self.permisos_documentos = [p for p in permisos if 'documento' in p.nombre.lower()]
+        self.permisos_admin = [p for p in permisos if 'administrar' in p.nombre.lower()]
+        self.permisos_otros = [p for p in permisos if 'documento' not in p.nombre.lower() and 'administrar' not in p.nombre.lower()]
 
 roles_bp = Blueprint('roles', __name__, url_prefix='/roles')
 

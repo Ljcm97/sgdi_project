@@ -5,6 +5,7 @@ from app.models.usuario import Usuario
 from app.forms.auth import LoginForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.utils.helpers import flash_errors, enviar_email_reset_password
 import secrets
+from sqlalchemy import func  # Importamos func para poder usar func.lower()
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,8 +20,12 @@ def login():
     form = LoginForm()
     
     if form.validate_on_submit():
-        # Intentar autenticar al usuario
-        usuario = Usuario.query.filter_by(username=form.username.data).first()
+        # Modificación: Buscar usuario insensible a mayúsculas/minúsculas
+        # Usamos func.lower() para convertir a minúsculas tanto el username en la base de datos
+        # como el username proporcionado en el formulario
+        usuario = Usuario.query.filter(
+            func.lower(Usuario.username) == func.lower(form.username.data)
+        ).first()
         
         if usuario and usuario.verificar_password(form.password.data):
             # Verificar si el usuario está activo

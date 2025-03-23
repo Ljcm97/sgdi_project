@@ -5,6 +5,7 @@ from flask_login import current_user
 def check_permission(permission):
     """
     Verifica si el usuario actual tiene el permiso especificado.
+    Maneja diferentes formatos de permisos (snake_case, capitalizado, etc.)
     
     Args:
         permission (str): El nombre del permiso que se va a verificar.
@@ -23,8 +24,25 @@ def check_permission(permission):
     if current_user.rol.nombre == 'Superadministrador':
         return True
     
-    # Verificar si el usuario tiene el permiso específico
-    return any(permiso.nombre == permission for permiso in current_user.rol.permisos)
+    # Normalizar el permiso recibido para diferentes formatos de comparación
+    permission_lower = permission.lower()
+    permission_snake = permission_lower.replace(' ', '_')
+    permission_words = permission_snake.split('_')
+    permission_title = ' '.join(word.capitalize() for word in permission_words)
+    permission_title_first = permission_words[0].capitalize() + ' ' + ' '.join(permission_words[1:])
+    
+    # Verificar si el usuario tiene el permiso específico comparando con todos los formatos posibles
+    for permiso in current_user.rol.permisos:
+        permiso_nombre = permiso.nombre.lower()
+        
+        # Comparar en diferentes formatos
+        if (permission_lower == permiso_nombre or
+            permission_snake == permiso_nombre.replace(' ', '_') or
+            permission_title.lower() == permiso_nombre or
+            permission_title_first.lower() == permiso_nombre):
+            return True
+            
+    return False
 
 def permission_required(permission):
     """

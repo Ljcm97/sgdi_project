@@ -14,14 +14,14 @@ reportes_bp = Blueprint('reportes', __name__, url_prefix='/reportes')
 
 @reportes_bp.route('/')
 @login_required
-@permission_required('ver_reportes')
+@permission_required('Ver reportes')  # Corregido para usar el formato correcto
 def index():
     """Vista principal de reportes"""
     return render_template('reportes/index.html')
 
 @reportes_bp.route('/por-area')
 @login_required
-@permission_required('ver_reportes')
+@permission_required('Ver reportes')  # Corregido para usar el formato correcto
 def por_area():
     """Reporte de documentos por área"""
     areas = Area.query.all()
@@ -66,7 +66,7 @@ def por_area():
 
 @reportes_bp.route('/por-estado')
 @login_required
-@permission_required('ver_reportes')
+@permission_required('Ver reportes')  # Corregido para usar el formato correcto
 def por_estado():
     """Reporte de documentos por estado"""
     estados = EstadoDocumento.query.all()
@@ -103,7 +103,7 @@ def por_estado():
 
 @reportes_bp.route('/tiempo-procesamiento')
 @login_required
-@permission_required('ver_reportes')
+@permission_required('Ver reportes')  # Corregido para usar el formato correcto
 def tiempo_procesamiento():
     """Reporte de tiempo de procesamiento de documentos"""
     # Obtener parámetros de filtro
@@ -179,7 +179,7 @@ def tiempo_procesamiento():
 
 @reportes_bp.route('/datos-grafico')
 @login_required
-@permission_required('ver_reportes')
+@permission_required('Ver reportes')  # Corregido para usar el formato correcto
 def datos_grafico():
     """API para obtener datos para gráficos en formato JSON"""
     tipo = request.args.get('tipo', 'area')
