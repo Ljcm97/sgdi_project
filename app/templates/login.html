@@ -210,12 +210,10 @@
             // Función para alternar visibilidad de la contraseña
             function togglePasswordVisibility() {
                 if (passwordField.type === 'password') {
-                    // Mostrar contraseña
                     passwordField.type = 'text';
                     eyeIcon.classList.remove('fa-eye-slash');
                     eyeIcon.classList.add('fa-eye');
                 } else {
-                    // Ocultar contraseña
                     passwordField.type = 'password';
                     eyeIcon.classList.remove('fa-eye');
                     eyeIcon.classList.add('fa-eye-slash');
@@ -223,16 +221,16 @@
             }
             
             // Asignar función al clic del ícono
-            document.querySelector('.eye-icon').onclick = togglePasswordVisibility;
+            document.querySelector('.eye-icon').addEventListener('click', togglePasswordVisibility);
             
             // Cambiar al ojo tachado cuando se ingresa texto
             passwordField.addEventListener('input', function() {
-                if (this.value.length > 0 && this.type === 'password') {
-                    // Si hay texto y la contraseña está oculta, mostrar el ojo tachado
+                if (this.value.length > 0) {
+                    // Si hay texto, mostrar el ojo tachado
                     eyeIcon.classList.remove('fa-eye');
                     eyeIcon.classList.add('fa-eye-slash');
-                } else if (this.value.length === 0 && this.type === 'password') {
-                    // Si no hay texto y la contraseña está oculta, mostrar el ojo normal
+                } else {
+                    // Si está vacío, mostrar el ojo normal
                     eyeIcon.classList.remove('fa-eye-slash');
                     eyeIcon.classList.add('fa-eye');
                 }
