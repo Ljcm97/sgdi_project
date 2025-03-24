@@ -60,7 +60,7 @@
                             
                             <div class="col-md-8">
                                 <h6 class="border-bottom pb-2 mb-3">Documentos recientes</h6>
-                                {% if resultado.documentos %}
+                                {% if resultado.documentos_serializables %}
                                     <div class="table-responsive">
                                         <table class="table table-hover">
                                             <thead>
@@ -73,12 +73,12 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for documento in resultado.documentos %}
+                                                {% for documento in resultado.documentos_serializables %}
                                                     <tr>
                                                         <td>{{ documento.radicado }}</td>
-                                                        <td>{{ documento.fecha_recepcion.strftime('%d/%m/%Y %H:%M') }}</td>
-                                                        <td>{{ documento.tipo_documento.nombre }}</td>
-                                                        <td>{{ documento.area_destino.nombre }}</td>
+                                                        <td>{{ documento.fecha_recepcion }}</td>
+                                                        <td>{{ documento.tipo_documento_nombre }}</td>
+                                                        <td>{{ documento.area_destino_nombre }}</td>
                                                         <td>
                                                             <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-sm btn-primary">
                                                                 <i class="fas fa-eye"></i> Ver

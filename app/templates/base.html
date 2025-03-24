@@ -64,27 +64,10 @@
                     
                     <!-- Reportes (solo para usuarios con permiso) -->
                     {% if check_permission('ver_reportes') or check_permission('Ver reportes') %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navReportes" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-chart-bar"></i> Reportes
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('reportes.index') }}">
+                            <i class="fas fa-chart-bar"></i> Reportes y Estadísticas
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navReportes">
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('reportes.por_area') }}">
-                                    <i class="fas fa-building"></i> Documentos por Área
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('reportes.por_estado') }}">
-                                    <i class="fas fa-tasks"></i> Documentos por Estado
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('reportes.tiempo_procesamiento') }}">
-                                    <i class="fas fa-clock"></i> Tiempo de Procesamiento
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     {% endif %}
                     
@@ -327,7 +310,7 @@
                     notificaciones.forEach(function(notif) {
                         var url = "{{ url_for('notificaciones.marcar_leida', id=0) }}".replace('0', notif.id);
                         
-                        var notifElement = $(
+                        var notifElement = $( 
                             '<li class="notificacion-item">' +
                             '  <a class="dropdown-item" href="' + url + '">' +
                             '    <div class="d-flex flex-column">' +

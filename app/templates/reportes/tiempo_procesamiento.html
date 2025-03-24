@@ -98,10 +98,10 @@
                                 <tbody>
                                     {% for resultado in resultados %}
                                         <tr>
-                                            <td>{{ resultado.documento.radicado }}</td>
-                                            <td>{{ resultado.documento.tipo_documento.nombre }}</td>
-                                            <td>{{ resultado.inicio.strftime('%d/%m/%Y %H:%M') }}</td>
-                                            <td>{{ resultado.fin.strftime('%d/%m/%Y %H:%M') }}</td>
+                                            <td>{{ resultado.documento_radicado }}</td>
+                                            <td>{{ resultado.documento_tipo_nombre }}</td>
+                                            <td>{{ resultado.inicio }}</td>
+                                            <td>{{ resultado.fin }}</td>
                                             <td>
                                                 {% if resultado.duracion_horas < 24 %}
                                                     {{ resultado.duracion_horas }} horas
@@ -110,7 +110,7 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <a href="{{ url_for('documentos.detalle', id=resultado.documento.id) }}" class="btn btn-sm btn-primary">
+                                                <a href="{{ url_for('documentos.detalle', id=resultado.documento_id) }}" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-eye"></i> Ver
                                                 </a>
                                             </td>

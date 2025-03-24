@@ -14,14 +14,14 @@ reportes_bp = Blueprint('reportes', __name__, url_prefix='/reportes')
 
 @reportes_bp.route('/')
 @login_required
-@permission_required('Ver reportes')  # Corregido para usar el formato correcto
+@permission_required('Ver reportes')
 def index():
     """Vista principal de reportes"""
     return render_template('reportes/index.html')
 
 @reportes_bp.route('/por-area')
 @login_required
-@permission_required('Ver reportes')  # Corregido para usar el formato correcto
+@permission_required('Ver reportes')
 def por_area():
     """Reporte de documentos por área"""
     areas = Area.query.all()
@@ -50,23 +50,25 @@ def por_area():
             EstadoDocumento.nombre, EstadoDocumento.color
         ).all()
         
-        # Formatear resultados
+        # Formatear resultados - asegurarse que son datos serializables
         estados = [{'estado': s.estado, 'color': s.color, 'cantidad': s.cantidad} for s in stats]
         
         # Calcular total
         total = sum(e['cantidad'] for e in estados)
         
+        # Asegurarse de que el objeto se puede serializar correctamente
         resultados.append({
             'area': area.nombre,
             'estados': estados,
             'total': total
         })
     
+    # Renderizar la vista con los resultados serializados
     return render_template('reportes/por_area.html', resultados=resultados)
 
 @reportes_bp.route('/por-estado')
 @login_required
-@permission_required('Ver reportes')  # Corregido para usar el formato correcto
+@permission_required('Ver reportes')
 def por_estado():
     """Reporte de documentos por estado"""
     estados = EstadoDocumento.query.all()
@@ -79,31 +81,42 @@ def por_estado():
         # Solo pueden ver documentos de su área
         base_query = Documento.query.filter(Documento.area_destino_id == current_user.persona.area_id)
     
-    # Obtener estadísticas por estado
+    # Modificar para crear una lista de diccionarios con datos serializables
     resultados = []
     for estado in estados:
         # Contar documentos en este estado
         cantidad = base_query.filter(Documento.estado_actual_id == estado.id).count()
         
         # Obtener documentos recientes en este estado (últimos 5)
-        documentos = base_query.filter(
+        docs = base_query.filter(
             Documento.estado_actual_id == estado.id
         ).order_by(
             Documento.fecha_recepcion.desc()
         ).limit(5).all()
         
+        # Convertir documentos a formato serializable
+        documentos_serializables = []
+        for doc in docs:
+            documentos_serializables.append({
+                'id': doc.id,
+                'radicado': doc.radicado,
+                'fecha_recepcion': doc.fecha_recepcion.strftime('%Y-%m-%d %H:%M'),
+                'tipo_documento_nombre': doc.tipo_documento.nombre,
+                'area_destino_nombre': doc.area_destino.nombre
+            })
+        
         resultados.append({
             'estado': estado.nombre,
             'color': estado.color,
             'cantidad': cantidad,
-            'documentos': documentos
+            'documentos_serializables': documentos_serializables
         })
     
     return render_template('reportes/por_estado.html', resultados=resultados)
 
 @reportes_bp.route('/tiempo-procesamiento')
 @login_required
-@permission_required('Ver reportes')  # Corregido para usar el formato correcto
+@permission_required('Ver reportes')
 def tiempo_procesamiento():
     """Reporte de tiempo de procesamiento de documentos"""
     # Obtener parámetros de filtro
@@ -150,8 +163,8 @@ def tiempo_procesamiento():
         Documento.creado_en >= fecha_limite
     ).all()
     
-    # Calcular tiempos de procesamiento
-    resultados = []
+    # Modificar para crear una lista de diccionarios con datos serializables
+    resultados_serializables = []
     for doc in documentos:
         # Obtener primer y último movimiento
         primer_mov = Movimiento.query.filter_by(documento_id=doc.id).order_by(Movimiento.fecha_hora).first()
@@ -162,24 +175,26 @@ def tiempo_procesamiento():
             duracion = ultimo_mov.fecha_hora - primer_mov.fecha_hora
             horas = duracion.total_seconds() / 3600
             
-            resultados.append({
-                'documento': doc,
-                'inicio': primer_mov.fecha_hora,
-                'fin': ultimo_mov.fecha_hora,
+            resultados_serializables.append({
+                'documento_id': doc.id,
+                'documento_radicado': doc.radicado,
+                'documento_tipo_nombre': doc.tipo_documento.nombre,
+                'inicio': primer_mov.fecha_hora.strftime('%Y-%m-%d %H:%M'),
+                'fin': ultimo_mov.fecha_hora.strftime('%Y-%m-%d %H:%M'),
                 'duracion_horas': round(horas, 2),
                 'duracion_dias': round(horas / 24, 2)
             })
     
     # Ordenar por duración (mayor a menor)
-    resultados.sort(key=lambda x: x['duracion_horas'], reverse=True)
+    resultados_serializables.sort(key=lambda x: x['duracion_horas'], reverse=True)
     
     return render_template('reportes/tiempo_procesamiento.html', 
-                          resultados=resultados,
+                          resultados=resultados_serializables,
                           dias=dias)
 
 @reportes_bp.route('/datos-grafico')
 @login_required
-@permission_required('Ver reportes')  # Corregido para usar el formato correcto
+@permission_required('Ver reportes')
 def datos_grafico():
     """API para obtener datos para gráficos en formato JSON"""
     tipo = request.args.get('tipo', 'area')

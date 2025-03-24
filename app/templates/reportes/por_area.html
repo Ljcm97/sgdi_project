@@ -78,7 +78,9 @@
                             <div class="col-md-8">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <canvas id="chart{{ loop.index }}" height="200"></canvas>
+                                        <div class="chart-container-area">
+                                            <canvas id="chart{{ loop.index }}"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -98,70 +100,37 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Función que se ejecuta cuando el DOM está completamente cargado
     document.addEventListener('DOMContentLoaded', function() {
-        // Datos para los gráficos
-        const resultados = {{ resultados|tojson }};
+        // Obtener los datos una sola vez
+        const datos = {{ resultados|tojson }};
         
-        // Colores por defecto para el gráfico general
-        const backgroundColors = [
-            'rgba(54, 162, 235, 0.7)',
-            'rgba(255, 99, 132, 0.7)',
-            'rgba(255, 206, 86, 0.7)',
-            'rgba(75, 192, 192, 0.7)',
-            'rgba(153, 102, 255, 0.7)',
-            'rgba(255, 159, 64, 0.7)',
-            'rgba(199, 199, 199, 0.7)'
-        ];
-        
-        // Gráfico general de áreas
-        if (resultados.length > 0) {
-            const areas = resultados.map(r => r.area);
-            const totales = resultados.map(r => r.total);
-            
-            new Chart(document.getElementById('chartAreas'), {
-                type: 'bar',
-                data: {
-                    labels: areas,
-                    datasets: [{
-                        label: 'Total de documentos',
-                        data: totales,
-                        backgroundColor: backgroundColors.slice(0, areas.length),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Distribución de Documentos por Área'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-            
-            // Gráficos individuales por área
-            resultados.forEach((resultado, index) => {
-                const estados = resultado.estados.map(e => e.estado);
-                const cantidades = resultado.estados.map(e => e.cantidad);
-                const colores = resultado.estados.map(e => e.color);
+        // Crear el gráfico principal si hay datos
+        if (datos && datos.length > 0) {
+            const areasCanvas = document.getElementById('chartAreas');
+            if (areasCanvas) {
+                // Colores predefinidos
+                const backgroundColors = [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(199, 199, 199, 0.7)'
+                ];
                 
-                new Chart(document.getElementById(`chart${index + 1}`), {
-                    type: 'pie',
+                const areas = datos.map(r => r.area);
+                const totales = datos.map(r => r.total);
+                
+                new Chart(areasCanvas, {
+                    type: 'bar',
                     data: {
-                        labels: estados,
+                        labels: areas,
                         datasets: [{
-                            data: cantidades,
-                            backgroundColor: colores,
+                            label: 'Total de documentos',
+                            data: totales,
+                            backgroundColor: backgroundColors.slice(0, areas.length),
                             borderWidth: 1
                         }]
                     },
@@ -170,15 +139,57 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'right',
+                                position: 'top',
                             },
                             title: {
                                 display: true,
-                                text: `Distribución por Estado - ${resultado.area}`
+                                text: 'Distribución de Documentos por Área'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
                             }
                         }
                     }
                 });
+            }
+            
+            // Crear los gráficos individuales por área
+            datos.forEach((resultado, index) => {
+                const canvasId = `chart${index + 1}`;
+                const canvas = document.getElementById(canvasId);
+                
+                if (canvas && resultado.estados && resultado.estados.length > 0) {
+                    const estados = resultado.estados.map(e => e.estado);
+                    const cantidades = resultado.estados.map(e => e.cantidad);
+                    const colores = resultado.estados.map(e => e.color);
+                    
+                    new Chart(canvas, {
+                        type: 'pie',
+                        data: {
+                            labels: estados,
+                            datasets: [{
+                                data: cantidades,
+                                backgroundColor: colores,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                },
+                                title: {
+                                    display: true,
+                                    text: `Distribución por Estado - ${resultado.area}`
+                                }
+                            }
+                        }
+                    });
+                }
             });
         }
     });
