@@ -3,12 +3,8 @@
 {% block title %}Reporte de Tiempo de Procesamiento - SGDI{% endblock %}
 
 {% block styles %}
-<style>
-    .chart-container {
-        height: 300px;
-        margin-bottom: 30px;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
 {% block content %}
@@ -25,34 +21,45 @@
     </div>
     <div class="card-body">
         <!-- Filtros -->
-        <div class="row mb-4">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Filtrar por período</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="GET" class="row g-3">
-                            <div class="col-md-8">
-                                <label for="dias" class="form-label">Mostrar documentos finalizados en los últimos:</label>
-                                <select class="form-select" id="dias" name="dias">
-                                    <option value="7" {% if dias == 7 %}selected{% endif %}>7 días</option>
-                                    <option value="15" {% if dias == 15 %}selected{% endif %}>15 días</option>
-                                    <option value="30" {% if dias == 30 %}selected{% endif %}>30 días</option>
-                                    <option value="90" {% if dias == 90 %}selected{% endif %}>90 días</option>
-                                    <option value="180" {% if dias == 180 %}selected{% endif %}>6 meses</option>
-                                    <option value="365" {% if dias == 365 %}selected{% endif %}>1 año</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-filter me-1"></i> Filtrar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <div class="filtros-container mb-4">
+            <h5><i class="fas fa-filter me-2"></i> Filtros</h5>
+            <form id="filtros-form" method="GET" class="row g-3">
+                <!-- Período -->
+                <div class="col-md-4">
+                    <label for="dias" class="form-label">Mostrar documentos finalizados en los últimos:</label>
+                    <select class="form-select" id="dias" name="dias">
+                        <option value="7" {% if dias == 7 %}selected{% endif %}>7 días</option>
+                        <option value="15" {% if dias == 15 %}selected{% endif %}>15 días</option>
+                        <option value="30" {% if dias == 30 %}selected{% endif %}>30 días</option>
+                        <option value="90" {% if dias == 90 %}selected{% endif %}>90 días</option>
+                        <option value="180" {% if dias == 180 %}selected{% endif %}>6 meses</option>
+                        <option value="365" {% if dias == 365 %}selected{% endif %}>1 año</option>
+                    </select>
                 </div>
-            </div>
+                
+                <!-- Tipo de Documento -->
+                <div class="col-md-4">
+                    <label for="tipo_documento_id" class="form-label">Tipo de Documento</label>
+                    <select class="form-select" id="tipo_documento_id" name="tipo_documento_id">
+                        <option value="0">Todos</option>
+                        {% for tipo in tipos_documento %}
+                            <option value="{{ tipo.id }}" {% if filtros.get('tipo_documento_id') == tipo.id %}selected{% endif %}>
+                                {{ tipo.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Botones -->
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i> Filtrar
+                    </button>
+                    <button type="button" id="btn-limpiar-filtros" class="btn btn-secondary">
+                        <i class="fas fa-eraser me-1"></i> Limpiar
+                    </button>
+                </div>
+            </form>
         </div>
         
         {% if mensaje %}
@@ -60,16 +67,77 @@
                 <i class="fas fa-info-circle me-2"></i> {{ mensaje }}
             </div>
         {% else %}
-            <!-- Gráfico de tiempos promedio -->
+            <!-- Tarjetas de estadísticas -->
+            <div class="row mb-4">
+                <!-- Documentos Analizados -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card stat-card-primary">
+                        <div class="stat-card-header">
+                            <i class="fas fa-file-alt me-2"></i> Documentos Analizados
+                        </div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-value">{{ estadisticas.total_docs }}</div>
+                            <div class="stat-card-label">Documentos finalizados</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tiempo Promedio -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card stat-card-success">
+                        <div class="stat-card-header">
+                            <i class="fas fa-clock me-2"></i> Tiempo Promedio
+                        </div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-value">{{ estadisticas.promedio|round(2) }}</div>
+                            <div class="stat-card-label">Horas de procesamiento</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tiempo Mínimo -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card stat-card-info">
+                        <div class="stat-card-header">
+                            <i class="fas fa-bolt me-2"></i> Tiempo Mínimo
+                        </div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-value">{{ estadisticas.minimo|round(2) }}</div>
+                            <div class="stat-card-label">Horas</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tiempo Máximo -->
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card stat-card-danger">
+                        <div class="stat-card-header">
+                            <i class="fas fa-hourglass-end me-2"></i> Tiempo Máximo
+                        </div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-value">{{ estadisticas.maximo|round(2) }}</div>
+                            <div class="stat-card-label">Horas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráfico de distribución de tiempos -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Tiempos de Procesamiento</h5>
+                            <h5 class="mb-0">Distribución por Tiempo de Procesamiento</h5>
                         </div>
                         <div class="card-body">
                             <div class="chart-container">
-                                <canvas id="chartTiempos"></canvas>
+                                <canvas id="chartTiempos" class="tiempo-chart" 
+                                        data-stats='[
+                                            {"rango": "Menos de 1 día", "cantidad": {{ resultados|selectattr("duracion_dias", "<", 1)|list|length }}},
+                                            {"rango": "Entre 1 y 3 días", "cantidad": {{ resultados|selectattr("duracion_dias", ">=", 1)|selectattr("duracion_dias", "<=", 3)|list|length }}},
+                                            {"rango": "Entre 3 y 7 días", "cantidad": {{ resultados|selectattr("duracion_dias", ">", 3)|selectattr("duracion_dias", "<=", 7)|list|length }}},
+                                            {"rango": "Más de 7 días", "cantidad": {{ resultados|selectattr("duracion_dias", ">", 7)|list|length }}}
+                                        ]'></canvas>
                             </div>
                         </div>
                     </div>
@@ -84,11 +152,13 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-striped table-hover data-table">
                                 <thead>
                                     <tr>
                                         <th>Radicado</th>
                                         <th>Tipo</th>
+                                        <th>Remitente</th>
+                                        <th>Área</th>
                                         <th>Inicio</th>
                                         <th>Fin</th>
                                         <th>Duración</th>
@@ -100,13 +170,19 @@
                                         <tr>
                                             <td>{{ resultado.documento_radicado }}</td>
                                             <td>{{ resultado.documento_tipo_nombre }}</td>
+                                            <td>{{ resultado.documento_remitente }}</td>
+                                            <td>{{ resultado.documento_area }}</td>
                                             <td>{{ resultado.inicio }}</td>
                                             <td>{{ resultado.fin }}</td>
                                             <td>
                                                 {% if resultado.duracion_horas < 24 %}
-                                                    {{ resultado.duracion_horas }} horas
+                                                    <span class="text-success">{{ resultado.duracion_horas|round(1) }} horas</span>
+                                                {% elif resultado.duracion_horas < 72 %}
+                                                    <span class="text-warning">{{ resultado.duracion_dias|round(1) }} días</span>
+                                                {% elif resultado.duracion_horas < 168 %}
+                                                    <span class="text-warning">{{ resultado.duracion_dias|round(1) }} días</span>
                                                 {% else %}
-                                                    {{ resultado.duracion_dias }} días
+                                                    <span class="text-danger">{{ resultado.duracion_dias|round(1) }} días</span>
                                                 {% endif %}
                                             </td>
                                             <td>
@@ -118,6 +194,20 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <!-- Panel de exportación -->
+                        <div class="export-panel mt-4">
+                            <h5>Exportar Reporte</h5>
+                            <button class="btn btn-success btn-exportar" data-formato="excel" data-reporte="tiempo">
+                                <i class="fas fa-file-excel me-1"></i> Excel
+                            </button>
+                            <button class="btn btn-danger btn-exportar" data-formato="pdf" data-reporte="tiempo">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
+                            </button>
+                            <button class="btn btn-primary btn-exportar" data-formato="xml" data-reporte="tiempo">
+                                <i class="fas fa-file-code me-1"></i> XML
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -133,70 +223,7 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Datos para el gráfico
-        const resultados = {{ resultados|tojson }};
-        
-        if (resultados && resultados.length > 0) {
-            // Agrupar por rangos de tiempo
-            const rangos = [
-                { label: 'Menos de 1 día', count: 0, color: '#28a745' },
-                { label: 'Entre 1 y 3 días', count: 0, color: '#17a2b8' },
-                { label: 'Entre 3 y 7 días', count: 0, color: '#ffc107' },
-                { label: 'Más de 7 días', count: 0, color: '#dc3545' }
-            ];
-            
-            // Clasificar documentos por rango
-            resultados.forEach(resultado => {
-                const dias = resultado.duracion_dias;
-                
-                if (dias < 1) {
-                    rangos[0].count++;
-                } else if (dias <= 3) {
-                    rangos[1].count++;
-                } else if (dias <= 7) {
-                    rangos[2].count++;
-                } else {
-                    rangos[3].count++;
-                }
-            });
-            
-            // Crear el gráfico
-            new Chart(document.getElementById('chartTiempos'), {
-                type: 'bar',
-                data: {
-                    labels: rangos.map(r => r.label),
-                    datasets: [{
-                        label: 'Cantidad de documentos',
-                        data: rangos.map(r => r.count),
-                        backgroundColor: rangos.map(r => r.color),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Distribución por Tiempo de Procesamiento'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="{{ url_for('static', filename='js/reportes.js') }}"></script>
 {% endblock %}

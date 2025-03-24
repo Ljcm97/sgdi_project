@@ -3,12 +3,8 @@
 {% block title %}Reporte de Documentos por Estado - SGDI{% endblock %}
 
 {% block styles %}
-<style>
-    .chart-container {
-        height: 300px;
-        margin-bottom: 30px;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
 {% block content %}
@@ -24,6 +20,84 @@
         </div>
     </div>
     <div class="card-body">
+        <!-- Filtros -->
+        <div class="filtros-container mb-4">
+            <h5><i class="fas fa-filter me-2"></i> Filtros</h5>
+            <form id="filtros-form" method="GET" class="row g-3">
+                <!-- Fecha Desde -->
+                <div class="col-md-3">
+                    <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                    <input type="text" class="form-control fecha-input" id="fecha_desde" name="fecha_desde" 
+                           value="{{ filtros.get('fecha_desde', '')|string }}">
+                </div>
+                
+                <!-- Fecha Hasta -->
+                <div class="col-md-3">
+                    <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                    <input type="text" class="form-control fecha-input" id="fecha_hasta" name="fecha_hasta"
+                           value="{{ filtros.get('fecha_hasta', '')|string }}">
+                </div>
+                
+                <!-- Área -->
+                <div class="col-md-3">
+                    <label for="area_id" class="form-label">Área</label>
+                    <select class="form-select" id="area_id" name="area_id">
+                        <option value="0">Todas</option>
+                        {% for area in areas %}
+                            <option value="{{ area.id }}" {% if filtros.get('area_id') == area.id %}selected{% endif %}>
+                                {{ area.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Tipo de Documento -->
+                <div class="col-md-3">
+                    <label for="tipo_documento_id" class="form-label">Tipo de Documento</label>
+                    <select class="form-select" id="tipo_documento_id" name="tipo_documento_id">
+                        <option value="0">Todos</option>
+                        {% for tipo in tipos_documento %}
+                            <option value="{{ tipo.id }}" {% if filtros.get('tipo_documento_id') == tipo.id %}selected{% endif %}>
+                                {{ tipo.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Tipo (Entrada/Salida) -->
+                <div class="col-md-6">
+                    <label class="form-label">Tipo</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tipo" id="tipo_todos" value=""
+                                {% if not filtros.get('tipo') %}checked{% endif %}>
+                            <label class="form-check-label" for="tipo_todos">Todos</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tipo" id="tipo_entrada" value="ENTRADA"
+                                {% if filtros.get('tipo') == 'ENTRADA' %}checked{% endif %}>
+                            <label class="form-check-label" for="tipo_entrada">Entrada</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tipo" id="tipo_salida" value="SALIDA"
+                                {% if filtros.get('tipo') == 'SALIDA' %}checked{% endif %}>
+                            <label class="form-check-label" for="tipo_salida">Salida</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i> Filtrar
+                    </button>
+                    <button type="button" id="btn-limpiar-filtros" class="btn btn-secondary">
+                        <i class="fas fa-eraser me-1"></i> Limpiar Filtros
+                    </button>
+                </div>
+            </form>
+        </div>
+        
         <!-- Gráfico general -->
         <div class="row mb-4">
             <div class="col-12">
@@ -33,7 +107,7 @@
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
-                            <canvas id="chartEstados"></canvas>
+                            <canvas id="chartEstados" class="estado-chart-main"></canvas>
                         </div>
                     </div>
                 </div>
@@ -42,66 +116,69 @@
         
         <!-- Detalle por estado -->
         {% if resultados %}
-            {% for resultado in resultados %}
-                <div class="card mb-4">
-                    <div class="card-header" style="background-color: {{ resultado.color }}; color: white;">
-                        <h5 class="card-title mb-0">{{ resultado.estado }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="card">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title">Total de documentos</h6>
-                                        <p class="display-4">{{ resultado.cantidad }}</p>
+            <div class="row">
+                {% for resultado in resultados %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: {{ resultado.color }}; color: white;">
+                                <h5 class="mb-0">{{ resultado.estado }}</h5>
+                                <span class="badge bg-light text-dark">{{ resultado.cantidad }} doc.</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Total de documentos</h6>
+                                                <p class="display-4">{{ resultado.cantidad }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-8">
+                                        <h6 class="border-bottom pb-2 mb-3">Documentos recientes</h6>
+                                        {% if resultado.documentos_serializables %}
+                                            <div class="list-group">
+                                                {% for doc in resultado.documentos_serializables %}
+                                                    <a href="{{ url_for('documentos.detalle', id=doc.id) }}" class="list-group-item list-group-item-action">
+                                                        <div class="d-flex w-100 justify-content-between">
+                                                            <h6 class="mb-1">{{ doc.radicado }}</h6>
+                                                            <small>{{ doc.fecha_recepcion }}</small>
+                                                        </div>
+                                                        <p class="mb-1">{{ doc.tipo_documento_nombre }}</p>
+                                                        <small>Área: {{ doc.area_destino_nombre }}</small>
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i> No hay documentos en este estado.
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-8">
-                                <h6 class="border-bottom pb-2 mb-3">Documentos recientes</h6>
-                                {% if resultado.documentos_serializables %}
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Radicado</th>
-                                                    <th>Fecha</th>
-                                                    <th>Tipo</th>
-                                                    <th>Área Actual</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for documento in resultado.documentos_serializables %}
-                                                    <tr>
-                                                        <td>{{ documento.radicado }}</td>
-                                                        <td>{{ documento.fecha_recepcion }}</td>
-                                                        <td>{{ documento.tipo_documento_nombre }}</td>
-                                                        <td>{{ documento.area_destino_nombre }}</td>
-                                                        <td>
-                                                            <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-sm btn-primary">
-                                                                <i class="fas fa-eye"></i> Ver
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                {% else %}
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-info-circle me-2"></i> No hay documentos en este estado.
-                                    </div>
-                                {% endif %}
-                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
+            
+            <!-- Panel de exportación -->
+            <div class="export-panel">
+                <h5>Exportar Reporte</h5>
+                <button class="btn btn-success btn-exportar" data-formato="excel" data-reporte="estado">
+                    <i class="fas fa-file-excel me-1"></i> Excel
+                </button>
+                <button class="btn btn-danger btn-exportar" data-formato="pdf" data-reporte="estado">
+                    <i class="fas fa-file-pdf me-1"></i> PDF
+                </button>
+                <button class="btn btn-primary btn-exportar" data-formato="xml" data-reporte="estado">
+                    <i class="fas fa-file-code me-1"></i> XML
+                </button>
+            </div>
         {% else %}
             <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No hay datos disponibles para este reporte.
+                <i class="fas fa-info-circle me-2"></i> No hay datos disponibles para este reporte con los filtros seleccionados.
             </div>
         {% endif %}
     </div>
@@ -110,41 +187,45 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="{{ url_for('static', filename='js/reportes.js') }}"></script>
+
+{% if resultados %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Datos para el gráfico
-        const resultados = {{ resultados|tojson }};
+        const labels = [{% for r in resultados %}'{{ r.estado }}',{% endfor %}];
+        const data = [{% for r in resultados %}{{ r.cantidad }},{% endfor %}];
+        const colors = [{% for r in resultados %}'{{ r.color }}',{% endfor %}];
         
-        if (resultados.length > 0) {
-            const labels = resultados.map(r => r.estado);
-            const data = resultados.map(r => r.cantidad);
-            const colors = resultados.map(r => r.color);
-            
-            new Chart(document.getElementById('chartEstados'), {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Distribución de Documentos por Estado'
-                        }
+        // Crear el gráfico
+        const ctx = document.getElementById('chartEstados').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribución de Documentos por Estado'
                     }
                 }
-            });
-        }
+            }
+        });
     });
 </script>
+{% endif %}
 {% endblock %}
