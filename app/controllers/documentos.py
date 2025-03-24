@@ -295,13 +295,13 @@ def buscar():
         if form.fecha_hasta.data:
             query = query.filter(Documento.fecha_recepcion <= form.fecha_hasta.data)
         
-        if form.transportadora_id.data and form.transportadora_id.data > 0:
+        if form.transportadora_id.data and int(form.transportadora_id.data) > 0:
             query = query.filter_by(transportadora_id=form.transportadora_id.data)
         
-        if form.tipo_documento_id.data and form.tipo_documento_id.data > 0:
+        if form.tipo_documento_id.data and int(form.tipo_documento_id.data) > 0:
             query = query.filter_by(tipo_documento_id=form.tipo_documento_id.data)
         
-        if form.estado_id.data and form.estado_id.data > 0:
+        if form.estado_id.data and int(form.estado_id.data) > 0:
             query = query.filter_by(estado_actual_id=form.estado_id.data)
         
         if form.tipo.data:
