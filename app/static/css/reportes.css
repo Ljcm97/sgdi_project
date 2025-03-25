@@ -56,27 +56,36 @@
 }
 
 .stat-card-success .stat-card-header {
-    background-color: #28a745;
+    background-color: #357234;
 }
 
 .stat-card-success .stat-card-value {
-    color: #28a745;
+    color: #357234;
 }
 
 .stat-card-warning .stat-card-header {
-    background-color: #ffc107;
+    background-color: #DAA520;
 }
 
 .stat-card-warning .stat-card-value {
-    color: #ffc107;
+    color: #DAA520;
 }
 
 .stat-card-danger .stat-card-header {
-    background-color: #dc3545;
+    background-color: #E20505;
 }
 
 .stat-card-danger .stat-card-value {
-    color: #dc3545;
+    color: #E20505;
+}
+
+/* Nueva clase: Corregir el color de "Tiempo Mínimo" */
+.stat-card-info .stat-card-header {
+    background-color: #0dcaf0; /* Un azul claro */
+}
+
+.stat-card-info .stat-card-value {
+    color: #0dcaf0;
 }
 
 /* Filtros */
@@ -108,6 +117,14 @@
     color: white;
 }
 
+/* Corrección: Asegurar que los encabezados sean blancos */
+.data-table thead th {
+    color: rgb(255, 255, 255) !important;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Filas con efecto hover */
 .data-table tbody tr:hover {
     background-color: rgba(29, 44, 150, 0.05);
 }
@@ -154,11 +171,11 @@
 }
 
 .tendencia-positiva {
-    color: #28a745;
+    color: #357234;
 }
 
 .tendencia-negativa {
-    color: #dc3545;
+    color: #E20505;
 }
 
 /* Personalización de gráficos */

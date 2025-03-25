@@ -39,28 +39,14 @@
                         </a>
                     </li>
                     
-                    <!-- Documentos -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navDocumentos" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-file-alt"></i> Documentos
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navDocumentos">
-                            {% if check_permission('crear_documento') or check_permission('Crear documento') %}
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('documentos.registrar') }}">
-                                    <i class="fas fa-plus-circle"></i> Registrar Documento
-                                </a>
-                            </li>
-                            {% endif %}
-                            {% if check_permission('ver_documento') or check_permission('Ver documento') %}
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('documentos.buscar') }}">
-                                    <i class="fas fa-search"></i> Buscar Documentos
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
+                    {% if check_permission('crear_documento') or check_permission('ver_documento') or 
+                    check_permission('Crear documento') or check_permission('Ver documento') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('documentos.mostrar_busqueda') }}">
+                                <i class="fas fa-file-alt"></i> Documentos
+                            </a>
+                        </li>
+                    {% endif %}
                     
                     <!-- Reportes (solo para usuarios con permiso) -->
                     {% if check_permission('ver_reportes') or check_permission('Ver reportes') %}

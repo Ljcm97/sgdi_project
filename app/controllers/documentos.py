@@ -13,9 +13,146 @@ from app.forms.buscar import BuscarDocumentoForm
 from app.utils.auth import permission_required, check_permission
 from app.utils.decorators import document_access_required, has_document_access, role_required
 from app.utils.helpers import crear_notificacion, flash_errors
+from app.utils.exportacion import exportar_excel, exportar_pdf, exportar_xml
 from sqlalchemy import or_
 
 documentos_bp = Blueprint('documentos', __name__, url_prefix='/documentos')
+
+@documentos_bp.route('/')
+@login_required
+@permission_required('Ver documento')
+def index():
+    """Vista principal que muestra el formulario de registro y la lista de documentos"""
+    # Obtener el formulario de registro
+    form = DocumentoForm()
+    
+    # Establecer fecha actual por defecto
+    form.fecha_recepcion.data = datetime.now()
+    
+    # Obtener documentos para mostrar en la tabla (puedes filtrar según el rol del usuario)
+    if current_user.rol.nombre == 'Superadministrador':
+        documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+    elif current_user.rol.nombre == 'Recepción':
+        documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+    else:
+        documentos = Documento.query.filter(
+            or_(
+                Documento.area_destino_id == current_user.persona.area_id,
+                Documento.persona_destino_id == current_user.persona_id
+            )
+        ).order_by(Documento.creado_en.desc()).limit(100).all()
+    
+    # Inicializar el formulario de búsqueda
+    buscar_form = BuscarDocumentoForm()
+    
+    return render_template('documentos/index.html', 
+                          form=form,
+                          buscar_form=buscar_form, 
+                          documentos=documentos,
+                          mostrar_busqueda=False,  # No mostrar búsqueda inicialmente
+                          mostrar_tabla=True)      # Mostrar tabla de documentos
+
+@documentos_bp.route('/procesar', methods=['POST'])
+@login_required
+@permission_required('Crear documento')
+def procesar():
+    """Vista para procesar el formulario de registro sin cambiar de página"""
+    form = DocumentoForm()
+    
+    if form.validate_on_submit():
+        # Obtener el estado inicial (Recibido)
+        estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+        
+        # Crear el documento
+        documento = Documento.crear_documento(
+            fecha_recepcion=form.fecha_recepcion.data,
+            transportadora_id=form.transportadora_id.data,
+            numero_guia=form.numero_guia.data,
+            remitente=form.remitente.data,
+            tipo_documento_id=form.tipo_documento_id.data,
+            contenido=form.contenido.data,
+            observaciones=form.observaciones.data,
+            area_destino_id=form.area_destino_id.data,
+            persona_destino_id=form.persona_destino_id.data,
+            estado_actual_id=estado_recibido.id,
+            tipo=form.tipo.data,
+            registrado_por_id=current_user.id
+        )
+        
+        # Crear el movimiento inicial
+        movimiento = Movimiento(
+            documento_id=documento.id,
+            fecha_hora=documento.fecha_recepcion,
+            usuario_origen_id=current_user.id,
+            area_origen_id=current_user.persona.area_id,
+            persona_origen_id=current_user.persona_id,
+            area_destino_id=documento.area_destino_id,
+            persona_destino_id=documento.persona_destino_id,
+            estado_documento_id=estado_recibido.id,
+            observaciones='Documento registrado en recepción'
+        )
+        db.session.add(movimiento)
+        
+        # Crear notificación para la persona destino
+        persona_destino = Persona.query.get(documento.persona_destino_id)
+        usuario_destino = Usuario.query.filter_by(persona_id=persona_destino.id).first()
+        
+        if usuario_destino:
+            crear_notificacion(
+                usuario_id=usuario_destino.id,
+                titulo=f'Nuevo documento asignado - {documento.radicado}',
+                mensaje=f'Se te ha asignado un nuevo documento de tipo {documento.tipo_documento.nombre}.',
+                documento_id=documento.id
+            )
+        
+        db.session.commit()
+        
+        flash(f'Documento registrado con éxito. Radicado: {documento.radicado}', 'success')
+        return redirect(url_for('documentos.index'))
+    
+    # Si hay errores de validación, mostrarlos
+    if form.errors:
+        flash_errors(form)
+    
+    # Obtener documentos nuevamente para mostrar en la tabla
+    if current_user.rol.nombre == 'Superadministrador':
+        documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+    elif current_user.rol.nombre == 'Recepción':
+        documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+    else:
+        documentos = Documento.query.filter(
+            or_(
+                Documento.area_destino_id == current_user.persona.area_id,
+                Documento.persona_destino_id == current_user.persona_id
+            )
+        ).order_by(Documento.creado_en.desc()).limit(100).all()
+    
+    # Inicializar el formulario de búsqueda
+    buscar_form = BuscarDocumentoForm()
+    
+    return render_template('documentos/index.html', 
+                          form=form, 
+                          buscar_form=buscar_form,
+                          documentos=documentos,
+                          mostrar_busqueda=False,
+                          mostrar_tabla=True)
+
+@documentos_bp.route('/mostrar-busqueda')
+@login_required
+def mostrar_busqueda():
+    """Vista para mostrar los filtros de búsqueda"""
+    form = DocumentoForm()
+    buscar_form = BuscarDocumentoForm()
+    
+    # No se cargan documentos inicialmente en la búsqueda
+    documentos = []
+    
+    return render_template('documentos/index.html', 
+                         form=form, 
+                         buscar_form=buscar_form,
+                         documentos=documentos,
+                         mostrar_busqueda=True,   # Mostrar búsqueda
+                         mostrar_tabla=False)     # No mostrar tabla inicialmente
 
 @documentos_bp.route('/registrar', methods=['GET', 'POST'])
 @login_required
@@ -341,3 +478,61 @@ def get_personas(area_id):
     personas = Persona.query.filter_by(area_id=area_id, activo=True).order_by(Persona.nombres_apellidos).all()
     personas_json = [{'id': p.id, 'nombre': p.nombre_completo, 'nombres_apellidos': p.nombres_apellidos} for p in personas]
     return jsonify(personas_json)
+
+@documentos_bp.route('/exportar/<formato>')
+@login_required
+@permission_required('Ver documento')
+def exportar(formato):
+    """Exportar lista de documentos en diferentes formatos"""
+    # Filtrar documentos según el rol del usuario
+    if current_user.rol.nombre == 'Superadministrador':
+        query = Documento.query
+    elif current_user.rol.nombre == 'Recepción':
+        query = Documento.query.filter_by(registrado_por_id=current_user.id)
+    else:
+        query = Documento.query.filter(
+            or_(
+                Documento.area_destino_id == current_user.persona.area_id,
+                Documento.persona_destino_id == current_user.persona_id
+            )
+        )
+    
+    # Obtener documentos
+    documentos = query.order_by(Documento.creado_en.desc()).all()
+    
+    # Preparar datos para exportación
+    datos = preparar_datos_exportacion_documentos(documentos)
+    
+    # Nombre de archivo
+    nombre_archivo = f"documentos_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    
+    # Exportar según formato
+    if formato == 'excel':
+        return exportar_excel(datos, nombre_archivo)
+    elif formato == 'pdf':
+        return exportar_pdf(datos, nombre_archivo, 'documentos')
+    elif formato == 'xml':
+        return exportar_xml(datos, nombre_archivo)
+    else:
+        flash('Formato de exportación no soportado', 'danger')
+        return redirect(url_for('documentos.index'))
+
+def preparar_datos_exportacion_documentos(documentos):
+    """Prepara los datos de documentos para exportación"""
+    # Definir encabezados
+    encabezados = ['Radicado', 'Fecha', 'Tipo', 'Remitente', 'Área', 'Estado', 'Registrado por']
+    
+    # Preparar datos
+    datos = []
+    for doc in documentos:
+        datos.append({
+            'Radicado': doc.radicado,
+            'Fecha': doc.fecha_recepcion.strftime('%d/%m/%Y %H:%M'),
+            'Tipo': doc.tipo_documento.nombre,
+            'Remitente': doc.remitente,
+            'Área': doc.area_destino.nombre,
+            'Estado': doc.estado_actual.nombre,
+            'Registrado por': doc.registrado_por.username
+        })
+    
+    return {'encabezados': encabezados, 'datos': datos}

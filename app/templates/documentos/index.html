@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Documentos - SGDI{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .card-fixed {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+    
+    .tab-content {
+        padding: 20px 0;
+    }
+    
+    .export-panel {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .export-panel h5 {
+        margin-bottom: 15px;
+    }
+    
+    .export-panel .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-file-alt me-2"></i> Gestión de Documentos
+        </h3>
+        <div>
+            <a href="{{ url_for('documentos.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle"></i> Registrar Documento
+            </a>
+            <a href="{{ url_for('documentos.mostrar_busqueda') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-search"></i> Buscar Documentos
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" role="tablist">
+            {% if not mostrar_busqueda %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab" aria-controls="registro" aria-selected="true">
+                    <i class="fas fa-plus-circle me-1"></i> Registrar Documento
+                </button>
+            </li>
+            {% endif %}
+            
+            {% if mostrar_busqueda %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="busqueda-tab" data-bs-toggle="tab" data-bs-target="#busqueda" type="button" role="tab" aria-controls="busqueda" aria-selected="true">
+                    <i class="fas fa-search me-1"></i> Filtros de Búsqueda
+                </button>
+            </li>
+            {% endif %}
+            
+            {% if mostrar_tabla %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if not mostrar_busqueda %}{% endif %}" id="documentos-tab" data-bs-toggle="tab" data-bs-target="#documentos" type="button" role="tab" aria-controls="documentos" aria-selected="false">
+                    <i class="fas fa-list me-1"></i> Lista de Documentos
+                </button>
+            </li>
+            {% endif %}
+        </ul>
+        
+        <div class="tab-content">
+            <!-- Formulario de Registro -->
+            {% if not mostrar_busqueda %}
+            <div class="tab-pane fade show active" id="registro" role="tabpanel" aria-labelledby="registro-tab">
+                <div class="card card-fixed mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-plus me-1"></i> Nuevo Documento
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('documentos.procesar') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="row">
+                                <!-- Fecha y Hora de Recepción -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.fecha_recepcion.label(class="form-label") }}
+                                    {{ form.fecha_recepcion(class="form-control", id="fecha_recepcion") }}
+                                    {% if form.fecha_recepcion.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.fecha_recepcion.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Transportadora -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.transportadora_id.label(class="form-label") }}
+                                    <select class="form-select" id="transportadora_id" name="transportadora_id" required>
+                                        <option value="">Seleccione transportadora</option>
+                                        {% for value, label in form.transportadora_id.choices %}
+                                            <option value="{{ value }}" {% if form.transportadora_id.data == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.transportadora_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.transportadora_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Número de Guía -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.numero_guia.label(class="form-label") }}
+                                    {{ form.numero_guia(class="form-control") }}
+                                    {% if form.numero_guia.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.numero_guia.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Remitente -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.remitente.label(class="form-label") }}
+                                    {{ form.remitente(class="form-control") }}
+                                    {% if form.remitente.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.remitente.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Tipo de Documento -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.tipo_documento_id.label(class="form-label") }}
+                                    <select class="form-select" id="tipo_documento_id" name="tipo_documento_id" required>
+                                        <option value="">Seleccione tipo de documento</option>
+                                        {% for value, label in form.tipo_documento_id.choices %}
+                                            <option value="{{ value }}" {% if form.tipo_documento_id.data == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.tipo_documento_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.tipo_documento_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Tipo (Entrada/Salida) -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tipo</label>
+                                    <div>
+                                        {% for subfield in form.tipo %}
+                                            <div class="form-check form-check-inline">
+                                                {{ subfield(class="form-check-input") }}
+                                                {{ subfield.label(class="form-check-label") }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if form.tipo.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.tipo.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Área Destino -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.area_destino_id.label(class="form-label") }}
+                                    <select class="form-select" id="area_destino_id" name="area_destino_id" required>
+                                        <option value="">Seleccione área</option>
+                                        {% for value, label in form.area_destino_id.choices %}
+                                            <option value="{{ value }}" {% if form.area_destino_id.data == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.area_destino_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.area_destino_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Persona Destino -->
+                                <div class="col-md-6 mb-3">
+                                    {{ form.persona_destino_id.label(class="form-label") }}
+                                    <select class="form-select" id="persona_destino_id" name="persona_destino_id" required>
+                                        <option value="">Seleccione persona</option>
+                                        {% for value, label in form.persona_destino_id.choices %}
+                                            <option value="{{ value }}" {% if form.persona_destino_id.data == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.persona_destino_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.persona_destino_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Contenido -->
+                                <div class="col-md-12 mb-3">
+                                    {{ form.contenido.label(class="form-label") }}
+                                    {{ form.contenido(class="form-control", rows=3) }}
+                                    {% if form.contenido.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.contenido.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Observaciones -->
+                                <div class="col-md-12 mb-3">
+                                    {{ form.observaciones.label(class="form-label") }}
+                                    {{ form.observaciones(class="form-control", rows=3) }}
+                                    {% if form.observaciones.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.observaciones.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Registrar Documento
+                                </button>
+                                <button type="reset" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-eraser me-1"></i> Limpiar Formulario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Filtros de Búsqueda -->
+            {% if mostrar_busqueda %}
+            <div class="tab-pane fade show active" id="busqueda" role="tabpanel" aria-labelledby="busqueda-tab">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-filter me-1"></i> Filtros de Búsqueda
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('documentos.buscar') }}">
+                            {{ buscar_form.hidden_tag() }}
+                            
+                            <div class="row">
+                                <!-- Radicado -->
+                                <div class="col-md-4 mb-3">
+                                    {{ buscar_form.radicado.label(class="form-label") }}
+                                    {{ buscar_form.radicado(class="form-control") }}
+                                </div>
+                                
+                                <!-- Fecha Desde -->
+                                <div class="col-md-4 mb-3">
+                                    {{ buscar_form.fecha_desde.label(class="form-label") }}
+                                    {{ buscar_form.fecha_desde(class="form-control", id="fecha_desde") }}
+                                </div>
+                                
+                                <!-- Fecha Hasta -->
+                                <div class="col-md-4 mb-3">
+                                    {{ buscar_form.fecha_hasta.label(class="form-label") }}
+                                    {{ buscar_form.fecha_hasta(class="form-control", id="fecha_hasta") }}
+                                </div>
+                                
+                                <!-- Transportadora -->
+                                <div class="col-md-4 mb-3">
+                                    {{ buscar_form.transportadora_id.label(class="form-label") }}
+                                    {{ buscar_form.transportadora_id(class="form-select") }}
+                                </div>
+                                
+                                <!-- Tipo de Documento -->
+                                <div class="col-md-4 mb-3">
+                                    {{ buscar_form.tipo_documento_id.label(class="form-label") }}
+                                    {{ buscar_form.tipo_documento_id(class="form-select") }}
+                                </div>
+                                
+                                <!-- Estado -->
+                                <div class="col-md-4 mb-3">
+                                    {{ buscar_form.estado_id.label(class="form-label") }}
+                                    {{ buscar_form.estado_id(class="form-select") }}
+                                </div>
+                                
+                                <!-- Tipo (Entrada/Salida) -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tipo</label>
+                                    <div>
+                                        {% for subfield in buscar_form.tipo %}
+                                            <div class="form-check form-check-inline">
+                                                {{ subfield(class="form-check-input") }}
+                                                {{ subfield.label(class="form-check-label") }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Remitente/Destinatario -->
+                                <div class="col-md-6 mb-3">
+                                    {{ buscar_form.remitente.label(class="form-label") }}
+                                    {{ buscar_form.remitente(class="form-control") }}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                {{ buscar_form.buscar(class="btn btn-primary me-2") }}
+                                {{ buscar_form.limpiar(class="btn btn-secondary", onclick="this.form.reset();") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Lista de Documentos -->
+            {% if mostrar_tabla %}
+            <div class="tab-pane fade {% if mostrar_busqueda %}{% else %}show active{% endif %}" id="documentos" role="tabpanel" aria-labelledby="documentos-tab">
+                <div class="card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list me-1"></i> Documentos Registrados
+                        </h5>
+                        <span class="badge bg-primary">{{ documentos|length }} documento(s)</span>
+                    </div>
+                    <div class="card-body">
+                        {% if documentos %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Radicado</th>
+                                            <th>Fecha</th>
+                                            <th>Transportadora</th>
+                                            <th>Tipo</th>
+                                            <th>Remitente</th>
+                                            <th>Área Actual</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for documento in documentos %}
+                                            <tr>
+                                                <td>{{ documento.radicado }}</td>
+                                                <td>{{ documento.fecha_recepcion.strftime('%d/%m/%Y %H:%M') }}</td>
+                                                <td>{{ documento.transportadora.nombre }}</td>
+                                                <td>{{ documento.tipo_documento.nombre }}</td>
+                                                <td>{{ documento.remitente }}</td>
+                                                <td>{{ documento.area_destino.nombre }}</td>
+                                                <td>
+                                                    <span class="badge" style="background-color: {{ documento.estado_actual.color }};">
+                                                        {{ documento.estado_actual.nombre }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Panel de exportación -->
+                            <div class="export-panel">
+                                <h5><i class="fas fa-download me-1"></i> Exportar Documentos</h5>
+                                <a href="{{ url_for('documentos.exportar', formato='excel') }}" class="btn btn-success">
+                                    <i class="fas fa-file-excel me-1"></i> Excel
+                                </a>
+                                <a href="{{ url_for('documentos.exportar', formato='pdf') }}" class="btn btn-danger">
+                                    <i class="fas fa-file-pdf me-1"></i> PDF
+                                </a>
+                                <a href="{{ url_for('documentos.exportar', formato='xml') }}" class="btn btn-primary">
+                                    <i class="fas fa-file-code me-1"></i> XML
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i> No hay documentos registrados.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+    // Inicializar los selectores de fecha
+    flatpickr("#fecha_recepcion", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        locale: "es",
+        time_24hr: true
+    });
+    
+    flatpickr("#fecha_desde", {
+        dateFormat: "Y-m-d",
+        locale: "es"
+    });
+    
+    flatpickr("#fecha_hasta", {
+        dateFormat: "Y-m-d",
+        locale: "es"
+    });
+
+    // Función para cargar personas de un área
+    function cargarPersonas(areaId) {
+        if (!areaId) {
+            // Si no hay área seleccionada, mostrar solo la opción por defecto
+            $("#persona_destino_id").html('<option value="">Seleccione persona</option>');
+            return;
+        }
+
+        $.getJSON("{{ url_for('documentos.get_personas', area_id=0) }}".replace("0", areaId), function(data) {
+            var options = '<option value="">Seleccione persona</option>';
+
+            // Ordenar datos alfabéticamente
+            data.sort(function(a, b) {
+                return a.nombre.localeCompare(b.nombre);
+            });
+
+            $.each(data, function(index, persona) {
+                options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
+            });
+
+            $("#persona_destino_id").html(options);
+        });
+    }
+
+    $(document).ready(function() {
+        // Evento al cambiar de área
+        $("#area_destino_id").change(function() {
+            cargarPersonas($(this).val());
+        });
+
+        // Cargar personas inicialmente si hay un área seleccionada
+        var areaInicial = $("#area_destino_id").val();
+        if (areaInicial) {
+            cargarPersonas(areaInicial);
+        }
+        
+        // Asegurar que el formulario se resetea correctamente
+        $('button[type="reset"]').click(function() {
+            setTimeout(function() {
+                // Resetear campos especiales como selectores de fecha
+                flatpickr("#fecha_recepcion").setDate(new Date());
+                
+                // Resetear el selector de personas
+                $("#persona_destino_id").html('<option value="">Seleccione persona</option>');
+            }, 10);
+        });
+        
+        // Activar la pestaña de documentos después de enviar el formulario
+        {% if mostrar_tabla and not mostrar_busqueda %}
+        $('#documentos-tab').click();
+        {% endif %}
+    });
+</script>
+{% endblock %}
