@@ -302,11 +302,29 @@ def personalizado():
     # Construir consulta dinámica según las dimensiones seleccionadas
     resultados = generar_reporte_personalizado(query, dimension1, dimension2)
     
+    # Obtener opciones para filtros
+    areas = Area.query.order_by(Area.nombre).all()
+    tipos_documento = TipoDocumento.query.order_by(TipoDocumento.nombre).all()
+    estados = EstadoDocumento.query.order_by(EstadoDocumento.nombre).all()
+    
+    # Obtener valores únicos para dimensión 2
+    valores_dim2 = []
+    if resultados:
+        for dim1 in resultados.values():
+            for dim2 in dim1.keys():
+                if dim2 not in valores_dim2:
+                    valores_dim2.append(dim2)
+        valores_dim2 = sorted(valores_dim2)
+    
     return render_template('reportes/personalizado.html',
                           resultados=resultados,
                           filtros=filtros,
                           dimension1=dimension1,
-                          dimension2=dimension2)
+                          dimension2=dimension2,
+                          areas=areas,
+                          tipos_documento=tipos_documento,
+                          estados=estados,
+                          valores_dim2=valores_dim2)
 
 @reportes_bp.route('/datos-grafico')
 @login_required
@@ -625,7 +643,9 @@ def generar_reporte_personalizado(query, dimension1, dimension2):
     elif dim1['rel'] is None:
         label1 = dim1['col'].label('dim1')
     else:
-        label1 = getattr(getattr(Documento, dim1['rel']), dim1['attr']).label('dim1')
+        # Corrección aquí
+        modelo_rel = getattr(Documento, dim1['rel']).prop.mapper.class_
+        label1 = getattr(modelo_rel, dim1['attr']).label('dim1')
     
     if dimension2 == 'mes':
         label2 = func.date_format(Documento.fecha_recepcion, '%Y-%m').label('dim2')
@@ -634,7 +654,9 @@ def generar_reporte_personalizado(query, dimension1, dimension2):
     elif dim2['rel'] is None:
         label2 = dim2['col'].label('dim2')
     else:
-        label2 = getattr(getattr(Documento, dim2['rel']), dim2['attr']).label('dim2')
+        # Corrección aquí
+        modelo_rel = getattr(Documento, dim2['rel']).prop.mapper.class_
+        label2 = getattr(modelo_rel, dim2['attr']).label('dim2')
     
     # Realizar la consulta
     resultados = db.session.query(
@@ -663,6 +685,44 @@ def generar_reporte_personalizado(query, dimension1, dimension2):
     valores_dim2 = sorted(set(dim2_valor for r in resultados for dim2_valor in [str(r.dim2)]))
     
     return matriz
+
+def preparar_datos_exportacion_area(query):
+    """Prepara los datos del reporte por área para exportación"""
+    areas = Area.query.all()
+    datos = []
+    
+    # Encabezados
+    encabezados = ['Área', 'Estado', 'Cantidad', 'Porcentaje del Área']
+    
+    for area in areas:
+        # Contar total para esta área
+        total_area = query.filter(Documento.area_destino_id == area.id).count()
+        
+        if total_area > 0:
+            # Obtener distribución por estados para esta área
+            estados = db.session.query(
+                EstadoDocumento.nombre,
+                func.count(Documento.id).label('cantidad')
+            ).join(
+                Documento, Documento.estado_actual_id == EstadoDocumento.id
+            ).filter(
+                Documento.area_destino_id == area.id,
+                Documento.id.in_(query.with_entities(Documento.id))
+            ).group_by(
+                EstadoDocumento.nombre
+            ).all()
+            
+            # Añadir registros para cada estado
+            for estado in estados:
+                porcentaje = round((estado.cantidad / total_area) * 100, 2)
+                datos.append({
+                    'Área': area.nombre,
+                    'Estado': estado.nombre,
+                    'Cantidad': estado.cantidad,
+                    'Porcentaje del Área': f"{porcentaje}%"
+                })
+    
+    return {'encabezados': encabezados, 'datos': datos}
 
 def preparar_datos_exportacion_estado(query):
     """Prepara los datos del reporte por estado para exportación"""
@@ -837,38 +897,3 @@ def preparar_datos_exportacion_personalizado(query, dimension1, dimension2):
     
     return {'encabezados': encabezados, 'datos': datos}
 
-def preparar_datos_exportacion_area(query):
-    """Prepara los datos del reporte por área para exportación"""
-    areas = Area.query.all()
-    datos = []
-    
-    # Encabezados
-    encabezados = ['Área', 'Estado', 'Cantidad', 'Porcentaje del Área']
-    
-    for area in areas:
-        # Contar total para esta área
-        total_area = query.filter(Documento.area_destino_id == area.id).count()
-        
-        if total_area > 0:
-            # Obtener distribución por estados para esta área
-            estados = db.session.query(
-                EstadoDocumento.nombre,
-                func.count(Documento.id).label('cantidad')
-            ).join(
-                Documento, Documento.estado_actual_id == EstadoDocumento.id
-            ).filter(
-                Documento.area_destino_id == area.id,
-                Documento.id.in_(query.with_entities(Documento.id))
-            ).group_by(
-                EstadoDocumento.nombre
-            ).all()
-            
-            # Añadir registros para cada estado
-            for estado in estados:
-                porcentaje = round((estado.cantidad / total_area) * 100, 2)
-                datos.append({
-                    'Área': area.nombre,
-                    'Estado': estado.nombre,
-                    'Cantidad': estado.cantidad,
-                    'Porcentaje del Área': f"{porcentaje}%"
-                })

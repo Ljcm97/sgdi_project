@@ -121,8 +121,12 @@
                                             <i class="fas fa-building me-2"></i> Documentos por Área
                                         </h5>
                                     </div>
-                                    <div class="card-body">
+                                    <div class="card-body d-flex flex-column">
                                         <p>Este reporte muestra la cantidad de documentos asignados a cada área, clasificados por estado.</p>
+                                        <!-- Espacio flexible -->
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-chart-pie fa-4x text-info"></i>
+                                        </div>
                                     </div>
                                     <div class="card-footer text-center">
                                         <a href="{{ url_for('reportes.por_area') }}" class="btn btn-info">
@@ -140,8 +144,12 @@
                                             <i class="fas fa-tasks me-2"></i> Documentos por Estado
                                         </h5>
                                     </div>
-                                    <div class="card-body">
+                                    <div class="card-body d-flex flex-column">
                                         <p>Este reporte muestra la cantidad de documentos en cada estado de procesamiento.</p>
+                                        <!-- Espacio flexible -->
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-chart-bar fa-4x text-warning"></i>
+                                        </div>
                                     </div>
                                     <div class="card-footer text-center">
                                         <a href="{{ url_for('reportes.por_estado') }}" class="btn btn-warning text-dark">
@@ -159,8 +167,12 @@
                                             <i class="fas fa-clock me-2"></i> Tiempo de Procesamiento
                                         </h5>
                                     </div>
-                                    <div class="card-body">
+                                    <div class="card-body d-flex flex-column">
                                         <p>Este reporte muestra estadísticas sobre el tiempo de procesamiento de documentos.</p>
+                                        <!-- Espacio flexible -->
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-clock fa-4x text-success"></i>
+                                        </div>
                                     </div>
                                     <div class="card-footer text-center">
                                         <a href="{{ url_for('reportes.tiempo_procesamiento') }}" class="btn btn-success">
@@ -171,40 +183,50 @@
                             </div>
                         </div>
                         
-                        <!-- Reporte de Tendencias -->
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-chart-line me-2"></i> Tendencias
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <p>Este reporte muestra la evolución de documentos a lo largo del tiempo, permitiendo identificar patrones y tendencias.</p>
-                                </div>
-                                <div class="card-footer text-center">
-                                    <a href="{{ url_for('reportes.tendencias') }}" class="btn btn-primary">
-                                        <i class="fas fa-eye me-1"></i> Ver Reporte
-                                    </a>
+                        <div class="row">
+                            <!-- Reporte de Tendencias -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-chart-line me-2"></i> Tendencias
+                                        </h5>
+                                    </div>
+                                    <div class="card-body d-flex flex-column">
+                                        <p>Este reporte muestra la evolución de documentos a lo largo del tiempo, permitiendo identificar patrones y tendencias.</p>
+                                        <!-- Espacio flexible -->
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-chart-line fa-4x text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <a href="{{ url_for('reportes.tendencias') }}" class="btn btn-primary">
+                                            <i class="fas fa-eye me-1"></i> Ver Reporte
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Reporte Personalizado -->
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-secondary text-white">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-cogs me-2"></i> Reporte Personalizado
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <p>Este reporte permite cruzar diferentes dimensiones de datos para obtener análisis más específicos y detallados según sus necesidades.</p>
-                                </div>
-                                <div class="card-footer text-center">
-                                    <a href="{{ url_for('reportes.personalizado') }}" class="btn btn-secondary">
-                                        <i class="fas fa-eye me-1"></i> Ver Reporte
-                                    </a>
+                            
+                            <!-- Reporte Personalizado -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-cogs me-2"></i> Reporte Personalizado
+                                        </h5>
+                                    </div>
+                                    <div class="card-body d-flex flex-column">
+                                        <p>Este reporte permite cruzar diferentes dimensiones de datos para obtener análisis más específicos y detallados según sus necesidades.</p>
+                                        <!-- Espacio flexible -->
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-cogs fa-4x text-secondary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <a href="{{ url_for('reportes.personalizado') }}" class="btn btn-secondary">
+                                            <i class="fas fa-eye me-1"></i> Ver Reporte
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -213,7 +235,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 {% endblock %}
 
