@@ -50,7 +50,7 @@ CREATE TABLE `areas` (
   `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -75,7 +75,7 @@ CREATE TABLE `cargos` (
   `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=235 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=237 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -84,7 +84,7 @@ CREATE TABLE `cargos` (
 
 LOCK TABLES `cargos` WRITE;
 /*!40000 ALTER TABLE `cargos` DISABLE KEYS */;
-INSERT INTO `cargos` VALUES (1,'ALMACENISTA','2025-03-20 12:08:58'),(2,'ANALISTA DE PROCESOS SAP','2025-03-21 12:16:42'),(3,'ANALISTA DE SISTEMAS','2025-03-21 12:16:42'),(4,'APRENDIZ SENA','2025-03-21 12:16:42'),(5,'ASISTENTE ADMINISTRATIVO','2025-03-21 12:16:42'),(6,'ASISTENTE DE CARTERA','2025-03-21 12:16:42'),(7,'ASISTENTE DE CONTABILIDAD','2025-03-21 12:16:42'),(8,'ASISTENTE DE CONTABILIDAD II','2025-03-21 12:16:42'),(9,'ASISTENTE DE COMPRAS MATERIA PRIMA','2025-03-21 12:16:42'),(10,'ASISTENTE DE COSTOS','2025-03-21 12:16:42'),(11,'ASISTENTE DE RECURSOS HUMANOS','2025-03-21 12:16:42'),(12,'ASISTENTE DE TESORERIA','2025-03-21 12:16:42'),(13,'AUXILIAR ADMINISTRATIVO','2025-03-21 12:16:42'),(14,'AUXILIAR CAFETERIA','2025-03-21 12:16:42'),(15,'AUXILIAR DE ALMACEN','2025-03-21 12:16:42'),(16,'AUXILIAR DE AUDITORIA','2025-03-21 12:16:42'),(17,'AUXILIAR DE CARTERA','2025-03-21 12:16:42'),(18,'AUXILIAR DE COMPRAS MATERIA PRIMA','2025-03-21 12:16:42'),(19,'AUXILIAR DE CONTABILIDAD','2025-03-21 12:16:42'),(20,'AUXILIAR DE TESORERIA','2025-03-21 12:16:42'),(21,'AUXILIAR DE VENTAS','2025-03-21 12:16:42'),(22,'AUXILIAR LOGISTICO','2025-03-21 12:16:42'),(24,'COMPRADOR MATERIA PRIMA TOLIMA CENTRO','2025-03-21 12:16:42'),(25,'COMPRADOR MATERIA PRIMA TOLIMA SUR','2025-03-21 12:16:42'),(26,'CONDUCTOR','2025-03-21 12:16:42'),(27,'COORDINADOR CONTROL DE CALIDAD','2025-03-21 12:16:42'),(28,'COORDINADOR DE ARCHIVO','2025-03-21 12:16:42'),(29,'COORDINADOR DE DESPACHOS','2025-03-21 12:16:42'),(30,'COORDINADOR DE VENTAS','2025-03-21 12:16:42'),(31,'COORDINADOR FLOTA PROPIA','2025-03-21 12:16:42'),(32,'COORDINADOR LOGISTICO','2025-03-21 12:16:42'),(33,'CONTRALOR','2025-03-21 12:16:42'),(34,'FACTURADOR','2025-03-21 12:16:42'),(35,'GERENTE ADMINISTRATIVO Y FINANCIERO','2025-03-21 12:16:42'),(36,'GERENTE GENERAL','2025-03-21 12:16:42'),(37,'GERENTE OPERATIVO PLANTA LA MARIA','2025-03-21 12:16:42'),(38,'JEFE DE AUDITORIA','2025-03-21 12:16:42'),(39,'JEFE DE CARTERA','2025-03-21 12:16:42'),(40,'JEFE DE COMPRAS Y ALMACEN','2025-03-21 12:16:42'),(41,'JEFE DE CONTABILIDAD','2025-03-21 12:16:42'),(42,'JEFE DE COSTOS','2025-03-21 12:16:42'),(43,'JEFE DE PLANTA U OBRA LA MARIA','2025-03-21 12:16:42'),(44,'JEFE DE RECURSOS HUMANOS','2025-03-21 12:16:42'),(45,'JEFE DE SEGURIDAD Y SALUD EN EL TRABAJO','2025-03-21 12:16:42'),(46,'JEFE GESTION DE CALIDAD','2025-03-21 12:16:42'),(47,'MENSAJERO','2025-03-21 12:16:42'),(48,'RECEPCIONISTA','2025-03-21 12:16:42'),(49,'SUPERNUMERARIO','2025-03-21 12:16:42'),(50,'SUPERNUMERARIO SST','2025-03-21 12:16:42'),(51,'SUPERVISOR DE VIGILANCIA','2025-03-21 12:16:42'),(52,'TESORERO','2025-03-21 12:16:42'),(53,'VENDEDOR','2025-03-21 12:16:42'),(54,'VIGILANTE','2025-03-21 12:16:42'),(232,'AUXILIAR SST','2025-03-21 12:16:42');
+INSERT INTO `cargos` VALUES (1,'ALMACENISTA','2025-03-20 12:08:58'),(2,'ANALISTA DE PROCESOS SAP','2025-03-21 12:16:42'),(3,'ANALISTA DE SISTEMAS','2025-03-21 12:16:42'),(4,'APRENDIZ SENA','2025-03-21 12:16:42'),(5,'ASISTENTE ADMINISTRATIVO','2025-03-21 12:16:42'),(6,'ASISTENTE DE CARTERA','2025-03-21 12:16:42'),(7,'ASISTENTE DE CONTABILIDAD','2025-03-21 12:16:42'),(8,'ASISTENTE DE CONTABILIDAD II','2025-03-21 12:16:42'),(9,'ASISTENTE DE COMPRAS MATERIA PRIMA','2025-03-21 12:16:42'),(10,'ASISTENTE DE COSTOS','2025-03-21 12:16:42'),(11,'ASISTENTE DE RECURSOS HUMANOS','2025-03-21 12:16:42'),(12,'ASISTENTE DE TESORERIA','2025-03-21 12:16:42'),(13,'AUXILIAR ADMINISTRATIVO','2025-03-21 12:16:42'),(14,'AUXILIAR CAFETERIA','2025-03-21 12:16:42'),(15,'AUXILIAR DE ALMACEN','2025-03-21 12:16:42'),(16,'AUXILIAR DE AUDITORIA','2025-03-21 12:16:42'),(17,'AUXILIAR DE CARTERA','2025-03-21 12:16:42'),(18,'AUXILIAR DE COMPRAS MATERIA PRIMA','2025-03-21 12:16:42'),(19,'AUXILIAR DE CONTABILIDAD','2025-03-21 12:16:42'),(20,'AUXILIAR DE TESORERIA','2025-03-21 12:16:42'),(21,'AUXILIAR DE VENTAS','2025-03-21 12:16:42'),(22,'AUXILIAR LOGISTICO','2025-03-21 12:16:42'),(24,'COMPRADOR MATERIA PRIMA TOLIMA CENTRO','2025-03-21 12:16:42'),(25,'COMPRADOR MATERIA PRIMA TOLIMA SUR','2025-03-21 12:16:42'),(26,'CONDUCTOR','2025-03-21 12:16:42'),(27,'COORDINADOR CONTROL DE CALIDAD','2025-03-21 12:16:42'),(28,'COORDINADOR DE ARCHIVO','2025-03-21 12:16:42'),(29,'COORDINADOR DE DESPACHOS','2025-03-21 12:16:42'),(30,'COORDINADOR DE VENTAS','2025-03-21 12:16:42'),(31,'COORDINADOR FLOTA PROPIA','2025-03-21 12:16:42'),(32,'COORDINADOR LOGISTICO','2025-03-21 12:16:42'),(33,'CONTRALOR','2025-03-21 12:16:42'),(34,'FACTURADOR','2025-03-21 12:16:42'),(35,'GERENTE ADMINISTRATIVO Y FINANCIERO','2025-03-21 12:16:42'),(36,'GERENTE GENERAL','2025-03-21 12:16:42'),(37,'GERENTE OPERATIVO PLANTA LA MARIA','2025-03-21 12:16:42'),(38,'JEFE DE AUDITORIA','2025-03-21 12:16:42'),(39,'JEFE DE CARTERA','2025-03-21 12:16:42'),(40,'JEFE DE COMPRAS Y ALMACEN','2025-03-21 12:16:42'),(41,'JEFE DE CONTABILIDAD','2025-03-21 12:16:42'),(42,'JEFE DE COSTOS','2025-03-21 12:16:42'),(43,'JEFE DE PLANTA U OBRA LA MARIA','2025-03-21 12:16:42'),(44,'JEFE DE RECURSOS HUMANOS','2025-03-21 12:16:42'),(45,'JEFE DE SEGURIDAD Y SALUD EN EL TRABAJO','2025-03-21 12:16:42'),(46,'JEFE GESTION DE CALIDAD','2025-03-21 12:16:42'),(47,'MENSAJERO','2025-03-21 12:16:42'),(48,'RECEPCIONISTA','2025-03-21 12:16:42'),(49,'SUPERNUMERARIO','2025-03-21 12:16:42'),(50,'SUPERNUMERARIO SST','2025-03-21 12:16:42'),(51,'SUPERVISOR DE VIGILANCIA','2025-03-21 12:16:42'),(52,'TESORERO','2025-03-21 12:16:42'),(53,'VENDEDOR','2025-03-21 12:16:42'),(54,'VIGILANTE','2025-03-21 12:16:42'),(232,'AUXILIAR SST','2025-03-21 12:16:42'),(236,'AUXILIAR DE RECURSOS HUMANOS','2025-03-23 17:33:22');
 /*!40000 ALTER TABLE `cargos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -125,7 +125,7 @@ CREATE TABLE `documentos` (
   CONSTRAINT `documentos_ibfk_4` FOREIGN KEY (`persona_destino_id`) REFERENCES `personas` (`id`),
   CONSTRAINT `documentos_ibfk_5` FOREIGN KEY (`estado_actual_id`) REFERENCES `estados_documento` (`id`),
   CONSTRAINT `documentos_ibfk_6` FOREIGN KEY (`registrado_por_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,7 +134,7 @@ CREATE TABLE `documentos` (
 
 LOCK TABLES `documentos` WRITE;
 /*!40000 ALTER TABLE `documentos` DISABLE KEYS */;
-INSERT INTO `documentos` VALUES (2,'20250322-8332','2025-03-22 10:14:00',3,'0123456789','Lina',5,'Se entregan 20 tiquetes de aguazul N° ....... etc','Sin novedades ',3,28,5,'ENTRADA',2,'2025-03-22 15:16:58'),(3,'20250322-2381','2025-03-22 12:39:00',4,'741258','Albertano',1,'Factura de celsia','Sin novedades ',17,4,7,'ENTRADA',2,'2025-03-22 17:58:36'),(4,'20250322-8960','2025-03-22 13:00:00',6,'159753','Planta aguazul',4,'Informes de Planta aguazul','Sin novedad',17,4,7,'ENTRADA',2,'2025-03-22 18:14:54');
+INSERT INTO `documentos` VALUES (2,'20250322-8332','2025-03-22 10:14:00',3,'0123456789','Lina',5,'Se entregan 20 tiquetes de aguazul N° ....... etc','Sin novedades ',3,28,5,'ENTRADA',2,'2025-03-22 15:16:58'),(3,'20250322-2381','2025-03-22 12:39:00',4,'741258','Albertano',1,'Factura de celsia','Sin novedades ',17,4,7,'ENTRADA',2,'2025-03-22 17:58:36'),(4,'20250322-8960','2025-03-22 13:00:00',6,'159753','Planta aguazul',4,'Informes de Planta aguazul','Sin novedad',17,4,7,'ENTRADA',2,'2025-03-22 18:14:54'),(5,'20250323-7054','2025-03-23 00:08:00',2,'159','Oscar',4,'','',7,21,4,'ENTRADA',2,'2025-03-23 05:09:53'),(6,'20250323-7371','2025-03-23 18:26:00',3,'147852','Oscar',4,'Informes de Aguazul','Sin novedad',7,21,4,'ENTRADA',2,'2025-03-23 23:27:34'),(7,'20250324-4787','2025-03-24 20:42:00',9,'147852','Edward',4,'','Sin novedad',7,21,3,'ENTRADA',2,'2025-03-25 01:45:35');
 /*!40000 ALTER TABLE `documentos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -152,7 +152,7 @@ CREATE TABLE `estados_documento` (
   `color` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -199,7 +199,7 @@ CREATE TABLE `movimientos` (
   CONSTRAINT `movimientos_ibfk_6` FOREIGN KEY (`persona_destino_id`) REFERENCES `personas` (`id`),
   CONSTRAINT `movimientos_ibfk_7` FOREIGN KEY (`estado_documento_id`) REFERENCES `estados_documento` (`id`),
   CONSTRAINT `movimientos_ibfk_8` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,7 +208,7 @@ CREATE TABLE `movimientos` (
 
 LOCK TABLES `movimientos` WRITE;
 /*!40000 ALTER TABLE `movimientos` DISABLE KEYS */;
-INSERT INTO `movimientos` VALUES (4,2,'2025-03-22 10:14:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-22 15:16:58'),(5,2,'2025-03-22 15:36:57',9,7,21,7,21,2,'Documento aceptado para procesamiento','2025-03-22 15:36:57'),(6,2,'2025-03-22 15:38:27',9,7,21,3,28,1,'Se pasa al área de auditoria los fletes para ser auditados ','2025-03-22 15:38:27'),(7,2,'2025-03-22 15:43:12',8,3,28,3,28,2,'Documento aceptado para procesamiento','2025-03-22 15:43:12'),(8,2,'2025-03-22 15:43:16',8,3,28,3,28,4,'Documento finalizado','2025-03-22 15:43:16'),(9,2,'2025-03-22 15:43:36',8,3,28,3,28,5,'Documento archivado','2025-03-22 15:43:36'),(10,3,'2025-03-22 12:39:00',2,17,4,3,28,1,'Documento registrado en recepción','2025-03-22 17:58:36'),(11,4,'2025-03-22 13:00:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-22 18:14:54'),(12,4,'2025-03-22 18:15:36',9,7,21,17,4,7,'Documento rechazado por Maria Paula Lozano Lozano','2025-03-22 18:15:36'),(13,3,'2025-03-22 20:29:46',8,3,28,17,4,7,'Documento rechazado por Nataly Tatiana Puentes Sierra','2025-03-22 20:29:46');
+INSERT INTO `movimientos` VALUES (4,2,'2025-03-22 10:14:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-22 15:16:58'),(5,2,'2025-03-22 15:36:57',9,7,21,7,21,2,'Documento aceptado para procesamiento','2025-03-22 15:36:57'),(6,2,'2025-03-22 15:38:27',9,7,21,3,28,1,'Se pasa al área de auditoria los fletes para ser auditados ','2025-03-22 15:38:27'),(7,2,'2025-03-22 15:43:12',8,3,28,3,28,2,'Documento aceptado para procesamiento','2025-03-22 15:43:12'),(8,2,'2025-03-22 15:43:16',8,3,28,3,28,4,'Documento finalizado','2025-03-22 15:43:16'),(9,2,'2025-03-22 15:43:36',8,3,28,3,28,5,'Documento archivado','2025-03-22 15:43:36'),(10,3,'2025-03-22 12:39:00',2,17,4,3,28,1,'Documento registrado en recepción','2025-03-22 17:58:36'),(11,4,'2025-03-22 13:00:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-22 18:14:54'),(12,4,'2025-03-22 18:15:36',9,7,21,17,4,7,'Documento rechazado por Maria Paula Lozano Lozano','2025-03-22 18:15:36'),(13,3,'2025-03-22 20:29:46',8,3,28,17,4,7,'Documento rechazado por Nataly Tatiana Puentes Sierra','2025-03-22 20:29:46'),(14,5,'2025-03-23 00:08:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-23 05:09:53'),(15,5,'2025-03-23 05:11:02',9,7,21,7,21,2,'Documento aceptado para procesamiento','2025-03-23 05:11:02'),(16,5,'2025-03-23 05:20:09',9,7,21,7,21,4,'Documento finalizado','2025-03-23 05:20:09'),(17,6,'2025-03-23 18:26:00',2,17,4,7,21,1,'Documento registrado en recepción','2025-03-23 23:27:34'),(18,6,'2025-03-23 23:28:00',9,7,21,7,21,2,'Documento aceptado para procesamiento','2025-03-23 23:28:00'),(19,6,'2025-03-23 23:28:31',9,7,21,7,21,4,'Documento finalizado','2025-03-23 23:28:31'),(20,7,'2025-03-24 20:42:00',2,17,4,3,28,1,'Documento registrado en recepción','2025-03-25 01:45:35'),(21,7,'2025-03-25 01:48:04',8,3,28,3,28,2,'Documento aceptado para procesamiento','2025-03-25 01:48:04'),(22,7,'2025-03-25 01:50:24',8,3,28,7,21,3,'','2025-03-25 01:50:24');
 /*!40000 ALTER TABLE `movimientos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -232,7 +232,7 @@ CREATE TABLE `notificaciones` (
   KEY `documento_id` (`documento_id`),
   CONSTRAINT `notificaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `notificaciones_ibfk_2` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,7 +241,7 @@ CREATE TABLE `notificaciones` (
 
 LOCK TABLES `notificaciones` WRITE;
 /*!40000 ALTER TABLE `notificaciones` DISABLE KEYS */;
-INSERT INTO `notificaciones` VALUES (4,9,'Nuevo documento asignado - 20250322-8332','Se te ha asignado un nuevo documento de tipo Tiquetes.',2,1,'2025-03-22 15:16:58'),(5,2,'Documento aceptado - 20250322-8332','El documento ha sido aceptado por Maria Paula Lozano Lozano.',2,0,'2025-03-22 15:36:57'),(6,8,'Documento transferido - 20250322-8332','Se te ha transferido un documento de tipo Tiquetes.',2,1,'2025-03-22 15:38:27'),(7,2,'Documento aceptado - 20250322-8332','El documento ha sido aceptado por Nataly Tatiana Puentes Sierra.',2,0,'2025-03-22 15:43:12'),(8,8,'Nuevo documento asignado - 20250322-2381','Se te ha asignado un nuevo documento de tipo Facturas.',3,1,'2025-03-22 17:58:36'),(9,9,'Nuevo documento asignado - 20250322-8960','Se te ha asignado un nuevo documento de tipo Correspondencia.',4,1,'2025-03-22 18:14:54'),(10,2,'Documento rechazado - 20250322-8960','El documento ha sido rechazado por Maria Paula Lozano Lozano.',4,0,'2025-03-22 18:15:36'),(11,2,'Documento rechazado - 20250322-2381','El documento ha sido rechazado por Nataly Tatiana Puentes Sierra.',3,0,'2025-03-22 20:29:46');
+INSERT INTO `notificaciones` VALUES (4,9,'Nuevo documento asignado - 20250322-8332','Se te ha asignado un nuevo documento de tipo Tiquetes.',2,1,'2025-03-22 15:16:58'),(5,2,'Documento aceptado - 20250322-8332','El documento ha sido aceptado por Maria Paula Lozano Lozano.',2,1,'2025-03-22 15:36:57'),(6,8,'Documento transferido - 20250322-8332','Se te ha transferido un documento de tipo Tiquetes.',2,1,'2025-03-22 15:38:27'),(7,2,'Documento aceptado - 20250322-8332','El documento ha sido aceptado por Nataly Tatiana Puentes Sierra.',2,1,'2025-03-22 15:43:12'),(8,8,'Nuevo documento asignado - 20250322-2381','Se te ha asignado un nuevo documento de tipo Facturas.',3,1,'2025-03-22 17:58:36'),(9,9,'Nuevo documento asignado - 20250322-8960','Se te ha asignado un nuevo documento de tipo Correspondencia.',4,1,'2025-03-22 18:14:54'),(10,2,'Documento rechazado - 20250322-8960','El documento ha sido rechazado por Maria Paula Lozano Lozano.',4,1,'2025-03-22 18:15:36'),(11,2,'Documento rechazado - 20250322-2381','El documento ha sido rechazado por Nataly Tatiana Puentes Sierra.',3,1,'2025-03-22 20:29:46'),(12,9,'Nuevo documento asignado - 20250323-7054','Se te ha asignado un nuevo documento de tipo Correspondencia.',5,1,'2025-03-23 05:09:53'),(13,2,'Documento aceptado - 20250323-7054','El documento ha sido aceptado por Maria Paula Lozano Lozano.',5,1,'2025-03-23 05:11:02'),(14,9,'Nuevo documento asignado - 20250323-7371','Se te ha asignado un nuevo documento de tipo Correspondencia.',6,1,'2025-03-23 23:27:34'),(15,2,'Documento aceptado - 20250323-7371','El documento ha sido aceptado por Maria Paula Lozano Lozano.',6,1,'2025-03-23 23:28:00'),(16,8,'Nuevo documento asignado - 20250324-4787','Se te ha asignado un nuevo documento de tipo Correspondencia.',7,1,'2025-03-25 01:45:35'),(17,2,'Documento aceptado - 20250324-4787','El documento ha sido aceptado por Nataly Tatiana Puentes Sierra.',7,0,'2025-03-25 01:48:04'),(18,9,'Documento transferido - 20250324-4787','Se te ha transferido un documento de tipo Correspondencia.',7,0,'2025-03-25 01:50:24');
 /*!40000 ALTER TABLE `notificaciones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -298,7 +298,7 @@ CREATE TABLE `personas` (
   CONSTRAINT `personas_ibfk_2` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`),
   CONSTRAINT `personas_ibfk_3` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`),
   CONSTRAINT `personas_ibfk_4` FOREIGN KEY (`cargo_id`) REFERENCES `cargos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -307,7 +307,7 @@ CREATE TABLE `personas` (
 
 LOCK TABLES `personas` WRITE;
 /*!40000 ALTER TABLE `personas` DISABLE KEYS */;
-INSERT INTO `personas` VALUES (1,'Ricardo Alexander Bohórquez Méndez','rbohorquez@arrozsonora.com.co','3112815201',1,1,19,3,1,'2025-03-20 12:08:58'),(2,'Jairo Antonio Lozano Vargas','sst@arrozsonora.com.co','3102118013',1,2,20,45,1,'2025-03-20 12:08:58'),(3,'Olga Patricia Ortiz Rivas','oortiz@arrozsonora.com.co','',1,3,6,40,1,'2025-03-20 12:08:58'),(4,'Yazmina Lorena Fayad Gutierrez','recepcion@arrozsonora.com.co','3104567890',1,1,17,48,1,'2025-03-20 12:08:58'),(5,'Jairo Sedan Murra','jsedan@arrozsonora.com.co','',1,1,13,36,1,'2025-03-21 09:11:56'),(6,'Julio Cesar Cepeda Rodríguez','jcepeda@arrozsonora.com.co','',1,1,14,37,1,'2025-03-21 09:11:56'),(7,'Yuly Slendy Castillo Robayo','ycastillo@arrozsonora.com.co','',1,1,12,35,1,'2025-03-21 09:11:56'),(8,'Myriam Rodríguez Arciniegas','mrodriguez@arrozsonora.com.co','',1,1,8,33,1,'2025-03-21 09:11:56'),(9,'Brayan Santick Quintero Cordoba','bquintero@arrozsonora.com.co','',1,1,2,5,1,'2025-03-21 09:11:56'),(10,'Viviana Caycedo Bocanegra','vcaycedo@arrozsonora.com.co','',1,1,21,49,1,'2025-03-21 09:11:56'),(11,'Martha Yaneth Diaz Trigueros','mdiaz@arrozsonora.com.co','',1,1,22,52,1,'2025-03-21 09:11:56'),(12,'Sandra Bibiana Laverde Parra','slaverde@arrozsonora.com.co','',1,1,22,20,1,'2025-03-21 09:11:56'),(13,'Juan David Lozano Guzman','jlozano@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(14,'Diana Marcela Bocanegra Tovar','dbocanegra@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(15,'Teresa Tovar Rivera','ttovar@arrozsonora.com.co','',1,1,5,9,1,'2025-03-21 09:11:56'),(16,'Angy Yulitza Vargas Padilla','avargas@arrozsonora.com.co','',1,1,5,18,1,'2025-03-21 09:11:56'),(17,'Ximena Paola Bocanegra Ortiz','xbocanegra@arrozsonora.com.co','',1,1,7,41,1,'2025-03-21 09:11:56'),(18,'Joan Jair Rodriguez Portela','jrodriguez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(19,'Adriana Lucia Gonzalez Serrano','agonzalez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(20,'Lizeth Daniela Melo Olis','lmelo@arrozsonora.com.co',NULL,1,1,7,8,1,'2025-03-21 09:11:56'),(21,'Maria Paula Lozano Lozano','mlozano@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(22,'Silvia Patricia Rivera Zabala','srivera@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(23,'Andres Felipe Arias Vargas','aarias@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(24,'Laura Maria Rodriguez Cuervo','lrodriguez@arrozsonora.com.co','',1,1,11,19,1,'2025-03-21 09:11:56'),(25,'Andrea Del Pilar Morales Trujillo','amorales@arrozsonora.com.co',NULL,1,1,7,7,1,'2025-03-21 09:11:56'),(26,'Karen Nureidys Carcamo Londono','kcarcamo@arrozsonora.com.co','',1,1,9,42,1,'2025-03-21 09:11:56'),(27,'Julian Andres Molina Avila','jmolina@arrozsonora.com.co','',1,1,9,10,1,'2025-03-21 09:11:56'),(28,'Nataly Tatiana Puentes Sierra','npuentes@arrozsonora.com.co','',1,1,3,38,1,'2025-03-21 09:11:56'),(29,'Adriana del Pilar Lopez Bustos','alopez@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(30,'Lina Fernanda Fierro Fierro','lfierro@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(31,'Leidy Johana Avila Gonzalez','lavila@arrozsonora.com.co','',1,1,4,39,1,'2025-03-21 09:11:56'),(32,'Julieth Paola Gonzalez Onatra','jgonzalez@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(33,'Jonathan Fabian Manrique Rodriguez','jmanrique@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(34,'Angie Katherine Zamora Cordoba','azamora@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(35,'Luana Simona Sendoya Echeverry','lsendoya@arrozsonora.com.co','',1,1,23,30,1,'2025-03-21 09:11:56'),(36,'Angi Xiomara Ramirez Ortiz','aramirez@arrozsonora.com.co','',1,1,23,21,1,'2025-03-21 09:11:56'),(37,'Juan Jose Cote Hernandez','jcote@arrozsonora.com.co','',1,1,15,32,1,'2025-03-21 09:11:56'),(38,'Angela Maria Zartha Leal','azartha@arrozsonora.com.co','',1,1,15,22,1,'2025-03-21 09:11:56'),(39,'Juan Pablo Celis Castillo','jcelis@arrozsonora.com.co','',1,1,15,31,1,'2025-03-21 09:11:56'),(40,'Ana Maria Rodriguez Mora','arodriguez@arrozsonora.com.co','',1,1,18,44,1,'2025-03-21 09:11:56'),(41,'Sandra Milena Garcia Gonzalez','sgarcia@arrozsonora.com.co','',1,1,18,11,1,'2025-03-21 09:11:56'),(42,'Yendy Fannory Bravo Gutierrez','ybravo@arrozsonora.com.co','',1,2,10,34,1,'2025-03-21 09:11:56'),(43,'Kelly Johanna Gomez Lozano','kgomez@arrozsonora.com.co','',1,2,20,232,1,'2025-03-21 09:11:56'),(44,'Sandra Milena Villa Rojas','smvilla@arrozsonora.com.co','',1,2,88,1,1,'2025-03-21 09:11:56'),(45,'Diana Alejandra Ortiz Jara','dortiz@arrozsonora.com.co','',1,2,88,27,1,'2025-03-21 09:11:56'),(46,'James Eduardo Rueda Trujillo','jrueda@arrozsonora.com.co','',1,2,16,43,1,'2025-03-21 09:11:56'),(47,'Luis Alberto Barreto Guzman','lbarreto@arrozsonora.com.co','',1,3,6,1,1,'2025-03-21 09:11:56'),(48,'Luis Alejandro Oliveros','','',1,3,6,15,1,'2025-03-21 09:11:56'),(49,'Jaime Vargas Ramirez','jvargas@arrozsonora.com.co','',1,3,1,28,1,'2025-03-21 09:11:58'),(95,'Lina Julieth Carvajal Mendoza','','',1,1,19,4,1,'2025-03-21 20:01:07');
+INSERT INTO `personas` VALUES (1,'Ricardo Alexander Bohórquez Méndez','rbohorquez@arrozsonora.com.co','3112815201',1,1,19,3,1,'2025-03-20 12:08:58'),(2,'Jairo Antonio Lozano Vargas','sst@arrozsonora.com.co','3102118013',1,2,20,45,1,'2025-03-20 12:08:58'),(3,'Olga Patricia Ortiz Rivas','oortiz@arrozsonora.com.co','',1,3,6,40,1,'2025-03-20 12:08:58'),(4,'Yazmina Lorena Fayad Gutierrez','recepcion@arrozsonora.com.co','3104567890',1,1,17,48,1,'2025-03-20 12:08:58'),(5,'Jairo Sedan Murra','jsedan@arrozsonora.com.co','',1,1,13,36,1,'2025-03-21 09:11:56'),(6,'Julio Cesar Cepeda Rodríguez','jcepeda@arrozsonora.com.co','',1,1,14,37,1,'2025-03-21 09:11:56'),(7,'Yuly Slendy Castillo Robayo','ycastillo@arrozsonora.com.co','',1,1,12,35,1,'2025-03-21 09:11:56'),(8,'Myriam Rodríguez Arciniegas','mrodriguez@arrozsonora.com.co','',1,1,8,33,1,'2025-03-21 09:11:56'),(9,'Brayan Santick Quintero Cordoba','bquintero@arrozsonora.com.co','',1,1,2,5,1,'2025-03-21 09:11:56'),(10,'Viviana Caycedo Bocanegra','vcaycedo@arrozsonora.com.co','',1,1,21,49,1,'2025-03-21 09:11:56'),(11,'Martha Yaneth Diaz Trigueros','mdiaz@arrozsonora.com.co','',1,1,22,52,1,'2025-03-21 09:11:56'),(12,'Sandra Bibiana Laverde Parra','slaverde@arrozsonora.com.co',NULL,1,1,22,13,1,'2025-03-21 09:11:56'),(13,'Juan David Lozano Guzman','jlozano@arrozsonora.com.co',NULL,1,1,22,20,1,'2025-03-21 09:11:56'),(14,'Diana Marcela Bocanegra Tovar','dbocanegra@arrozsonora.com.co','',1,1,22,12,1,'2025-03-21 09:11:56'),(15,'Teresa Tovar Rivera','ttovar@arrozsonora.com.co','',1,1,5,9,1,'2025-03-21 09:11:56'),(16,'Angy Yulitza Vargas Padilla','avargas@arrozsonora.com.co','',1,1,5,18,1,'2025-03-21 09:11:56'),(17,'Ximena Paola Bocanegra Ortiz','xbocanegra@arrozsonora.com.co','',1,1,7,41,1,'2025-03-21 09:11:56'),(18,'Joan Jair Rodriguez Portela','jrodriguez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(19,'Adriana Lucia Gonzalez Serrano','agonzalez@arrozsonora.com.co','',1,1,7,7,1,'2025-03-21 09:11:56'),(20,'Lizeth Daniela Melo Olis','lmelo@arrozsonora.com.co',NULL,1,1,7,8,1,'2025-03-21 09:11:56'),(21,'Maria Paula Lozano Lozano','mlozano@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(22,'Silvia Patricia Rivera Zabala','srivera@arrozsonora.com.co','',1,1,7,19,1,'2025-03-21 09:11:56'),(23,'Andres Felipe Arias Vargas','aarias@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(24,'Laura Maria Rodriguez Cuervo','lrodriguez@arrozsonora.com.co','',1,1,11,19,1,'2025-03-21 09:11:56'),(25,'Andrea Del Pilar Morales Trujillo','amorales@arrozsonora.com.co',NULL,1,1,7,7,1,'2025-03-21 09:11:56'),(26,'Karen Nureidys Carcamo Londono','kcarcamo@arrozsonora.com.co','',1,1,9,42,1,'2025-03-21 09:11:56'),(27,'Julian Andres Molina Avila','jmolina@arrozsonora.com.co','',1,1,9,10,1,'2025-03-21 09:11:56'),(28,'Nataly Tatiana Puentes Sierra','npuentes@arrozsonora.com.co','',1,1,3,38,1,'2025-03-21 09:11:56'),(29,'Adriana del Pilar Lopez Bustos','alopez@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(30,'Lina Fernanda Fierro Fierro','lfierro@arrozsonora.com.co','',1,1,3,16,1,'2025-03-21 09:11:56'),(31,'Leidy Johana Avila Gonzalez','lavila@arrozsonora.com.co','',1,1,4,39,1,'2025-03-21 09:11:56'),(32,'Julieth Paola Gonzalez Onatra','jgonzalez@arrozsonora.com.co','',1,1,4,6,1,'2025-03-21 09:11:56'),(33,'Jonathan Fabian Manrique Rodriguez','jmanrique@arrozsonora.com.co',NULL,1,1,4,17,1,'2025-03-21 09:11:56'),(34,'Angie Katherine Zamora Cordoba','azamora@arrozsonora.com.co',NULL,1,1,4,17,1,'2025-03-21 09:11:56'),(35,'Luana Simona Sendoya Echeverry','lsendoya@arrozsonora.com.co','',1,1,23,30,1,'2025-03-21 09:11:56'),(36,'Angi Xiomara Ramirez Ortiz','aramirez@arrozsonora.com.co','',1,1,23,21,0,'2025-03-21 09:11:56'),(37,'Juan Jose Cote Hernandez','jcote@arrozsonora.com.co','',1,1,15,32,1,'2025-03-21 09:11:56'),(38,'Angela Maria Zartha Leal','azartha@arrozsonora.com.co','',1,1,15,22,1,'2025-03-21 09:11:56'),(39,'Juan Pablo Celis Castillo','jcelis@arrozsonora.com.co','',1,1,15,31,1,'2025-03-21 09:11:56'),(40,'Ana Maria Rodriguez Mora','arodriguez@arrozsonora.com.co','',1,1,18,44,1,'2025-03-21 09:11:56'),(41,'Sandra Milena Garcia Gonzalez','sgarcia@arrozsonora.com.co','',1,1,18,11,1,'2025-03-21 09:11:56'),(42,'Yendy Fannory Bravo Gutierrez','ybravo@arrozsonora.com.co','',1,2,10,34,1,'2025-03-21 09:11:56'),(43,'Kelly Johanna Gomez Lozano','kgomez@arrozsonora.com.co','',1,2,20,232,1,'2025-03-21 09:11:56'),(44,'Sandra Milena Villa Rojas','smvilla@arrozsonora.com.co',NULL,1,2,88,46,1,'2025-03-21 09:11:56'),(45,'Diana Alejandra Ortiz Jara','dortiz@arrozsonora.com.co','',1,2,88,27,1,'2025-03-21 09:11:56'),(46,'James Eduardo Rueda Trujillo','jrueda@arrozsonora.com.co','',1,2,16,43,1,'2025-03-21 09:11:56'),(47,'Luis Alberto Barreto Guzman','lbarreto@arrozsonora.com.co','',1,3,6,1,1,'2025-03-21 09:11:56'),(48,'Luis Alejandro Oliveros Guarnizo',NULL,NULL,1,3,6,15,1,'2025-03-21 09:11:56'),(49,'Jaime Vargas Ramirez','jvargas@arrozsonora.com.co','',1,3,1,28,1,'2025-03-21 09:11:58'),(95,'Lina Julieth Carvajal Mendoza','','',1,1,19,4,1,'2025-03-21 20:01:07'),(99,'Jorge Elias Ortiz',NULL,NULL,1,2,23,29,1,'2025-03-23 17:44:44');
 /*!40000 ALTER TABLE `personas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -354,7 +354,7 @@ CREATE TABLE `roles_permisos` (
   KEY `permiso_id` (`permiso_id`),
   CONSTRAINT `roles_permisos_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`),
   CONSTRAINT `roles_permisos_ibfk_2` FOREIGN KEY (`permiso_id`) REFERENCES `permisos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=162 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -363,7 +363,7 @@ CREATE TABLE `roles_permisos` (
 
 LOCK TABLES `roles_permisos` WRITE;
 /*!40000 ALTER TABLE `roles_permisos` DISABLE KEYS */;
-INSERT INTO `roles_permisos` VALUES (1,1,1,'2025-03-20 12:08:58'),(2,1,2,'2025-03-20 12:08:58'),(3,1,3,'2025-03-20 12:08:58'),(4,1,4,'2025-03-20 12:08:58'),(5,1,5,'2025-03-20 12:08:58'),(6,1,6,'2025-03-20 12:08:58'),(7,1,7,'2025-03-20 12:08:58'),(8,1,8,'2025-03-20 12:08:58'),(9,1,9,'2025-03-20 12:08:58'),(10,1,10,'2025-03-20 12:08:58'),(11,1,11,'2025-03-20 12:08:58'),(12,1,12,'2025-03-20 12:08:58'),(13,1,13,'2025-03-20 12:08:58'),(14,1,14,'2025-03-20 12:08:58'),(15,1,15,'2025-03-20 12:08:58'),(16,1,16,'2025-03-20 12:08:58'),(17,1,17,'2025-03-20 12:08:58'),(18,1,18,'2025-03-20 12:08:58'),(19,1,19,'2025-03-20 12:08:58'),(20,1,20,'2025-03-20 12:08:58'),(21,1,21,'2025-03-20 12:08:58'),(128,2,20,'2025-03-22 20:27:53'),(129,2,9,'2025-03-22 20:27:53'),(130,2,3,'2025-03-22 20:27:53'),(131,2,8,'2025-03-22 20:27:53'),(132,2,2,'2025-03-22 20:27:53'),(133,2,5,'2025-03-22 20:27:53'),(134,2,1,'2025-03-22 20:27:53'),(156,3,2,'2025-03-23 02:26:49'),(157,3,5,'2025-03-23 02:26:49'),(158,3,7,'2025-03-23 02:26:49'),(159,3,6,'2025-03-23 02:26:49'),(160,3,8,'2025-03-23 02:26:49'),(161,3,20,'2025-03-23 02:26:49');
+INSERT INTO `roles_permisos` VALUES (1,1,1,'2025-03-20 12:08:58'),(2,1,2,'2025-03-20 12:08:58'),(3,1,3,'2025-03-20 12:08:58'),(4,1,4,'2025-03-20 12:08:58'),(5,1,5,'2025-03-20 12:08:58'),(6,1,6,'2025-03-20 12:08:58'),(7,1,7,'2025-03-20 12:08:58'),(8,1,8,'2025-03-20 12:08:58'),(9,1,9,'2025-03-20 12:08:58'),(10,1,10,'2025-03-20 12:08:58'),(11,1,11,'2025-03-20 12:08:58'),(12,1,12,'2025-03-20 12:08:58'),(13,1,13,'2025-03-20 12:08:58'),(14,1,14,'2025-03-20 12:08:58'),(15,1,15,'2025-03-20 12:08:58'),(16,1,16,'2025-03-20 12:08:58'),(17,1,17,'2025-03-20 12:08:58'),(18,1,18,'2025-03-20 12:08:58'),(19,1,19,'2025-03-20 12:08:58'),(20,1,20,'2025-03-20 12:08:58'),(21,1,21,'2025-03-20 12:08:58'),(156,3,2,'2025-03-23 02:26:49'),(157,3,5,'2025-03-23 02:26:49'),(158,3,7,'2025-03-23 02:26:49'),(159,3,6,'2025-03-23 02:26:49'),(160,3,8,'2025-03-23 02:26:49'),(161,3,20,'2025-03-23 02:26:49'),(162,2,3,'2025-03-23 02:47:37'),(163,2,20,'2025-03-23 02:47:37'),(164,2,8,'2025-03-23 02:47:37'),(165,2,1,'2025-03-23 02:47:37'),(166,2,2,'2025-03-23 02:47:37'),(167,2,9,'2025-03-23 02:47:37'),(168,2,5,'2025-03-23 02:47:37');
 /*!40000 ALTER TABLE `roles_permisos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -379,7 +379,7 @@ CREATE TABLE `tipos_documento` (
   `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -404,7 +404,7 @@ CREATE TABLE `transportadoras` (
   `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -429,7 +429,7 @@ CREATE TABLE `unidades` (
   `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -464,7 +464,7 @@ CREATE TABLE `usuarios` (
   KEY `persona_id` (`persona_id`),
   CONSTRAINT `usuarios_ibfk_2` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`),
   CONSTRAINT `usuarios_ibfk_3` FOREIGN KEY (`persona_id`) REFERENCES `personas` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -473,7 +473,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'rbohorquez','$2b$12$h8H9COaJrgpqyE9sQewA7.bMWNcJk1eIJcOKInxqTrcOtuWmji77i',1,1,'2025-03-23 02:23:19',1,'2025-03-20 21:18:20'),(2,'yfayad','$2b$12$.Vsma9zYL6ivAOrfzNbN2uO8tw7.21nUBONXcUzOyHWPOrR82AdUq',4,2,'2025-03-22 17:39:29',1,'2025-03-21 12:39:04'),(8,'npuentes','$2b$12$2Q44xvcj0xIBIL4R6nty2uMMOLTFFU4d3UiW1F.ZaGi9a9WcH.syK',28,3,'2025-03-22 20:29:35',1,'2025-03-22 05:06:01'),(9,'mlozano','$2b$12$ZDiZDmGcldxaGx1FIM13cOV2qk7DVCdgnD4.1ZKBRMd7QaP201ege',21,3,'2025-03-22 18:15:19',1,'2025-03-22 05:06:52'),(10,'lcarvajal','$2b$12$nlV/o7UKblD7DYbux5PBr.SQGbFC2sqmiLrbmEvVxa7oirshtdP6u',95,1,NULL,1,'2025-03-22 19:10:49');
+INSERT INTO `usuarios` VALUES (1,'rbohorquez','$2b$12$.Vsma9zYL6ivAOrfzNbN2uO8tw7.21nUBONXcUzOyHWPOrR82AdUq',1,1,'2025-03-25 02:47:26',1,'2025-03-20 21:18:20'),(2,'yfayad','$2b$12$.Vsma9zYL6ivAOrfzNbN2uO8tw7.21nUBONXcUzOyHWPOrR82AdUq',4,2,'2025-03-25 01:40:20',1,'2025-03-21 12:39:04'),(8,'npuentes','$2b$12$2Q44xvcj0xIBIL4R6nty2uMMOLTFFU4d3UiW1F.ZaGi9a9WcH.syK',28,3,'2025-03-25 01:47:48',1,'2025-03-22 05:06:01'),(9,'mlozano','$2b$12$ZDiZDmGcldxaGx1FIM13cOV2qk7DVCdgnD4.1ZKBRMd7QaP201ege',21,3,'2025-03-23 23:27:52',1,'2025-03-22 05:06:52'),(10,'lcarvajal','$2b$12$1/XsVHZv7IdsyHZARfWoeubjUBpgb6M22Kt0PTVi5vFy0DO9.iwnm',95,1,'2025-03-23 06:08:24',1,'2025-03-22 19:10:49');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -489,7 +489,7 @@ CREATE TABLE `zonas_economicas` (
   `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_en` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -511,4 +511,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-22 21:45:11
+-- Dump completed on 2025-03-24 21:57:42
