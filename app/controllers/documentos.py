@@ -29,28 +29,101 @@ def index():
     # Establecer fecha actual por defecto
     form.fecha_recepcion.data = datetime.now()
     
-    # Obtener documentos para mostrar en la tabla (puedes filtrar según el rol del usuario)
-    if current_user.rol.nombre == 'Superadministrador':
-        documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
-    elif current_user.rol.nombre == 'Recepción':
-        documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
-    else:
-        documentos = Documento.query.filter(
-            or_(
-                Documento.area_destino_id == current_user.persona.area_id,
-                Documento.persona_destino_id == current_user.persona_id
-            )
-        ).order_by(Documento.creado_en.desc()).limit(100).all()
-    
-    # Inicializar el formulario de búsqueda
+    # Obtener el formulario de búsqueda
     buscar_form = BuscarDocumentoForm()
+    
+    # Verificar si hay parámetros de búsqueda
+    is_search = any(key for key in request.args.keys() if key != 'page' and request.args.get(key))
+    
+    # Si hay parámetros de búsqueda, realizar búsqueda
+    if is_search:
+        # Construir la consulta base
+        query = Documento.query
+        
+        # Aplicar filtros si están presentes
+        if request.args.get('radicado'):
+            query = query.filter(Documento.radicado.like(f'%{request.args.get("radicado")}%'))
+        
+        if request.args.get('fecha_desde'):
+            try:
+                fecha_desde = datetime.strptime(request.args.get('fecha_desde'), '%Y-%m-%d')
+                query = query.filter(Documento.fecha_recepcion >= fecha_desde)
+            except ValueError:
+                pass
+        
+        if request.args.get('fecha_hasta'):
+            try:
+                fecha_hasta = datetime.strptime(request.args.get('fecha_hasta'), '%Y-%m-%d')
+                # Incluir todo el día
+                fecha_hasta = datetime.combine(fecha_hasta.date(), datetime.max.time())
+                query = query.filter(Documento.fecha_recepcion <= fecha_hasta)
+            except ValueError:
+                pass
+        
+        if request.args.get('transportadora_id') and int(request.args.get('transportadora_id')) > 0:
+            query = query.filter_by(transportadora_id=request.args.get('transportadora_id'))
+        
+        if request.args.get('tipo_documento_id') and int(request.args.get('tipo_documento_id')) > 0:
+            query = query.filter_by(tipo_documento_id=request.args.get('tipo_documento_id'))
+        
+        if request.args.get('estado_id') and int(request.args.get('estado_id')) > 0:
+            query = query.filter_by(estado_actual_id=request.args.get('estado_id'))
+        
+        if request.args.get('tipo'):
+            query = query.filter_by(tipo=request.args.get('tipo'))
+        
+        if request.args.get('remitente'):
+            query = query.filter(Documento.remitente.like(f'%{request.args.get("remitente")}%'))
+        
+        # Filtrar según el rol del usuario
+        if current_user.rol.nombre == 'Superadministrador':
+            # Superadministrador ve todos los documentos
+            pass
+        elif current_user.rol.nombre == 'Recepción':
+            # Recepción ve los documentos que ha registrado
+            query = query.filter_by(registrado_por_id=current_user.id)
+        else:
+            # Usuario regular ve los documentos de su área o asignados a él
+            query = query.filter(
+                or_(
+                    Documento.area_destino_id == current_user.persona.area_id,
+                    Documento.persona_destino_id == current_user.persona_id
+                )
+            )
+        
+        # Ordenar por fecha de creación (más recientes primero)
+        documentos = query.order_by(Documento.creado_en.desc()).all()
+        
+        # Pasar los parámetros de búsqueda al formulario para mantenerlos en la interfaz
+        for key, value in request.args.items():
+            if key in buscar_form._fields:
+                field = getattr(buscar_form, key)
+                if hasattr(field, 'data'):
+                    try:
+                        field.data = value
+                    except:
+                        pass
+    else:
+        # Si no hay búsqueda, obtener documentos según el rol del usuario
+        if current_user.rol.nombre == 'Superadministrador':
+            documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+        elif current_user.rol.nombre == 'Recepción':
+            documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+        else:
+            documentos = Documento.query.filter(
+                or_(
+                    Documento.area_destino_id == current_user.persona.area_id,
+                    Documento.persona_destino_id == current_user.persona_id
+                )
+            ).order_by(Documento.creado_en.desc()).limit(100).all()
     
     return render_template('documentos/index.html', 
                           form=form,
                           buscar_form=buscar_form, 
                           documentos=documentos,
-                          mostrar_busqueda=False,  # No mostrar búsqueda inicialmente
-                          mostrar_tabla=True)      # Mostrar tabla de documentos
+                          mostrar_busqueda=False,
+                          mostrar_tabla=True,
+                          is_search=is_search)
 
 @documentos_bp.route('/procesar', methods=['POST'])
 @login_required
@@ -58,6 +131,7 @@ def index():
 def procesar():
     """Vista para procesar el formulario de registro sin cambiar de página"""
     form = DocumentoForm()
+    buscar_form = BuscarDocumentoForm()
     
     if form.validate_on_submit():
         # Obtener el estado inicial (Recibido)
@@ -108,6 +182,8 @@ def procesar():
         db.session.commit()
         
         flash(f'Documento registrado con éxito. Radicado: {documento.radicado}', 'success')
+        
+        # Redirigir a la misma página para mantener el formulario activo
         return redirect(url_for('documentos.index'))
     
     # Si hay errores de validación, mostrarlos
@@ -127,9 +203,6 @@ def procesar():
             )
         ).order_by(Documento.creado_en.desc()).limit(100).all()
     
-    # Inicializar el formulario de búsqueda
-    buscar_form = BuscarDocumentoForm()
-    
     return render_template('documentos/index.html', 
                           form=form, 
                           buscar_form=buscar_form,
@@ -141,18 +214,34 @@ def procesar():
 @login_required
 def mostrar_busqueda():
     """Vista para mostrar los filtros de búsqueda"""
+    # Obtener el formulario de registro
     form = DocumentoForm()
+    
+    # Establecer fecha actual por defecto
+    form.fecha_recepcion.data = datetime.now()
+    
+    # Inicializar el formulario de búsqueda
     buscar_form = BuscarDocumentoForm()
     
-    # No se cargan documentos inicialmente en la búsqueda
-    documentos = []
+    # Obtener documentos según el rol del usuario
+    if current_user.rol.nombre == 'Superadministrador':
+        documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+    elif current_user.rol.nombre == 'Recepción':
+        documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+    else:
+        documentos = Documento.query.filter(
+            or_(
+                Documento.area_destino_id == current_user.persona.area_id,
+                Documento.persona_destino_id == current_user.persona_id
+            )
+        ).order_by(Documento.creado_en.desc()).limit(100).all()
     
     return render_template('documentos/index.html', 
                          form=form, 
                          buscar_form=buscar_form,
                          documentos=documentos,
-                         mostrar_busqueda=True,   # Mostrar búsqueda
-                         mostrar_tabla=False)     # No mostrar tabla inicialmente
+                         mostrar_busqueda=True,
+                         mostrar_tabla=True)
 
 @documentos_bp.route('/registrar', methods=['GET', 'POST'])
 @login_required
@@ -246,7 +335,7 @@ def detalle(id):
 @documentos_bp.route('/transferir/<int:id>', methods=['GET', 'POST'])
 @login_required
 @document_access_required
-@permission_required('Transferir documento')  # Corregido para usar el formato correcto
+@permission_required('Transferir documento')
 def transferir(id):
     """Vista para transferir un documento"""
     documento = Documento.query.get_or_404(id)
@@ -289,11 +378,10 @@ def transferir(id):
                           documento=documento, 
                           form=form)
 
-
 @documentos_bp.route('/aceptar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('Aceptar documento')  # Corregido para usar el formato correcto
+@permission_required('Aceptar documento')
 def aceptar(id):
     """Vista para aceptar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -332,7 +420,7 @@ def aceptar(id):
 @documentos_bp.route('/rechazar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('Rechazar documento')  # Corregido para usar el formato correcto
+@permission_required('Rechazar documento')
 def rechazar(id):
     """Vista para rechazar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -384,7 +472,7 @@ def rechazar(id):
 @documentos_bp.route('/finalizar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('Transferir documento')  # Este permiso se utiliza para finalizar también
+@permission_required('Transferir documento')
 def finalizar(id):
     """Vista para finalizar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -399,7 +487,7 @@ def finalizar(id):
 @documentos_bp.route('/archivar/<int:id>')
 @login_required
 @document_access_required
-@permission_required('Transferir documento')  # Este permiso se utiliza para archivar también
+@permission_required('Transferir documento')
 def archivar(id):
     """Vista para archivar un documento"""
     documento = Documento.query.get_or_404(id)
@@ -446,8 +534,8 @@ def buscar():
         
         if form.remitente.data:
             query = query.filter(Documento.remitente.like(f'%{form.remitente.data}%'))
-        
-        # Filtrar según el rol del usuario
+
+            # Filtrar según el rol del usuario
         if current_user.rol.nombre == 'Superadministrador':
             # Superadministrador ve todos los documentos
             pass
@@ -496,6 +584,40 @@ def exportar(formato):
                 Documento.persona_destino_id == current_user.persona_id
             )
         )
+    
+    # Aplicar filtros si están presentes en los parámetros de la consulta
+    if request.args.get('radicado'):
+        query = query.filter(Documento.radicado.like(f'%{request.args.get("radicado")}%'))
+    
+    if request.args.get('fecha_desde'):
+        try:
+            fecha_desde = datetime.strptime(request.args.get('fecha_desde'), '%Y-%m-%d')
+            query = query.filter(Documento.fecha_recepcion >= fecha_desde)
+        except ValueError:
+            pass
+    
+    if request.args.get('fecha_hasta'):
+        try:
+            fecha_hasta = datetime.strptime(request.args.get('fecha_hasta'), '%Y-%m-%d')
+            fecha_hasta = datetime.combine(fecha_hasta.date(), datetime.max.time())
+            query = query.filter(Documento.fecha_recepcion <= fecha_hasta)
+        except ValueError:
+            pass
+    
+    if request.args.get('transportadora_id') and int(request.args.get('transportadora_id')) > 0:
+        query = query.filter_by(transportadora_id=request.args.get('transportadora_id'))
+    
+    if request.args.get('tipo_documento_id') and int(request.args.get('tipo_documento_id')) > 0:
+        query = query.filter_by(tipo_documento_id=request.args.get('tipo_documento_id'))
+    
+    if request.args.get('estado_id') and int(request.args.get('estado_id')) > 0:
+        query = query.filter_by(estado_actual_id=request.args.get('estado_id'))
+    
+    if request.args.get('tipo'):
+        query = query.filter_by(tipo=request.args.get('tipo'))
+    
+    if request.args.get('remitente'):
+        query = query.filter(Documento.remitente.like(f'%{request.args.get("remitente")}%'))
     
     # Obtener documentos
     documentos = query.order_by(Documento.creado_en.desc()).all()
