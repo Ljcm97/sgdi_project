@@ -13,6 +13,7 @@ from app.forms.buscar import BuscarDocumentoForm
 from app.utils.auth import permission_required, check_permission
 from app.utils.decorators import document_access_required, has_document_access, role_required
 from app.utils.helpers import crear_notificacion, flash_errors
+from app.utils.pagination import Pagination
 from app.utils.exportacion import exportar_excel, exportar_pdf, exportar_xml
 from sqlalchemy import or_
 

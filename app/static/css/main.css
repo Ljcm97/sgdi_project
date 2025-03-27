@@ -161,3 +161,26 @@ footer {
         padding-right: 10px;
     }
 }
+
+/* Estilos personalizados para la paginación */
+.pagination {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1D2C96;
+    border-color: #1D2C96;
+}
+
+.pagination .page-link {
+    color: #1D2C96;
+}
+
+.pagination .page-link:hover {
+    color: #DAA520;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+}

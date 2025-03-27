@@ -4,6 +4,7 @@ from app import db
 from app.models.unidad import Unidad
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from app.utils.pagination import Pagination
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm

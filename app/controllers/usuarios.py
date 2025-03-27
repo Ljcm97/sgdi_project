@@ -7,6 +7,7 @@ from app.models.rol import Rol
 from app.forms.usuario import UsuarioForm
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from app.utils.pagination import Pagination
 from sqlalchemy import func
 
 usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/usuarios')

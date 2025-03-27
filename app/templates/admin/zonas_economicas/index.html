@@ -63,7 +63,7 @@
                                         <a href="{{ url_for('zonas_economicas.editar', id=zona.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ url_for('zonas_economicas.eliminar', id=zona.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta zona económica? Esta acción no se puede deshacer.')">
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('zonas_economicas.eliminar', id=zona.id) }}', '¿Estás seguro de eliminar esta zona económica? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -80,4 +80,13 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Script para confirmación de eliminación -->
+<script>
+    function confirmarEliminacion(url, mensaje) {
+        if (confirm(mensaje)) {
+            window.location.href = url;
+        }
+    }
+</script>
 {% endblock %}

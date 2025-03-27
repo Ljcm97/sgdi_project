@@ -4,6 +4,7 @@ from app import db
 from app.models.area import Area
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from app.utils.pagination import Pagination
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
@@ -23,10 +24,22 @@ areas_bp = Blueprint('areas', __name__, url_prefix='/areas')
 @admin_required
 def index():
     """Vista para listar todas las áreas"""
-    # Obtener áreas ordenadas alfabéticamente por nombre
-    areas = Area.query.order_by(Area.nombre).all()
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = Area.query.order_by(Area.nombre)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'areas.index')
+    areas = pagination.items
+    
     form = AreaForm()
-    return render_template('admin/areas/index.html', areas=areas, form=form)
+    return render_template('admin/areas/index.html', 
+                          areas=areas, 
+                          pagination=pagination,
+                          form=form)
 
 @areas_bp.route('/crear', methods=['POST'])
 @login_required

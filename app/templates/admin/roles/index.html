@@ -80,7 +80,7 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             {% if rol.nombre not in ['Recepción', 'Usuario'] and not rol.usuarios %}
-                                                <a href="{{ url_for('roles.eliminar', id=rol.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este rol? Esta acción no se puede deshacer.')">
+                                                <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('roles.eliminar', id=rol.id) }}', '¿Estás seguro de eliminar este rol? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             {% endif %}
@@ -103,4 +103,14 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Script de confirmación -->
+<script>
+    function confirmarEliminacion(url, mensaje) {
+        if (confirm(mensaje)) {
+            window.location.href = url;
+        }
+    }
+</script>
+
 {% endblock %}

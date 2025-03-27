@@ -10,6 +10,7 @@ from app.forms.persona import PersonaForm
 from app.utils.auth import permission_required
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from app.utils.pagination import Pagination
 from sqlalchemy import func
 
 personas_bp = Blueprint('personas', __name__, url_prefix='/personas')

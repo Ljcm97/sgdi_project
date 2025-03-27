@@ -16,6 +16,9 @@
     
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     {% block styles %}{% endblock %}
 </head>
@@ -214,17 +217,29 @@
     
     <!-- Contenido principal -->
     <main class="container py-4">
-        <!-- Mensajes flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        <!-- Mensajes flash (ocultos, solo para procesamiento JS) -->
+        <div id="mensajes-flash" style="display: none;">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message" data-category="{{ category }}" data-message="{{ message }}"></div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <!-- Script para procesar mensajes flash -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Procesar mensajes flash con SweetAlert2
+                const mensajes = document.querySelectorAll('.flash-message');
+                mensajes.forEach(function(mensaje) {
+                    const categoria = mensaje.getAttribute('data-category');
+                    const contenido = mensaje.getAttribute('data-message');
+                    mostrarMensajesFlash(categoria, contenido);
+                });
+            });
+        </script>
         
         {% block content %}{% endblock %}
     </main>
@@ -244,7 +259,7 @@
     
     <!-- Script principal -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
     {% if current_user.is_authenticated %}
     <!-- Script para notificaciones -->
     <script>
@@ -349,5 +364,12 @@
     {% endif %}
     
     {% block scripts %}{% endblock %}
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Custom SweetAlert2 functions -->
+    <script src="{{ url_for('static', filename='js/sweet-alerts.js') }}"></script>
+
 </body>
 </html>

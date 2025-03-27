@@ -4,6 +4,7 @@ from app import db
 from app.models.cargo import Cargo
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
+from app.utils.pagination import Pagination
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
@@ -23,11 +24,22 @@ cargos_bp = Blueprint('cargos', __name__, url_prefix='/cargos')
 @admin_required
 def index():
     """Vista para listar todos los cargos"""
-    # Obtener cargos ordenados alfabéticamente por nombre
-    cargos = Cargo.query.order_by(Cargo.nombre).all()
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = Cargo.query.order_by(Cargo.nombre)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'cargos.index')
+    cargos = pagination.items
+    
     form = CargoForm()
-    return render_template('admin/cargos/index.html', cargos=cargos, form=form)
-
+    return render_template('admin/cargos/index.html', 
+                          cargos=cargos, 
+                          pagination=pagination,
+                          form=form)
 @cargos_bp.route('/crear', methods=['POST'])
 @login_required
 @admin_required

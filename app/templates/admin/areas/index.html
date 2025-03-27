@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros/pagination.html" import render_pagination %}
 
 {% block title %}Gestión de Áreas - SGDI{% endblock %}
 
@@ -63,7 +64,7 @@
                                         <a href="{{ url_for('areas.editar', id=area.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ url_for('areas.eliminar', id=area.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta área? Esta acción no se puede deshacer.')">
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('areas.eliminar', id=area.id) }}', '¿Estás seguro de eliminar esta área? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -72,6 +73,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                
+                <!-- Controles de paginación -->
+                {{ render_pagination(pagination) }}
+                
             </div>
         {% else %}
             <div class="alert alert-info">
@@ -80,4 +85,44 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function confirmarEliminacion(url, mensaje) {
+        Swal.fire({
+            title: 'Confirmar eliminación',
+            text: mensaje,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Para el formulario de creación
+        const formCrear = document.querySelector('form[action="{{ url_for("areas.crear") }}"]');
+        if (formCrear) {
+            formCrear.addEventListener('submit', function(event) {
+                Swal.fire({
+                    title: 'Creando área...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            });
+        }
+    });
+</script>
 {% endblock %}

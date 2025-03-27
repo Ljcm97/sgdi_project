@@ -60,7 +60,7 @@
                                                 <i class="fas fa-check"></i>
                                             {% endif %}
                                         </a>
-                                        <a href="{{ url_for('personas.eliminar', id=persona.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta persona? Esta acción no se puede deshacer.')">
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('personas.eliminar', id=persona.id) }}', '¿Estás seguro de eliminar esta persona? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -77,4 +77,12 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    function confirmarEliminacion(url, mensaje) {
+        if (confirm(mensaje)) {
+            window.location.href = url;
+        }
+    }
+</script>
 {% endblock %}
