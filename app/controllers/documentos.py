@@ -144,6 +144,11 @@ def index():
 @permission_required('Crear documento')
 def procesar():
     """Vista para procesar el formulario de registro sin cambiar de página"""
+    # Verificar explícitamente si el usuario tiene el rol adecuado
+    if current_user.rol.nombre != 'Superadministrador' and current_user.rol.nombre != 'Recepción':
+        flash('No tienes permiso para registrar documentos.', 'danger')
+        return redirect(url_for('documentos.index'))
+    
     form = DocumentoForm()
     buscar_form = BuscarDocumentoForm()
     
@@ -151,9 +156,12 @@ def procesar():
         # Obtener el estado inicial (Recibido)
         estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
         
-        # Crear el documento
+        # La fecha de recepción del formulario
+        fecha_recepcion = form.fecha_recepcion.data
+        
+        # Crear el documento usando la misma fecha tanto para recepción como para creado_en
         documento = Documento.crear_documento(
-            fecha_recepcion=form.fecha_recepcion.data,
+            fecha_recepcion=fecha_recepcion,
             transportadora_id=form.transportadora_id.data,
             numero_guia=form.numero_guia.data,
             remitente=form.remitente.data,
@@ -164,7 +172,8 @@ def procesar():
             persona_destino_id=form.persona_destino_id.data,
             estado_actual_id=estado_recibido.id,
             tipo=form.tipo.data,
-            registrado_por_id=current_user.id
+            registrado_por_id=current_user.id,
+            creado_en=fecha_recepcion  # ¡Establecer explícitamente la fecha de creación!
         )
         
         # Crear el movimiento inicial
@@ -229,7 +238,7 @@ def procesar():
                           form=form, 
                           buscar_form=buscar_form,
                           documentos=documentos,
-                          pagination=pagination,  # Añadir la variable pagination aquí
+                          pagination=pagination,
                           mostrar_busqueda=False,
                           mostrar_tabla=True)
 
@@ -271,7 +280,7 @@ def mostrar_busqueda():
                          form=form, 
                          buscar_form=buscar_form,
                          documentos=documentos,
-                         pagination=pagination,  # Añadir la variable pagination aquí
+                         pagination=pagination,
                          mostrar_busqueda=True,
                          mostrar_tabla=True)
 
@@ -280,6 +289,11 @@ def mostrar_busqueda():
 @permission_required('Crear documento')
 def registrar():
     """Vista para registrar un nuevo documento"""
+    # Verificar explícitamente si el usuario tiene el rol adecuado
+    if current_user.rol.nombre != 'Superadministrador' and current_user.rol.nombre != 'Recepción':
+        flash('No tienes permiso para registrar documentos.', 'danger')
+        return redirect(url_for('documentos.index'))
+    
     form = DocumentoForm()
     
     # Establecer fecha actual por defecto
@@ -290,9 +304,12 @@ def registrar():
         # Obtener el estado inicial (Recibido)
         estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
         
+        # La fecha de recepción del formulario
+        fecha_recepcion = form.fecha_recepcion.data
+        
         # Crear el documento
         documento = Documento.crear_documento(
-            fecha_recepcion=form.fecha_recepcion.data,
+            fecha_recepcion=fecha_recepcion,
             transportadora_id=form.transportadora_id.data,
             numero_guia=form.numero_guia.data,
             remitente=form.remitente.data,
@@ -303,7 +320,8 @@ def registrar():
             persona_destino_id=form.persona_destino_id.data,
             estado_actual_id=estado_recibido.id,
             tipo=form.tipo.data,
-            registrado_por_id=current_user.id
+            registrado_por_id=current_user.id,
+            creado_en=fecha_recepcion  
         )
         
         # Crear el movimiento inicial
@@ -362,7 +380,6 @@ def detalle(id):
     return render_template('documentos/detalle.html', 
                           documento=documento, 
                           movimientos=movimientos)
-
 
 @documentos_bp.route('/transferir/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -448,7 +465,6 @@ def aceptar(id):
     flash('Documento aceptado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
 
-
 @documentos_bp.route('/rechazar/<int:id>')
 @login_required
 @document_access_required
@@ -529,7 +545,6 @@ def archivar(id):
     
     flash('Documento archivado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
-
 
 @documentos_bp.route('/buscar', methods=['GET', 'POST'])
 @login_required
@@ -690,3 +705,4 @@ def preparar_datos_exportacion_documentos(documentos):
         })
     
     return {'encabezados': encabezados, 'datos': datos}
+

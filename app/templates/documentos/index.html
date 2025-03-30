@@ -63,7 +63,8 @@
     </div>
     <div class="card-body">
 
-        <!-- Registro de Documentos (Siempre visible en la parte superior) -->
+        {% if current_user.rol.nombre == 'Superadministrador' or current_user.rol.nombre == 'Recepción' %}
+        <!-- Registro de Documentos (Solo visible para Recepción y Superadministrador) -->
         <div class="accordion-item">
             <h2 class="accordion-header" id="registroHeading">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#registroCollapse" aria-expanded="true" aria-controls="registroCollapse">
@@ -243,9 +244,10 @@
                         </button>
                     </div>
                 </form>
+            </div>
         </div>
     </div>
-</div>
+    {% endif %}
 
         <!-- Acordeón para Filtros y Tabla de Documentos -->
         <div class="accordion" id="documentosAccordion">

@@ -41,6 +41,10 @@ class Documento(db.Model, CRUDMixin):
         if 'radicado' not in kwargs:
             kwargs['radicado'] = generate_radicado()
         
+        # Asegurarnos de que la fecha de creación coincida con la fecha de recepción
+        if 'fecha_recepcion' in kwargs and 'creado_en' not in kwargs:
+            kwargs['creado_en'] = kwargs['fecha_recepcion']
+        
         return cls.create(**kwargs)
     
     def transferir(self, usuario_origen, area_destino, persona_destino, estado_nuevo, observaciones=None):
