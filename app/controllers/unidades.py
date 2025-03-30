@@ -24,10 +24,22 @@ unidades_bp = Blueprint('unidades', __name__, url_prefix='/unidades')
 @admin_required
 def index():
     """Vista para listar todas las unidades"""
-    # Obtener unidades ordenadas alfabéticamente por nombre
-    unidades = Unidad.query.order_by(Unidad.nombre).all()
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = Unidad.query.order_by(Unidad.nombre)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'unidades.index')
+    unidades = pagination.items
+    
     form = UnidadForm()
-    return render_template('admin/unidades/index.html', unidades=unidades, form=form)
+    return render_template('admin/unidades/index.html', 
+                          unidades=unidades, 
+                          pagination=pagination,
+                          form=form)
 
 @unidades_bp.route('/crear', methods=['POST'])
 @login_required

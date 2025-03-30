@@ -24,10 +24,22 @@ transportadoras_bp = Blueprint('transportadoras', __name__, url_prefix='/transpo
 @admin_required
 def index():
     """Vista para listar todas las transportadoras"""
-    # Obtener transportadoras ordenadas alfabéticamente por nombre
-    transportadoras = Transportadora.query.order_by(Transportadora.nombre).all()
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = Transportadora.query.order_by(Transportadora.nombre)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'transportadoras.index')
+    transportadoras = pagination.items
+    
     form = TransportadoraForm()
-    return render_template('admin/transportadoras/index.html', transportadoras=transportadoras, form=form)
+    return render_template('admin/transportadoras/index.html', 
+                          transportadoras=transportadoras, 
+                          pagination=pagination,
+                          form=form)
 
 @transportadoras_bp.route('/crear', methods=['POST'])
 @login_required

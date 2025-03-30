@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% from "macros/pagination.html" import render_pagination %}
+
 {% block title %}Gestión de Transportadoras - SGDI{% endblock %}
 
 {% block content %}
@@ -79,6 +81,10 @@
             </div>
         {% endif %}
     </div>
+
+<!-- Controles de paginación -->
+{{ render_pagination(pagination) }}
+
 </div>
 
 <!-- Script para confirmar eliminación -->

@@ -19,10 +19,21 @@ personas_bp = Blueprint('personas', __name__, url_prefix='/personas')
 @login_required
 @admin_required
 def index():
-    """Vista para listar todas las personas"""
-    # Ordenar alfabéticamente por nombre
-    personas = Persona.query.order_by(Persona.nombres_apellidos).all()
-    return render_template('admin/personas/index.html', personas=personas)
+    """Vista para listar todas las personas con paginación"""
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = Persona.query.order_by(Persona.nombres_apellidos)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'personas.index')
+    personas = pagination.items
+    
+    return render_template('admin/personas/index.html', 
+                          personas=personas, 
+                          pagination=pagination)
 
 @personas_bp.route('/crear', methods=['GET', 'POST'])
 @login_required

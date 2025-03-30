@@ -17,9 +17,20 @@ usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/usuarios')
 @admin_required
 def index():
     """Vista para listar todos los usuarios"""
-    # Obtener usuarios ordenados alfabéticamente por nombre de usuario
-    usuarios = Usuario.query.order_by(Usuario.username).all()
-    return render_template('admin/usuarios/index.html', usuarios=usuarios)
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = Usuario.query.order_by(Usuario.username)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'usuarios.index')
+    usuarios = pagination.items
+    
+    return render_template('admin/usuarios/index.html', 
+                          usuarios=usuarios, 
+                          pagination=pagination)
 
 @usuarios_bp.route('/crear', methods=['GET', 'POST'])
 @login_required
@@ -172,7 +183,7 @@ def cambiar_password(id):
     from flask_wtf import FlaskForm
     
     class CambiarPasswordForm(FlaskForm):
-        password = PasswordField('Nueva contraseña', validators=[
+        password = PasswordField('Nueva contraseña', validators=[ 
             DataRequired(message='La nueva contraseña es obligatoria'),
             Length(min=6, message='La contraseña debe tener al menos 6 caracteres')
         ])

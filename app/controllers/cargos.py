@@ -40,6 +40,7 @@ def index():
                           cargos=cargos, 
                           pagination=pagination,
                           form=form)
+
 @cargos_bp.route('/crear', methods=['POST'])
 @login_required
 @admin_required

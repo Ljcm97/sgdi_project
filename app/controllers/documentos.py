@@ -34,7 +34,11 @@ def index():
     buscar_form = BuscarDocumentoForm()
     
     # Verificar si hay parámetros de búsqueda
-    is_search = any(key for key in request.args.keys() if key != 'page' and request.args.get(key))
+    is_search = any(key for key in request.args.keys() if key != 'page' and key != 'per_page' and request.args.get(key))
+    
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
     
     # Si hay parámetros de búsqueda, realizar búsqueda
     if is_search:
@@ -93,7 +97,11 @@ def index():
             )
         
         # Ordenar por fecha de creación (más recientes primero)
-        documentos = query.order_by(Documento.creado_en.desc()).all()
+        query = query.order_by(Documento.creado_en.desc())
+        
+        # Paginar los resultados
+        pagination = Pagination(query, page, per_page, 'documentos.index')
+        documentos = pagination.items
         
         # Pasar los parámetros de búsqueda al formulario para mantenerlos en la interfaz
         for key, value in request.args.items():
@@ -107,21 +115,26 @@ def index():
     else:
         # Si no hay búsqueda, obtener documentos según el rol del usuario
         if current_user.rol.nombre == 'Superadministrador':
-            documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+            query = Documento.query.order_by(Documento.creado_en.desc())
         elif current_user.rol.nombre == 'Recepción':
-            documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+            query = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc())
         else:
-            documentos = Documento.query.filter(
+            query = Documento.query.filter(
                 or_(
                     Documento.area_destino_id == current_user.persona.area_id,
                     Documento.persona_destino_id == current_user.persona_id
                 )
-            ).order_by(Documento.creado_en.desc()).limit(100).all()
+            ).order_by(Documento.creado_en.desc())
+        
+        # Paginar los resultados
+        pagination = Pagination(query, page, per_page, 'documentos.index')
+        documentos = pagination.items
     
     return render_template('documentos/index.html', 
                           form=form,
                           buscar_form=buscar_form, 
                           documentos=documentos,
+                          pagination=pagination,
                           mostrar_busqueda=False,
                           mostrar_tabla=True,
                           is_search=is_search)
@@ -191,23 +204,32 @@ def procesar():
     if form.errors:
         flash_errors(form)
     
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
     # Obtener documentos nuevamente para mostrar en la tabla
     if current_user.rol.nombre == 'Superadministrador':
-        documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+        query = Documento.query.order_by(Documento.creado_en.desc())
     elif current_user.rol.nombre == 'Recepción':
-        documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+        query = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc())
     else:
-        documentos = Documento.query.filter(
+        query = Documento.query.filter(
             or_(
                 Documento.area_destino_id == current_user.persona.area_id,
                 Documento.persona_destino_id == current_user.persona_id
             )
-        ).order_by(Documento.creado_en.desc()).limit(100).all()
+        ).order_by(Documento.creado_en.desc())
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'documentos.index')
+    documentos = pagination.items
     
     return render_template('documentos/index.html', 
                           form=form, 
                           buscar_form=buscar_form,
                           documentos=documentos,
+                          pagination=pagination,  # Añadir la variable pagination aquí
                           mostrar_busqueda=False,
                           mostrar_tabla=True)
 
@@ -224,23 +246,32 @@ def mostrar_busqueda():
     # Inicializar el formulario de búsqueda
     buscar_form = BuscarDocumentoForm()
     
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
     # Obtener documentos según el rol del usuario
     if current_user.rol.nombre == 'Superadministrador':
-        documentos = Documento.query.order_by(Documento.creado_en.desc()).limit(100).all()
+        query = Documento.query.order_by(Documento.creado_en.desc())
     elif current_user.rol.nombre == 'Recepción':
-        documentos = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc()).limit(100).all()
+        query = Documento.query.filter_by(registrado_por_id=current_user.id).order_by(Documento.creado_en.desc())
     else:
-        documentos = Documento.query.filter(
+        query = Documento.query.filter(
             or_(
                 Documento.area_destino_id == current_user.persona.area_id,
                 Documento.persona_destino_id == current_user.persona_id
             )
-        ).order_by(Documento.creado_en.desc()).limit(100).all()
+        ).order_by(Documento.creado_en.desc())
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'documentos.index')
+    documentos = pagination.items
     
     return render_template('documentos/index.html', 
                          form=form, 
                          buscar_form=buscar_form,
                          documentos=documentos,
+                         pagination=pagination,  # Añadir la variable pagination aquí
                          mostrar_busqueda=True,
                          mostrar_tabla=True)
 

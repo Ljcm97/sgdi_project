@@ -24,10 +24,22 @@ zonas_economicas_bp = Blueprint('zonas_economicas', __name__, url_prefix='/zonas
 @admin_required
 def index():
     """Vista para listar todas las zonas económicas"""
-    # Obtener zonas ordenadas alfabéticamente por nombre
-    zonas = ZonaEconomica.query.order_by(ZonaEconomica.nombre).all()
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Crear la consulta base
+    query = ZonaEconomica.query.order_by(ZonaEconomica.nombre)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'zonas_economicas.index')
+    zonas = pagination.items
+    
     form = ZonaEconomicaForm()
-    return render_template('admin/zonas_economicas/index.html', zonas=zonas, form=form)
+    return render_template('admin/zonas_economicas/index.html', 
+                          zonas=zonas, 
+                          pagination=pagination,
+                          form=form)
 
 @zonas_economicas_bp.route('/crear', methods=['POST'])
 @login_required
