@@ -455,12 +455,13 @@ def aceptar(id):
     # Notificar a recepción que se aceptó el documento
     usuario_recepcion = documento.registrado_por
     
-    crear_notificacion(
-        usuario_id=usuario_recepcion.id,
-        titulo=f'Documento aceptado - {documento.radicado}',
-        mensaje=f'El documento ha sido aceptado por {current_user.persona.nombre_completo}.',
-        documento_id=documento.id
-    )
+    if usuario_recepcion:
+        crear_notificacion(
+            usuario_id=usuario_recepcion.id,
+            titulo=f'Documento aceptado - {documento.radicado}',
+            mensaje=f'El documento ha sido aceptado por {current_user.persona.nombre_completo}.',
+            documento_id=documento.id
+        )
     
     flash('Documento aceptado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
@@ -516,7 +517,6 @@ def rechazar(id):
     flash('Documento rechazado exitosamente.', 'success')
     # Redirigir al dashboard en lugar del detalle del documento
     return redirect(url_for('dashboard.index'))
-
 
 @documentos_bp.route('/finalizar/<int:id>')
 @login_required
@@ -605,7 +605,6 @@ def buscar():
     return render_template('documentos/buscar.html', 
                           form=form, 
                           documentos=documentos)
-
 
 @documentos_bp.route('/get_personas/<int:area_id>')
 @login_required
@@ -706,4 +705,3 @@ def preparar_datos_exportacion_documentos(documentos):
         })
     
     return {'encabezados': encabezados, 'datos': datos}
-
