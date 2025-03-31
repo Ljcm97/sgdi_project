@@ -352,9 +352,7 @@ function inicializarTendenciaChart(container) {
     });
 }
 
-/**
- * Configurar los filtros de reportes
- */
+
 function configurarFiltros() {
     // Formulario de filtros
     const formFiltros = document.getElementById('filtros-form');
@@ -371,6 +369,13 @@ function configurarFiltros() {
                 inputs.forEach(input => {
                     if (input.type === 'checkbox') {
                         input.checked = false;
+                    } else if (input.type === 'radio') {
+                        // Para radio buttons, seleccionar el primero o el valor por defecto
+                        if (input.value === '' || input.value === '0' || input.value === 'todos') {
+                            input.checked = true;
+                        } else {
+                            input.checked = false;
+                        }
                     } else if (input.type !== 'submit' && input.type !== 'button') {
                         input.value = '';
                     }

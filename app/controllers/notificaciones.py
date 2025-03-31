@@ -82,7 +82,7 @@ def recientes():
             'id': notif.id,
             'titulo': notif.titulo,
             'mensaje': notif.mensaje,
-            'creado_en': notif.creado_en.strftime('%Y-%m-%d %H:%M'),
+            'creado_en': notif.creado_en.strftime('%d/%m/%Y %H:%M'),
             'documento_id': notif.documento_id
         }
         
@@ -95,3 +95,4 @@ def recientes():
         result.append(item)
     
     return jsonify(result)
+

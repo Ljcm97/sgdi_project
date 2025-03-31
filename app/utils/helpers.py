@@ -22,6 +22,7 @@ def generate_radicado():
     
     return f"{date_str}-{random_num}"
 
+
 def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
     """
     Crea una nueva notificación para un usuario.
@@ -35,16 +36,19 @@ def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
     Returns:
         Notificacion: La notificación creada.
     """
+    # Usar datetime.now() para asegurar que tiene la hora correcta
     notificacion = Notificacion(
         usuario_id=usuario_id,
         titulo=titulo,
         mensaje=mensaje,
-        documento_id=documento_id
+        documento_id=documento_id,
+        creado_en=datetime.datetime.now()  # Asegurar que se usa la hora actual
     )
     db.session.add(notificacion)
     db.session.commit()
     
     return notificacion
+
 
 def flash_errors(form):
     """
