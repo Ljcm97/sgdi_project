@@ -21,8 +21,6 @@ def login():
     
     if form.validate_on_submit():
         # Modificación: Buscar usuario insensible a mayúsculas/minúsculas
-        # Usamos func.lower() para convertir a minúsculas tanto el username en la base de datos
-        # como el username proporcionado en el formulario
         usuario = Usuario.query.filter(
             func.lower(Usuario.username) == func.lower(form.username.data)
         ).first()
@@ -68,10 +66,13 @@ def cambiar_password():
     if form.validate_on_submit():
         # Verificar la contraseña actual
         if current_user.verificar_password(form.current_password.data):
-            # Actualizar la contraseña
-            current_user.actualizar_password(form.new_password.data)
-            flash('Tu contraseña ha sido actualizada.', 'success')
-            return redirect(url_for('dashboard.index'))
+            try:
+                # Actualizar la contraseña
+                current_user.actualizar_password(form.new_password.data)
+                flash('Tu contraseña ha sido actualizada.', 'success')
+                return redirect(url_for('dashboard.index'))
+            except ValueError as e:
+                flash(str(e), 'danger')
         else:
             flash('La contraseña actual es incorrecta.', 'danger')
     
@@ -99,7 +100,7 @@ def olvido_password():
             session[f'reset_token_{token}'] = usuario.id
             session.permanent = True  # El token dura lo que dure la sesión
             
-            # Enviar email con token (simulado)
+            # Enviar email con token
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             enviar_email_reset_password(usuario.persona.email, reset_url)
             
@@ -133,13 +134,16 @@ def reset_password(token):
     form = ResetPasswordForm()
     
     if form.validate_on_submit():
-        # Actualizar contraseña
-        usuario.actualizar_password(form.password.data)
-        
-        # Eliminar token
-        session.pop(f'reset_token_{token}', None)
-        
-        flash('Tu contraseña ha sido restablecida. Ahora puedes iniciar sesión.', 'success')
-        return redirect(url_for('auth.login'))
+        try:
+            # Actualizar contraseña
+            usuario.actualizar_password(form.password.data)
+            
+            # Eliminar token
+            session.pop(f'reset_token_{token}', None)
+            
+            flash('Tu contraseña ha sido restablecida. Ahora puedes iniciar sesión.', 'success')
+            return redirect(url_for('auth.login'))
+        except ValueError as e:
+            flash(str(e), 'danger')
     
     return render_template('auth/reset_password.html', form=form)

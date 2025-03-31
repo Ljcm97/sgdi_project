@@ -17,20 +17,16 @@ usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/usuarios')
 @admin_required
 def index():
     """Vista para listar todos los usuarios"""
-    # Obtener parámetros de paginación
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    
-    # Crear la consulta base
+
     query = Usuario.query.order_by(Usuario.username)
-    
-    # Paginar los resultados
     pagination = Pagination(query, page, per_page, 'usuarios.index')
     usuarios = pagination.items
-    
+
     return render_template('admin/usuarios/index.html', 
-                          usuarios=usuarios, 
-                          pagination=pagination)
+                           usuarios=usuarios, 
+                           pagination=pagination)
 
 @usuarios_bp.route('/crear', methods=['GET', 'POST'])
 @login_required
@@ -40,25 +36,21 @@ def crear():
     form = UsuarioForm()
     
     if form.validate_on_submit():
-        # Normalizar nombre de usuario (convertir siempre a minúsculas)
         username_normalizado = form.username.data.strip().lower()
-        
-        # Verificar si ya existe un usuario con el mismo username (insensible a mayúsculas/minúsculas)
+
         existente = Usuario.query.filter(func.lower(Usuario.username) == username_normalizado).first()
         if existente:
             flash('Ya existe un usuario con este nombre de usuario.', 'danger')
             return redirect(url_for('usuarios.crear'))
-        
-        # Verificar si la persona ya tiene un usuario asociado
+
         persona = Persona.query.get(form.persona_id.data)
         if hasattr(persona, 'usuario') and persona.usuario:
             flash('Esta persona ya tiene un usuario asociado.', 'danger')
             return redirect(url_for('usuarios.crear'))
-        
-        # Crear el usuario
+
         if form.password.data:
             usuario = Usuario.crear_usuario(
-                username=username_normalizado,  # Siempre guardamos en minúsculas
+                username=username_normalizado,
                 password=form.password.data,
                 persona_id=form.persona_id.data,
                 rol_id=form.rol_id.data
@@ -70,8 +62,7 @@ def crear():
             return redirect(url_for('usuarios.index'))
         else:
             form.password.errors.append('La contraseña es obligatoria para crear un usuario.')
-    
-    # Si hay errores de validación, mostrarlos
+
     if form.errors:
         flash_errors(form)
     
@@ -84,15 +75,12 @@ def editar(id):
     """Vista para editar un usuario existente"""
     usuario = Usuario.query.get_or_404(id)
     form = UsuarioForm(obj=usuario)
-    
-    # La contraseña no es obligatoria para editar
+
     form.password.validators = []
-    
+
     if form.validate_on_submit():
-        # Normalizar nombre de usuario (convertir siempre a minúsculas)
         username_normalizado = form.username.data.strip().lower()
-        
-        # Verificar si ya existe otro usuario con el mismo username (insensible a mayúsculas/minúsculas)
+
         existente = Usuario.query.filter(
             func.lower(Usuario.username) == username_normalizado, 
             Usuario.id != id
@@ -100,23 +88,20 @@ def editar(id):
         if existente:
             flash('Ya existe otro usuario con este nombre de usuario.', 'danger')
             return redirect(url_for('usuarios.editar', id=id))
-        
-        # Actualizar los datos básicos del usuario
-        usuario.username = username_normalizado  # Siempre guardamos en minúsculas
+
+        usuario.username = username_normalizado
         usuario.persona_id = form.persona_id.data
         usuario.rol_id = form.rol_id.data
         usuario.activo = form.activo.data
-        
-        # Actualizar la contraseña solo si se proporciona una nueva
+
         if form.password.data:
             usuario.actualizar_password(form.password.data)
-        
+
         db.session.commit()
         
         flash('Usuario actualizado exitosamente.', 'success')
         return redirect(url_for('usuarios.index'))
-    
-    # Si hay errores de validación, mostrarlos
+
     if form.errors:
         flash_errors(form)
     
@@ -128,21 +113,18 @@ def editar(id):
 def eliminar(id):
     """Vista para eliminar un usuario"""
     usuario = Usuario.query.get_or_404(id)
-    
-    # No permitir eliminar al propio usuario actual
+
     if usuario.id == current_user.id:
         flash('No puedes eliminar tu propio usuario.', 'danger')
         return redirect(url_for('usuarios.index'))
-    
-    # No permitir eliminar al superadministrador del sistema
+
     if usuario.rol.nombre == 'Superadministrador' and Usuario.query.filter_by(rol_id=usuario.rol_id).count() <= 1:
         flash('No se puede eliminar el único usuario superadministrador del sistema.', 'danger')
         return redirect(url_for('usuarios.index'))
-    
-    # Eliminar el usuario
+
     db.session.delete(usuario)
     db.session.commit()
-    
+
     flash('Usuario eliminado exitosamente.', 'success')
     return redirect(url_for('usuarios.index'))
 
@@ -152,21 +134,18 @@ def eliminar(id):
 def toggle_estado(id):
     """Vista para activar/desactivar un usuario"""
     usuario = Usuario.query.get_or_404(id)
-    
-    # No permitir desactivar al propio usuario actual
+
     if usuario.id == current_user.id:
         flash('No puedes desactivar tu propio usuario.', 'danger')
         return redirect(url_for('usuarios.index'))
-    
-    # No permitir desactivar al superadministrador del sistema
+
     if usuario.rol.nombre == 'Superadministrador' and Usuario.query.filter_by(rol_id=usuario.rol_id, activo=True).count() <= 1 and usuario.activo:
         flash('No se puede desactivar el único usuario superadministrador activo del sistema.', 'danger')
         return redirect(url_for('usuarios.index'))
-    
-    # Cambiar el estado
+
     usuario.activo = not usuario.activo
     db.session.commit()
-    
+
     estado = "activado" if usuario.activo else "desactivado"
     flash(f'Usuario {estado} exitosamente.', 'success')
     return redirect(url_for('usuarios.index'))
@@ -177,31 +156,35 @@ def toggle_estado(id):
 def cambiar_password(id):
     """Vista para cambiar la contraseña de un usuario"""
     usuario = Usuario.query.get_or_404(id)
-    
+
     from wtforms import PasswordField, SubmitField
     from wtforms.validators import DataRequired, Length, EqualTo
     from flask_wtf import FlaskForm
+    from app.utils.password_validators import validate_password_complexity
     
     class CambiarPasswordForm(FlaskForm):
         password = PasswordField('Nueva contraseña', validators=[ 
             DataRequired(message='La nueva contraseña es obligatoria'),
-            Length(min=6, message='La contraseña debe tener al menos 6 caracteres')
+            Length(min=8, message='La contraseña debe tener al menos 8 caracteres'),
+            validate_password_complexity
         ])
         confirm_password = PasswordField('Confirmar contraseña', validators=[ 
             DataRequired(message='Debe confirmar la contraseña'),
             EqualTo('password', message='Las contraseñas no coinciden')
         ])
         submit = SubmitField('Cambiar Contraseña')
-    
+
     form = CambiarPasswordForm()
-    
+
     if form.validate_on_submit():
-        usuario.actualizar_password(form.password.data)
-        flash('Contraseña actualizada exitosamente.', 'success')
-        return redirect(url_for('usuarios.index'))
-    
-    # Si hay errores de validación, mostrarlos
+        try:
+            usuario.actualizar_password(form.password.data)
+            flash('Contraseña actualizada exitosamente.', 'success')
+            return redirect(url_for('usuarios.index'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+
     if form.errors:
         flash_errors(form)
-    
+
     return render_template('admin/usuarios/cambiar_password.html', form=form, usuario=usuario)

@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
+from app.utils.password_validators import validate_password_complexity
 
 class LoginForm(FlaskForm):
     """Formulario de inicio de sesión"""
@@ -28,7 +29,8 @@ class ChangePasswordForm(FlaskForm):
     
     new_password = PasswordField('Nueva contraseña', validators=[
         DataRequired(message='La nueva contraseña es obligatoria'),
-        Length(min=6, message='La contraseña debe tener al menos 6 caracteres')
+        Length(min=8, message='La contraseña debe tener al menos 8 caracteres'),
+        validate_password_complexity
     ])
     
     confirm_password = PasswordField('Confirmar contraseña', validators=[
@@ -66,7 +68,8 @@ class ResetPasswordForm(FlaskForm):
     
     password = PasswordField('Nueva contraseña', validators=[
         DataRequired(message='La contraseña es obligatoria'),
-        Length(min=6, message='La contraseña debe tener al menos 6 caracteres')
+        Length(min=8, message='La contraseña debe tener al menos 8 caracteres'),
+        validate_password_complexity
     ])
     
     confirm_password = PasswordField('Confirmar contraseña', validators=[

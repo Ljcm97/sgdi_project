@@ -514,7 +514,8 @@ def rechazar(id):
         )
     
     flash('Documento rechazado exitosamente.', 'success')
-    return redirect(url_for('documentos.detalle', id=documento.id))
+    # Redirigir al dashboard en lugar del detalle del documento
+    return redirect(url_for('dashboard.index'))
 
 
 @documentos_bp.route('/finalizar/<int:id>')
