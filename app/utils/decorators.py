@@ -73,7 +73,12 @@ def has_document_access(document):
     # El usuario tiene acceso si está en la misma área del documento
     if document.area_destino_id == current_user.persona.area_id:
         # Verificar si tiene permiso para ver documentos del área
-        return check_permission('ver_documento')
+        if check_permission('ver_documento') or check_permission('Ver documento'):
+            return True
+    
+    # El usuario tiene acceso si tiene permiso para transferir documentos
+    if check_permission('transferir_documento') or check_permission('Transferir documento'):
+        return True
     
     return False
 
@@ -91,18 +96,10 @@ def document_access_required(f):
         from app.models.documento import Documento
         documento = Documento.query.get_or_404(document_id)
         
-        # Superadministrador siempre tiene acceso
-        if current_user.rol.nombre == 'Superadministrador':
+        # Verificar acceso con la función has_document_access
+        if has_document_access(documento):
             return f(*args, **kwargs)
-            
-        # Recepción tiene acceso a todos los documentos que registró
-        if current_user.rol.nombre == 'Recepción' and documento.registrado_por_id == current_user.id:
-            return f(*args, **kwargs)
-            
-        # Verificar acceso para usuarios normales
-        if documento.area_destino_id == current_user.persona.area_id or documento.persona_destino_id == current_user.persona_id:
-            return f(*args, **kwargs)
-            
+        
         # Si no tiene acceso, redirigir al dashboard con mensaje
         flash('No tienes permiso para acceder a este documento.', 'danger')
         return redirect(url_for('dashboard.index'))
