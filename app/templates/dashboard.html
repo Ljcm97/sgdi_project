@@ -18,16 +18,16 @@
                         <h5 class="card-title text-warning">
                             <i class="fas fa-clock me-2"></i> Documentos Pendientes
                         </h5>
-                        <p class="display-4">{{ documentos_pendientes }}</p>
+                        <p class="display-4" id="contador-pendientes">{{ documentos_pendientes }}</p>
                     </div>
                     <div class="card-footer bg-light text-center">
-                        <a href="{{ url_for('documentos.buscar', pendientes=1) }}" class="btn btn-outline-warning btn-sm">
+                        <a href="{{ url_for('documentos.buscar', estado_id=estado_pendiente_id) }}" class="btn btn-outline-warning btn-sm">
                             <i class="fas fa-search me-1"></i> Ver Pendientes
                         </a>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Documentos Finalizados -->
             <div class="col-md-6 mb-4">
                 <div class="card h-100 border-success">
@@ -35,10 +35,10 @@
                         <h5 class="card-title text-success">
                             <i class="fas fa-check-circle me-2"></i> Documentos Finalizados
                         </h5>
-                        <p class="display-4">{{ documentos_finalizados }}</p>
+                        <p class="display-4" id="contador-finalizados">{{ documentos_finalizados }}</p>
                     </div>
                     <div class="card-footer bg-light text-center">
-                        <a href="{{ url_for('documentos.buscar', estado_id=estado_finalizado.id if estado_finalizado else '') }}" class="btn btn-outline-success btn-sm">
+                        <a href="{{ url_for('documentos.buscar', estado_id=estado_finalizado_id) }}" class="btn btn-outline-success btn-sm">
                             <i class="fas fa-search me-1"></i> Ver Finalizados
                         </a>
                     </div>
@@ -103,4 +103,31 @@
         </a>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // Función para actualizar los contadores
+    function actualizarContadores() {
+        fetch('{{ url_for("dashboard.contador_documentos") }}')
+            .then(response => response.json())
+            .then(data => {
+                // Actualizar los contadores en la página
+                document.getElementById('contador-pendientes').textContent = data.documentos_pendientes;
+                document.getElementById('contador-finalizados').textContent = data.documentos_finalizados;
+            })
+            .catch(error => console.error('Error al actualizar contadores:', error));
+    }
+
+    // Actualizar los contadores cada 30 segundos
+    setInterval(actualizarContadores, 30000);
+    
+    // También actualizar cuando la página se vuelve visible
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            actualizarContadores();
+        }
+    });
+</script>
 {% endblock %}

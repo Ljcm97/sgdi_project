@@ -113,14 +113,15 @@
 
     <div class="card-footer">
         <div class="d-flex justify-content-center">
-            <!-- Botones para documento en estado "Recibido" -->
+            <!-- Botones para documento en estado "Recibido" con actualización de contadores -->
             {% if documento.estado_actual.nombre == 'Recibido' %}
                 {% if documento.persona_destino_id == current_user.persona_id %}
                     <!-- Opciones para aceptar/rechazar si está asignado al usuario actual y está en estado recibido -->
-                    <a href="{{ url_for('documentos.aceptar', id=documento.id) }}" class="btn btn-success me-2">
+                    <a href="{{ url_for('documentos.aceptar', id=documento.id) }}" class="btn btn-success me-2" 
+                       onclick="try { window.opener && window.opener.actualizarContadoresDashboard && window.opener.actualizarContadoresDashboard(); } catch(e) { console.log('No se pudo actualizar dashboard en otra ventana'); }">
                         <i class="fas fa-check-circle"></i> Aceptar Documento
                     </a>
-                    <a href="javascript:void(0);" onclick="confirmarAccion('{{ url_for('documentos.rechazar', id=documento.id) }}', '¿Estás seguro de rechazar este documento?')" class="btn btn-danger me-2">
+                    <a href="javascript:void(0);" onclick="return actualizarDespuesDeAccion('{{ url_for('documentos.rechazar', id=documento.id) }}', '¿Estás seguro de rechazar este documento?')" class="btn btn-danger me-2">
                         <i class="fas fa-times-circle"></i> Rechazar Documento
                     </a>
                 {% endif %}
@@ -135,16 +136,14 @@
             
             <!-- Opción para finalizar (disponible si está en proceso) -->
             {% if documento.estado_actual.nombre == 'En proceso' and (check_permission('transferir_documento') or check_permission('Transferir documento')) %}
-                <a href="{{ url_for('documentos.finalizar', id=documento.id) }}" class="btn btn-info me-2"
-                   onclick="return confirm('¿Estás seguro de finalizar este documento?');">
+                <a href="javascript:void(0);" onclick="return actualizarDespuesDeAccion('{{ url_for('documentos.finalizar', id=documento.id) }}', '¿Estás seguro de finalizar este documento?')" class="btn btn-info me-2">
                     <i class="fas fa-check-double"></i> Finalizar
                 </a>
             {% endif %}
             
             <!-- Opción para archivar (disponible si está finalizado) -->
             {% if documento.estado_actual.nombre == 'Finalizado' and (check_permission('transferir_documento') or check_permission('Transferir documento')) %}
-                <a href="{{ url_for('documentos.archivar', id=documento.id) }}" class="btn btn-secondary me-2"
-                   onclick="return confirm('¿Estás seguro de archivar este documento?');">
+                <a href="javascript:void(0);" onclick="return actualizarDespuesDeAccion('{{ url_for('documentos.archivar', id=documento.id) }}', '¿Estás seguro de archivar este documento?')" class="btn btn-secondary me-2">
                     <i class="fas fa-archive"></i> Archivar
                 </a>
             {% endif %}
@@ -198,4 +197,33 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Script para manejar las acciones con actualización de contadores -->
+<script>
+    // Función para actualizar contadores después de acciones
+    function actualizarDespuesDeAccion(url, confirmMessage) {
+        if (confirm(confirmMessage)) {
+            fetch(url)
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        return response.text();
+                    }
+                })
+                .then(() => {
+                    // Intentar actualizar contadores del dashboard en caso de que esté abierto en otra pestaña
+                    try {
+                        window.opener && window.opener.actualizarContadoresDashboard && 
+                        window.opener.actualizarContadoresDashboard();
+                    } catch (e) {
+                        console.log('No se pudo actualizar dashboard en otra ventana');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            return false;
+        }
+        return false;
+    }
+</script>
 {% endblock %}

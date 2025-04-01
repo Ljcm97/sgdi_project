@@ -71,3 +71,33 @@ document.addEventListener('DOMContentLoaded', function() {
     setupAutoCloseAlerts();
     setupDynamicPersonaSelector();
 });
+
+// Función para actualizar los contadores del dashboard si están presentes en la página
+function actualizarContadoresDashboard() {
+    // Verificar si estamos en la página del dashboard
+    const contadorPendientes = document.getElementById('contador-pendientes');
+    const contadorFinalizados = document.getElementById('contador-finalizados');
+    
+    if (contadorPendientes && contadorFinalizados) {
+        fetch('/contador-documentos')
+            .then(response => response.json())
+            .then(data => {
+                contadorPendientes.textContent = data.documentos_pendientes;
+                contadorFinalizados.textContent = data.documentos_finalizados;
+            })
+            .catch(error => console.error('Error al actualizar contadores:', error));
+    }
+}
+
+// Agregar al DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    initTooltips();
+    setupConfirmations();
+    setupAutoCloseAlerts();
+    setupDynamicPersonaSelector();
+    
+    // Configurar actualización periódica de contadores si estamos en el dashboard
+    if (document.getElementById('contador-pendientes')) {
+        setInterval(actualizarContadoresDashboard, 30000); // Cada 30 segundos
+    }
+});

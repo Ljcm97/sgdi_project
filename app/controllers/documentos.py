@@ -427,7 +427,7 @@ def transferir(id):
                           documento=documento, 
                           form=form)
 
-@documentos_bp.route('/aceptar/<int:id>')
+@documentos_bp.route('/aceptar/<int:id>', methods=['GET', 'POST'])
 @login_required
 @document_access_required
 @permission_required('Aceptar documento')
@@ -437,6 +437,11 @@ def aceptar(id):
     
     # Verificar si el documento está asignado al usuario actual
     if documento.persona_destino_id != current_user.persona_id:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': False, 
+                'message': 'No puedes aceptar este documento porque no está asignado a ti.'
+            }), 403
         flash('No puedes aceptar este documento porque no está asignado a ti.', 'danger')
         return redirect(url_for('documentos.detalle', id=documento.id))
     
@@ -463,8 +468,17 @@ def aceptar(id):
             documento_id=documento.id
         )
     
+    # Responder según el tipo de solicitud
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'success': True,
+            'message': 'Documento aceptado exitosamente.',
+            'redirect': url_for('documentos.detalle', id=documento.id)
+        })
+    
     flash('Documento aceptado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
+
 
 @documentos_bp.route('/rechazar/<int:id>')
 @login_required
@@ -553,124 +567,107 @@ def archivar(id):
 def buscar():
     """Vista para buscar documentos"""
     form = BuscarDocumentoForm()
+    documentos = []
     
     # Obtener parámetros de paginación
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
-    # Procesar solicitudes GET (para enlaces directos con filtros)
-    is_search = request.args.get('buscar') or any(key for key in request.args.keys() 
-                                              if key != 'page' and key != 'per_page' 
-                                              and request.args.get(key))
+    # Manejar estado_id que podría ser una lista separada por comas
+    estado_id = request.args.get('estado_id')
+    estados_ids = []
     
-    if is_search or form.validate_on_submit():
+    if request.method == 'GET' and estado_id:
+        if ',' in estado_id:
+            form.estado_id.data = '0'  # Mostrar "Todos" en la interfaz
+            estados_ids = [int(id) for id in estado_id.split(',') if id.isdigit()]
+        elif estado_id.isdigit():
+            form.estado_id.data = estado_id
+
+    # Determinar si es una búsqueda
+    is_search = request.args.get('buscar') or any(
+        key for key in request.args.keys() if key not in ['page', 'per_page'] and request.args.get(key)
+    ) or form.validate_on_submit()
+
+    if is_search:
         # Construir la consulta base
         query = Documento.query
+
+        # Aplicar filtros
+        if form.radicado.data:
+            query = query.filter(Documento.radicado.like(f'%{form.radicado.data}%'))
+        elif request.args.get('radicado'):
+            query = query.filter(Documento.radicado.like(f'%{request.args.get("radicado")}%'))
         
-        # Aplicar filtros según el método
-        if request.method == 'POST':
-            # Usar datos del formulario POST
-            if form.radicado.data:
-                query = query.filter(Documento.radicado.like(f'%{form.radicado.data}%'))
-            
-            if form.fecha_desde.data:
-                query = query.filter(Documento.fecha_recepcion >= form.fecha_desde.data)
-            
-            if form.fecha_hasta.data:
-                # Incluir todo el día
-                fecha_hasta = datetime.combine(form.fecha_hasta.data, datetime.max.time())
+        if form.fecha_desde.data:
+            query = query.filter(Documento.fecha_recepcion >= form.fecha_desde.data)
+        elif request.args.get('fecha_desde'):
+            try:
+                fecha_desde = datetime.strptime(request.args.get('fecha_desde'), '%Y-%m-%d')
+                query = query.filter(Documento.fecha_recepcion >= fecha_desde)
+            except ValueError:
+                pass
+
+        if form.fecha_hasta.data:
+            fecha_hasta = datetime.combine(form.fecha_hasta.data, datetime.max.time())
+            query = query.filter(Documento.fecha_recepcion <= fecha_hasta)
+        elif request.args.get('fecha_hasta'):
+            try:
+                fecha_hasta = datetime.strptime(request.args.get('fecha_hasta'), '%Y-%m-%d')
+                fecha_hasta = datetime.combine(fecha_hasta.date(), datetime.max.time())
                 query = query.filter(Documento.fecha_recepcion <= fecha_hasta)
-            
-            if form.transportadora_id.data and int(form.transportadora_id.data) > 0:
-                query = query.filter_by(transportadora_id=form.transportadora_id.data)
-            
-            if form.tipo_documento_id.data and int(form.tipo_documento_id.data) > 0:
-                query = query.filter_by(tipo_documento_id=form.tipo_documento_id.data)
-            
-            if form.estado_id.data and int(form.estado_id.data) > 0:
-                query = query.filter_by(estado_actual_id=form.estado_id.data)
-            
-            if form.tipo.data:
-                query = query.filter_by(tipo=form.tipo.data)
-            
-            if form.remitente.data:
-                query = query.filter(Documento.remitente.like(f'%{form.remitente.data}%'))
-        else:
-            # Usar datos de la URL (GET)
-            if request.args.get('radicado'):
-                query = query.filter(Documento.radicado.like(f'%{request.args.get("radicado")}%'))
-            
-            if request.args.get('fecha_desde'):
-                try:
-                    fecha_desde = datetime.strptime(request.args.get('fecha_desde'), '%Y-%m-%d')
-                    query = query.filter(Documento.fecha_recepcion >= fecha_desde)
-                except ValueError:
-                    pass
-            
-            if request.args.get('fecha_hasta'):
-                try:
-                    fecha_hasta = datetime.strptime(request.args.get('fecha_hasta'), '%Y-%m-%d')
-                    # Incluir todo el día
-                    fecha_hasta = datetime.combine(fecha_hasta.date(), datetime.max.time())
-                    query = query.filter(Documento.fecha_recepcion <= fecha_hasta)
-                except ValueError:
-                    pass
-            
-            if request.args.get('transportadora_id') and int(request.args.get('transportadora_id')) > 0:
-                query = query.filter_by(transportadora_id=request.args.get('transportadora_id'))
-            
-            if request.args.get('tipo_documento_id') and int(request.args.get('tipo_documento_id')) > 0:
-                query = query.filter_by(tipo_documento_id=request.args.get('tipo_documento_id'))
-            
-            if request.args.get('estado_id') and int(request.args.get('estado_id')) > 0:
-                query = query.filter_by(estado_actual_id=request.args.get('estado_id'))
-            elif request.args.get('estado_id'):
-                # Si hay un estado_id que no es un número, intenta buscar por nombre
-                estado = EstadoDocumento.query.filter_by(nombre=request.args.get('estado_id')).first()
-                if estado:
-                    query = query.filter_by(estado_actual_id=estado.id)
-            
-            # Para manejar el filtro de pendientes (recibidos + en proceso)
-            if request.args.get('pendientes'):
-                # Obtener los estados "Recibido" y "En proceso"
-                estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
-                estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
-                
-                if estado_recibido and estado_en_proceso:
-                    # Filtrar por ambos estados
-                    query = query.filter(Documento.estado_actual_id.in_([estado_recibido.id, estado_en_proceso.id]))
-            
-            if request.args.get('tipo'):
-                query = query.filter_by(tipo=request.args.get('tipo'))
-            
-            if request.args.get('remitente'):
-                query = query.filter(Documento.remitente.like(f'%{request.args.get("remitente")}%'))
+            except ValueError:
+                pass
         
+        # Filtrar por estado_id múltiple o único
+        if estados_ids:
+            query = query.filter(Documento.estado_actual_id.in_(estados_ids))
+        elif form.estado_id.data and int(form.estado_id.data) > 0:
+            query = query.filter_by(estado_actual_id=form.estado_id.data)
+        elif request.args.get('estado_id') and request.args.get('estado_id') != '0':
+            query = query.filter_by(estado_actual_id=request.args.get('estado_id'))
+        
+        if form.transportadora_id.data and int(form.transportadora_id.data) > 0:
+            query = query.filter_by(transportadora_id=form.transportadora_id.data)
+        elif request.args.get('transportadora_id') and int(request.args.get('transportadora_id')) > 0:
+            query = query.filter_by(transportadora_id=request.args.get('transportadora_id'))
+
+        if form.tipo_documento_id.data and int(form.tipo_documento_id.data) > 0:
+            query = query.filter_by(tipo_documento_id=form.tipo_documento_id.data)
+        elif request.args.get('tipo_documento_id') and int(request.args.get('tipo_documento_id')) > 0:
+            query = query.filter_by(tipo_documento_id=request.args.get('tipo_documento_id'))
+
+        if form.tipo.data:
+            query = query.filter_by(tipo=form.tipo.data)
+        elif request.args.get('tipo'):
+            query = query.filter_by(tipo=request.args.get('tipo'))
+
+        if form.remitente.data:
+            query = query.filter(Documento.remitente.like(f'%{form.remitente.data}%'))
+        elif request.args.get('remitente'):
+            query = query.filter(Documento.remitente.like(f'%{request.args.get("remitente")}%'))
+
         # Filtrar según el rol del usuario
         if current_user.rol.nombre == 'Superadministrador':
-            # Superadministrador ve todos los documentos
-            pass
+            pass  # Ve todos los documentos
         elif current_user.rol.nombre == 'Recepción':
-            # Recepción ve los documentos que ha registrado
             query = query.filter_by(registrado_por_id=current_user.id)
         else:
-            # Usuario regular ve los documentos de su área o asignados a él
             query = query.filter(
                 or_(
                     Documento.area_destino_id == current_user.persona.area_id,
                     Documento.persona_destino_id == current_user.persona_id
                 )
             )
-        
+
         # Ordenar por fecha de creación (más recientes primero)
         query = query.order_by(Documento.creado_en.desc())
-        
+
         # Paginar los resultados
-        from app.utils.pagination import Pagination
         pagination = Pagination(query, page, per_page, 'documentos.buscar')
         documentos = pagination.items
-        
-        # Pasar los parámetros de búsqueda al formulario para mantenerlos en la interfaz
+
+        # Mantener valores en el formulario si es una búsqueda GET
         if request.method == 'GET' and is_search:
             for key, value in request.args.items():
                 if key in form._fields:
@@ -683,7 +680,7 @@ def buscar():
                                 field.data = value
                         except:
                             pass
-        
+
         return render_template('documentos/buscar.html', 
                               form=form, 
                               documentos=documentos,
