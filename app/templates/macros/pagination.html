@@ -6,13 +6,13 @@
                 {% if pagination.has_prev %}
                     <li class="page-item">
                         <a class="page-link" href="{{ pagination.get_url(pagination.page - 1) }}" aria-label="Anterior">
-                            <span aria-hidden="true">&laquo;</span>
+                            <span aria-hidden="true">« Anterior</span>
                         </a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
                         <a class="page-link" href="#" aria-label="Anterior">
-                            <span aria-hidden="true">&laquo;</span>
+                            <span aria-hidden="true">« Anterior</span>
                         </a>
                     </li>
                 {% endif %}
@@ -40,13 +40,13 @@
                 {% if pagination.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="{{ pagination.get_url(pagination.page + 1) }}" aria-label="Siguiente">
-                            <span aria-hidden="true">&raquo;</span>
+                            <span aria-hidden="true">Siguiente »</span>
                         </a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
                         <a class="page-link" href="#" aria-label="Siguiente">
-                            <span aria-hidden="true">&raquo;</span>
+                            <span aria-hidden="true">Siguiente »</span>
                         </a>
                     </li>
                 {% endif %}

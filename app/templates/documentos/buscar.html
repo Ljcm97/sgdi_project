@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% from "macros/pagination.html" import render_pagination %}
+
 {% block title %}Buscar Documentos - SGDI{% endblock %}
 
 {% block styles %}
@@ -89,7 +91,7 @@
             <i class="fas fa-file-alt me-2"></i> Resultados
         </h4>
         {% if documentos %}
-            <span class="badge bg-light text-dark">{{ documentos|length }} documento(s) encontrado(s)</span>
+            <span class="badge bg-light text-dark">{{ pagination.total if pagination else documentos|length }} documento(s) encontrado(s)</span>
         {% endif %}
     </div>
     <div class="card-body">
@@ -131,6 +133,11 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <!-- Agregar controles de paginación -->
+                {% if pagination %}
+                    {{ render_pagination(pagination) }}
+                {% endif %}
             </div>
         {% else %}
             <div class="alert alert-info">

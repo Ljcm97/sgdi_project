@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app.models.documento import Documento
 from app.models.estado_documento import EstadoDocumento
 from app.utils.auth import check_permission
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -57,4 +57,7 @@ def index():
     return render_template('dashboard.html',
                           documentos_pendientes=documentos_pendientes,
                           documentos_finalizados=documentos_finalizados,
-                          documentos_recientes=documentos_recientes)
+                          documentos_recientes=documentos_recientes,
+                          estado_recibido=estado_recibido,
+                          estado_en_proceso=estado_en_proceso,
+                          estado_finalizado=estado_finalizado)
