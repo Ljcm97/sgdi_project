@@ -19,21 +19,44 @@ personas_bp = Blueprint('personas', __name__, url_prefix='/personas')
 @login_required
 @admin_required
 def index():
-    """Vista para listar todas las personas con paginación"""
+    """Vista para listar todas las personas con paginación y filtros"""
+    # Obtener parámetros de búsqueda y filtros
+    search = request.args.get('search', '')
+    area_id = request.args.get('area_id', 0, type=int)
+    
     # Obtener parámetros de paginación
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
     # Crear la consulta base
-    query = Persona.query.order_by(Persona.nombres_apellidos)
+    query = Persona.query
+    
+    # Aplicar filtros si existen
+    if search:
+        # Usar el operador LIKE con comodines para la consulta, pero mantener el valor original
+        search_pattern = f"%{search}%"
+        query = query.filter(Persona.nombres_apellidos.like(search_pattern) | 
+                            Persona.email.like(search_pattern))
+    
+    if area_id > 0:
+        query = query.filter(Persona.area_id == area_id)
+    
+    # Ordenar resultados
+    query = query.order_by(Persona.nombres_apellidos)
     
     # Paginar los resultados
     pagination = Pagination(query, page, per_page, 'personas.index')
     personas = pagination.items
     
+    # Obtener todas las áreas para el filtro
+    areas = Area.query.order_by(Area.nombre).all()
+    
     return render_template('admin/personas/index.html', 
                           personas=personas, 
-                          pagination=pagination)
+                          pagination=pagination,
+                          search=search,  # Pasamos el valor original sin los comodines
+                          area_id=area_id,
+                          areas=areas)
 
 @personas_bp.route('/crear', methods=['GET', 'POST'])
 @login_required

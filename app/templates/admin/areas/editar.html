@@ -6,7 +6,7 @@
 <div class="card">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-edit me-2"></i> Editar Área
+            <i class="fas fa-edit me-2"></i> Editar Área: {{ area.nombre }}
         </h3>
         <div>
             <a href="{{ url_for('areas.index') }}" class="btn btn-light btn-sm">
@@ -15,34 +15,115 @@
         </div>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <form method="POST">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="mb-3">
-                        {{ form.nombre.label(class="form-label") }}
-                        {{ form.nombre(class="form-control") }}
-                        {% if form.nombre.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.nombre.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+        <form method="POST" action="{{ url_for('areas.editar', id=area.id) }}" id="formEditarArea">
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.nombre.label(class="form-label") }}
+                    {{ form.nombre(class="form-control") }}
+                    {% if form.nombre.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.nombre.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form.activo.label(class="form-check-label") }}
+                    <div class="form-check form-switch">
+                        {{ form.activo(class="form-check-input") }}
                     </div>
-                    
-                    <div class="text-center mt-4">
-                        <a href="{{ url_for('areas.index') }}" class="btn btn-secondary me-2">
-                            <i class="fas fa-times"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Guardar Cambios
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
+            
+            <div class="mb-3">
+                {{ form.descripcion.label(class="form-label") }}
+                {{ form.descripcion(class="form-control", rows=3) }}
+                {% if form.descripcion.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.descripcion.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="text-center">
+                <a href="{{ url_for('areas.index') }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if area.personas or area.documentos_asignados %}
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Información Adicional</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% if area.personas %}
+            <div class="col-md-6">
+                <h6>Personas asignadas ({{ area.personas.count() }})</h6>
+                <ul class="list-group">
+                    {% for persona in area.personas %}
+                    <li class="list-group-item">{{ persona.nombre_completo }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% if area.documentos_asignados %}
+            <div class="col-md-6">
+                <h6>Documentos asignados ({{ area.documentos_asignados.count() }})</h6>
+                <div class="alert alert-info">
+                    Esta área tiene {{ area.documentos_asignados.count() }} documentos asignados
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formEditar = document.getElementById('formEditarArea');
+        if (formEditar) {
+            formEditar.addEventListener('submit', function(event) {
+                const nombreField = document.getElementById('nombre');
+                if (!nombreField.value.trim()) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'El nombre del área es obligatorio'
+                    });
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'Actualizando área...',
+                    text: 'Por favor espere',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -16,6 +16,36 @@
             </a>
         </div>
     </div>
+    
+    <!-- Filtros de búsqueda -->
+    <div class="card-body bg-light border-bottom">
+        <form method="GET" action="{{ url_for('personas.index') }}" class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Buscar por nombre o email..." value="{{ search }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" name="area_id" onchange="this.form.submit()">
+                    <option value="0">Todas las áreas</option>
+                    {% for area in areas %}
+                    <option value="{{ area.id }}" {% if area_id == area.id %}selected{% endif %}>{{ area.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 text-end">
+                {% if search or area_id > 0 %}
+                <a href="{{ url_for('personas.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
     <div class="card-body">
         {% if personas %}
             <div class="table-responsive">
@@ -55,14 +85,14 @@
                                         <a href="{{ url_for('personas.editar', id=persona.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ url_for('personas.toggle_estado', id=persona.id) }}" class="btn btn-warning" title="Cambiar estado" onclick="return confirm('¿Estás seguro de cambiar el estado de esta persona?')">
+                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('personas.toggle_estado', id=persona.id) }}', '{{ persona.nombres_apellidos }}', {{ persona.activo|lower }})" class="btn btn-warning" title="Cambiar estado">
                                             {% if persona.activo %}
                                                 <i class="fas fa-ban"></i>
                                             {% else %}
                                                 <i class="fas fa-check"></i>
                                             {% endif %}
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('personas.eliminar', id=persona.id) }}', '¿Estás seguro de eliminar esta persona? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacionSwal('{{ url_for('personas.eliminar', id=persona.id) }}', '{{ persona.nombres_apellidos }}')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -89,6 +119,45 @@
         if (confirm(mensaje)) {
             window.location.href = url;
         }
+    }
+    
+    function confirmarCambioEstado(url, nombre, estaActivo) {
+        const accion = estaActivo ? 'desactivar' : 'activar';
+        const titulo = estaActivo ? 'Desactivar persona' : 'Activar persona';
+        const texto = `¿Estás seguro de ${accion} a ${nombre}?`;
+        const icono = estaActivo ? 'warning' : 'question';
+        
+        Swal.fire({
+            title: titulo,
+            text: texto,
+            icon: icono,
+            showCancelButton: true,
+            confirmButtonColor: estaActivo ? '#dc3545' : '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${accion}`,
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+    
+    function confirmarEliminacionSwal(url, nombre) {
+        Swal.fire({
+            title: '¿Eliminar persona?',
+            text: `¿Estás seguro de eliminar a ${nombre}? Esta acción no se puede deshacer.`,
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
     }
 </script>
 {% endblock %}
