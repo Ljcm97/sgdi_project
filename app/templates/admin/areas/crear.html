@@ -15,34 +15,64 @@
         </div>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <form method="POST">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="mb-3">
-                        {{ form.nombre.label(class="form-label") }}
-                        {{ form.nombre(class="form-control") }}
-                        {% if form.nombre.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.nombre.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="row">
+                <!-- Nombre del área -->
+                <div class="col-md-6 mb-3">
+                    {{ form.nombre.label(class="form-label") }}
+                    {{ form.nombre(class="form-control") }}
+                    {% if form.nombre.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.nombre.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Descripción del área -->
+                <div class="col-md-6 mb-3">
+                    {{ form.descripcion.label(class="form-label") }}
+                    {{ form.descripcion(class="form-control", rows=3) }}
+                    {% if form.descripcion.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.descripcion.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Estado del área (Activo/Inactivo) -->
+                <div class="col-md-6 mb-3">
+                    <div class="form-check mt-4">
+                        {{ form.activo(class="form-check-input") }}
+                        {{ form.activo.label(class="form-check-label") }}
                     </div>
-                    
-                    <div class="text-center mt-4">
-                        <a href="{{ url_for('areas.index') }}" class="btn btn-secondary me-2">
-                            <i class="fas fa-times"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Guardar
-                        </button>
-                    </div>
-                </form>
+                    {% if form.activo.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.activo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('areas.index') }}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+                {{ form.submit(class="btn btn-primary") }}  <!-- Renderiza el botón de submit -->
+            </div>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Incluir script para cargar cargos según el área, si es necesario -->
+<script src="{{ url_for('static', filename='js/area-cargo.js') }}"></script>
 {% endblock %}

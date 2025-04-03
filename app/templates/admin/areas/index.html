@@ -8,64 +8,81 @@
 <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-building me-2"></i> Gestión de Áreas
+            <i class="fas fa-cogs me-2"></i> GESTIÓN DE ÁREAS
         </h3>
+        <div>
+            <a href="{{ url_for('areas.crear') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle"></i> Crear Nueva Área
+            </a>
+        </div>
     </div>
+
+    <!-- Filtro de búsqueda -->
     <div class="card-body">
-        <!-- Formulario de creación -->
-        <div class="row mb-4">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Crear Nueva Área</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('areas.crear') }}">
-                            {{ form.hidden_tag() }}
-                            
-                            <div class="mb-3">
-                                {{ form.nombre.label(class="form-label") }}
-                                {{ form.nombre(class="form-control") }}
-                                {% if form.nombre.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.nombre.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle me-1"></i> Crear Área
+        <!-- Sección de filtros -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buscar Áreas</h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('areas.index') }}">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Buscar por nombre..." value="{{ search if search else '' }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i> Buscar
                                 </button>
                             </div>
-                        </form>
+                        </div>
+                        <div class="col-md-4">
+                            {% if search %}
+                            <a href="{{ url_for('areas.index') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-        
-        <!-- Listado de áreas -->
+
         {% if areas %}
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
+                <table class="table table-hover table-striped table-bordered">
+                    <thead class="bg-light text-center">
                         <tr>
-                            <th>Nombre</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="align-middle">NOMBRE</th>
+                            <th class="align-middle">DESCRIPCIÓN</th>
+                            <th class="align-middle">ESTADO</th>
+                            <th class="align-middle">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for area in areas %}
-                            <tr>
-                                <td>{{ area.nombre }}</td>
-                                <td class="text-center">
+                            <tr class="text-center">
+                                <td class="align-middle">{{ area.nombre }}</td>
+                                <td class="align-middle">{{ area.descripcion or 'N/A' }}</td>
+                                <td class="align-middle">
+                                    {% if area.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('areas.editar', id=area.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('areas.eliminar', id=area.id) }}', '¿Estás seguro de eliminar esta área? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
+                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('areas.toggle_estado', id=area.id) }}', '{{ area.nombre }}', {{ 'true' if area.activo else 'false' }})" class="btn btn-warning" title="{{ 'Desactivar' if area.activo else 'Activar' }}">
+                                            {% if area.activo %}
+                                                <i class="fas fa-ban"></i>
+                                            {% else %}
+                                                <i class="fas fa-check"></i>
+                                            {% endif %}
+                                        </a>
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('areas.eliminar', id=area.id) }}', '¿Estás seguro de eliminar el área {{ area.nombre }}? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -74,10 +91,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                
-                <!-- Controles de paginación -->
-                {{ render_pagination(pagination) }}
-                
             </div>
         {% else %}
             <div class="alert alert-info">
@@ -85,20 +98,41 @@
             </div>
         {% endif %}
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
-{{ super() }}
+    <!-- Controles de paginación -->
+    {{ render_pagination(pagination) }}
+</div>
+
 <script>
+    function confirmarCambioEstado(url, nombre, estaActivo) {
+        const accion = estaActivo ? 'desactivar' : 'activar';
+        const titulo = estaActivo ? 'Desactivar área' : 'Activar área';
+        const icono = estaActivo ? 'warning' : 'question';
+        
+        Swal.fire({
+            title: titulo,
+            text: `¿Estás seguro de ${accion} el área ${nombre}?`,
+            icon: icono,
+            showCancelButton: true,
+            confirmButtonColor: estaActivo ? '#dc3545' : '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${accion}`,
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+    
     function confirmarEliminacion(url, mensaje) {
         Swal.fire({
-            title: 'Confirmar eliminación',
+            title: 'Eliminar área',
             text: mensaje,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
@@ -107,23 +141,5 @@
             }
         });
     }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Para el formulario de creación
-        const formCrear = document.querySelector('form[action="{{ url_for("areas.crear") }}"]');
-        if (formCrear) {
-            formCrear.addEventListener('submit', function(event) {
-                Swal.fire({
-                    title: 'Creando área...',
-                    text: 'Por favor espere',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            });
-        }
-    });
 </script>
 {% endblock %}

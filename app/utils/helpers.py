@@ -11,16 +11,42 @@ def generate_radicado():
     Genera un número de radicado único para los documentos.
     
     Returns:
-        str: Número de radicado en formato: AAAAMMDD-XXXX (Año, Mes, Día, Número aleatorio)
+        str: Número de radicado en formato: AAMMDD-XXXX (Año con 2 dígitos, Mes, Día, Número secuencial)
     """
+    from app.models.documento import Documento
+    from sqlalchemy import func
+    
     # Obtener la fecha actual
     now = datetime.datetime.now()
-    date_str = now.strftime("%Y%m%d")
+    date_str = now.strftime("%y%m%d")  # Año con 2 dígitos
     
-    # Generar un número aleatorio de 4 dígitos
-    random_num = ''.join(random.choices(string.digits, k=4))
+    # Buscar el último radicado para el día actual
+    today_prefix = f"{date_str}-"
     
-    return f"{date_str}-{random_num}"
+    # Consultar el último radicado del día
+    ultimo_radicado = Documento.query.filter(
+        Documento.radicado.like(f"{today_prefix}%")
+    ).order_by(
+        Documento.radicado.desc()
+    ).first()
+    
+    # Determinar el siguiente número secuencial
+    if ultimo_radicado:
+        try:
+            # Extraer el número después del guion
+            ultimo_numero = int(ultimo_radicado.radicado.split('-')[1])
+            siguiente_numero = ultimo_numero + 1
+        except (ValueError, IndexError):
+            # Si hay algún error al parsear, comenzar con 0001
+            siguiente_numero = 1
+    else:
+        # Si no hay radicados para hoy, comenzar con 0001
+        siguiente_numero = 1
+    
+    # Formatear el número secuencial con ceros a la izquierda (4 dígitos)
+    num_secuencial = f"{siguiente_numero:04d}"
+    
+    return f"{date_str}-{num_secuencial}"
 
 
 def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
