@@ -12,137 +12,37 @@
         </h3>
     </div>
     <div class="card-body">
-        <!-- Tarjetas de estadísticas -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Áreas</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_areas }}</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-building fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Áreas Activas</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ areas_activas }}</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Áreas con Más Personal</div>
-                                <div class="h6 mb-0 font-weight-bold text-gray-800">
-                                    {% if areas_con_mas_personal %}
-                                    <ul class="list-unstyled small">
-                                        {% for area in areas_con_mas_personal %}
-                                        <li>{{ area.nombre }}: {{ area.total_personas }} personas</li>
-                                        {% endfor %}
-                                    </ul>
-                                    {% else %}
-                                    <p class="mb-0">No hay datos disponibles</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-users fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Búsqueda -->
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">Buscar Áreas</h5>
-            </div>
-            <div class="card-body">
-                <form method="GET" action="{{ url_for('areas.index') }}">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="search" placeholder="Buscar por nombre..." value="{{ search }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                        {% if search %}
-                        <a href="{{ url_for('areas.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Limpiar
-                        </a>
-                        {% endif %}
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- Formulario de creación -->
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">Crear Nueva Área</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('areas.crear') }}" id="formCrearArea">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            {{ form.nombre.label(class="form-label") }}
-                            {{ form.nombre(class="form-control") }}
-                            {% if form.nombre.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.nombre.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            {{ form.activo.label(class="form-check-label") }}
-                            <div class="form-check form-switch">
-                                {{ form.activo(class="form-check-input") }}
+        <div class="row mb-4">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Crear Nueva Área</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('areas.crear') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3">
+                                {{ form.nombre.label(class="form-label") }}
+                                {{ form.nombre(class="form-control") }}
+                                {% if form.nombre.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.nombre.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        {{ form.descripcion.label(class="form-label") }}
-                        {{ form.descripcion(class="form-control", rows=3) }}
-                        {% if form.descripcion.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.descripcion.errors %}
-                                    {{ error }}
-                                {% endfor %}
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i> Crear Área
+                                </button>
                             </div>
-                        {% endif %}
+                        </form>
                     </div>
-                    
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus-circle me-1"></i> Crear Área
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
         
@@ -153,8 +53,6 @@
                     <thead>
                         <tr>
                             <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th class="text-center">Estado</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -162,21 +60,10 @@
                         {% for area in areas %}
                             <tr>
                                 <td>{{ area.nombre }}</td>
-                                <td>{{ area.descripcion or 'Sin descripción' }}</td>
-                                <td class="text-center">
-                                    {% if area.activo %}
-                                    <span class="badge bg-success">Activa</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">Inactiva</span>
-                                    {% endif %}
-                                </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('areas.editar', id=area.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" onclick="toggleEstadoArea('{{ url_for('areas.toggle_estado', id=area.id) }}', '{{ area.activo }}')" class="btn {% if area.activo %}btn-warning{% else %}btn-success{% endif %}" title="{% if area.activo %}Desactivar{% else %}Activar{% endif %}">
-                                            <i class="fas {% if area.activo %}fa-ban{% else %}fa-check{% endif %}"></i>
                                         </a>
                                         <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('areas.eliminar', id=area.id) }}', '¿Estás seguro de eliminar esta área? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
@@ -221,40 +108,11 @@
         });
     }
 
-    function toggleEstadoArea(url, estadoActual) {
-        const accion = estadoActual === 'True' ? 'desactivar' : 'activar';
-        Swal.fire({
-            title: `¿Deseas ${accion} esta área?`,
-            text: `El área quedará ${accion === 'desactivar' ? 'inactiva' : 'activa'}.`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: accion === 'desactivar' ? '#d33' : '#28a745',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: `Sí, ${accion}`,
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = url;
-            }
-        });
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         // Para el formulario de creación
-        const formCrear = document.getElementById('formCrearArea');
+        const formCrear = document.querySelector('form[action="{{ url_for("areas.crear") }}"]');
         if (formCrear) {
             formCrear.addEventListener('submit', function(event) {
-                const nombreField = document.getElementById('nombre');
-                if (!nombreField.value.trim()) {
-                    event.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'El nombre del área es obligatorio'
-                    });
-                    return;
-                }
-                
                 Swal.fire({
                     title: 'Creando área...',
                     text: 'Por favor espere',

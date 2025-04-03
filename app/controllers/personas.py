@@ -69,8 +69,8 @@ def crear():
         # Normalizar correo electrónico
         email = form.email.data.strip().lower() if form.email.data else None
         
-        # Normalizar nombre (trim)
-        nombres_apellidos = form.nombres_apellidos.data.strip()
+        # Normalizar nombre (trim y convertir a mayúsculas)
+        nombres_apellidos = form.nombres_apellidos.data.strip().upper()
         
         # Verificar si el correo ya existe (si se proporciona)
         if email:
@@ -79,9 +79,9 @@ def crear():
                 flash(f'Ya existe una persona con el correo {email}.', 'danger')
                 return render_template('admin/personas/crear.html', form=form)
         
-        # Verificar si el nombre y apellido ya existe
+        # Verificar si el nombre y apellido ya existe (convertido a mayúsculas)
         existente_nombre = Persona.query.filter(
-            func.lower(Persona.nombres_apellidos) == nombres_apellidos.lower()
+            func.upper(Persona.nombres_apellidos) == nombres_apellidos
         ).first()
         if existente_nombre:
             flash(f'Ya existe una persona con el nombre {nombres_apellidos}.', 'danger')
@@ -89,7 +89,7 @@ def crear():
         
         # Crear la persona
         persona = Persona(
-            nombres_apellidos=nombres_apellidos,
+            nombres_apellidos=nombres_apellidos,  # Ya está en mayúsculas
             email=email,
             telefono=form.telefono.data.strip() if form.telefono.data else None,
             zona_economica_id=form.zona_economica_id.data,
@@ -110,6 +110,7 @@ def crear():
     
     return render_template('admin/personas/crear.html', form=form)
 
+
 @personas_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -122,8 +123,8 @@ def editar(id):
         # Normalizar correo electrónico
         email = form.email.data.strip().lower() if form.email.data else None
         
-        # Normalizar nombre (trim)
-        nombres_apellidos = form.nombres_apellidos.data.strip()
+        # Normalizar nombre (trim y convertir a mayúsculas)
+        nombres_apellidos = form.nombres_apellidos.data.strip().upper()
         
         # Verificar si el correo ya existe (si se proporciona)
         if email:
@@ -135,9 +136,9 @@ def editar(id):
                 flash(f'Ya existe otra persona con el correo {email}.', 'danger')
                 return render_template('admin/personas/editar.html', form=form, persona=persona)
         
-        # Verificar si el nombre y apellido ya existe
+        # Verificar si el nombre y apellido ya existe (comparación en mayúsculas)
         existente_nombre = Persona.query.filter(
-            func.lower(Persona.nombres_apellidos) == nombres_apellidos.lower(),
+            func.upper(Persona.nombres_apellidos) == nombres_apellidos,
             Persona.id != id
         ).first()
         if existente_nombre:
@@ -145,7 +146,7 @@ def editar(id):
             return render_template('admin/personas/editar.html', form=form, persona=persona)
         
         # Actualizar la persona
-        persona.nombres_apellidos = nombres_apellidos
+        persona.nombres_apellidos = nombres_apellidos  # Ya está en mayúsculas
         persona.email = email
         persona.telefono = form.telefono.data.strip() if form.telefono.data else None
         persona.zona_economica_id = form.zona_economica_id.data
@@ -163,6 +164,7 @@ def editar(id):
         flash_errors(form)
     
     return render_template('admin/personas/editar.html', form=form, persona=persona)
+
 
 @personas_bp.route('/eliminar/<int:id>')
 @login_required
@@ -195,12 +197,17 @@ def toggle_estado(id):
     """Vista para activar/desactivar una persona"""
     persona = Persona.query.get_or_404(id)
     
+    # Guardar el estado anterior para el mensaje
+    estado_anterior = "activa" if persona.activo else "inactiva"
+    
     # Cambiar el estado
     persona.activo = not persona.activo
     db.session.commit()
     
-    estado = "activada" if persona.activo else "desactivada"
-    flash(f'Persona {estado} exitosamente.', 'success')
+    # Determinar el nuevo estado para el mensaje
+    estado_actual = "desactivada" if estado_anterior == "activa" else "activada"
+    
+    flash(f'Persona {estado_actual} exitosamente.', 'success')
     return redirect(url_for('personas.index'))
 
 @personas_bp.route('/get-by-area/<int:area_id>')

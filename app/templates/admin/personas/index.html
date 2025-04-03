@@ -8,7 +8,7 @@
 <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-users me-2"></i> Gestión de Personas
+            <i class="fas fa-users me-2"></i> GESTIÓN DE PERSONAS
         </h3>
         <div>
             <a href="{{ url_for('personas.crear') }}" class="btn btn-light btn-sm">
@@ -17,82 +17,90 @@
         </div>
     </div>
     
-    <!-- Filtros de búsqueda -->
-    <div class="card-body bg-light border-bottom">
-        <form method="GET" action="{{ url_for('personas.index') }}" class="row g-3">
-            <div class="col-md-5">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="search" placeholder="Buscar por nombre o email..." value="{{ search }}">
-                    <button class="btn btn-primary" type="submit">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <select class="form-select" name="area_id" onchange="this.form.submit()">
-                    <option value="0">Todas las áreas</option>
-                    {% for area in areas %}
-                    <option value="{{ area.id }}" {% if area_id == area.id %}selected{% endif %}>{{ area.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3 text-end">
-                {% if search or area_id > 0 %}
-                <a href="{{ url_for('personas.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Limpiar
-                </a>
-                {% endif %}
-            </div>
-        </form>
-    </div>
-    
+    <!-- Filtro de búsqueda -->
     <div class="card-body">
+        <!-- Sección de filtros -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buscar Personas</h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('personas.index') }}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Buscar por nombre, apellido o email..." value="{{ search if search else '' }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" name="area_id" onchange="this.form.submit()">
+                                <option value="0">TODAS LAS ÁREAS</option>
+                                {% for area in areas %}
+                                <option value="{{ area.id }}" {% if area_id and area_id == area.id %}selected{% endif %}>{{ area.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            {% if search or area_id %}
+                            <a href="{{ url_for('personas.index') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
         {% if personas %}
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
+                <table class="table table-hover table-striped table-bordered">
+                    <thead class="bg-light text-center">
                         <tr>
-                            <th>Nombres y Apellidos</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Zona Económica</th>
-                            <th>Unidad</th>
-                            <th>Área</th>
-                            <th>Cargo</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                            <th class="align-middle">NOMBRES Y APELLIDOS</th>
+                            <th class="align-middle">EMAIL</th>
+                            <th class="align-middle">TELÉFONO</th>
+                            <th class="align-middle">ZONA ECONÓMICA</th>
+                            <th class="align-middle">UNIDAD</th>
+                            <th class="align-middle">ÁREA</th>
+                            <th class="align-middle">CARGO</th>
+                            <th class="align-middle">ESTADO</th>
+                            <th class="align-middle">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for persona in personas %}
                             <tr>
-                                <td>{{ persona.nombres_apellidos }}</td>
-                                <td>{{ persona.email or 'N/A' }}</td>
-                                <td>{{ persona.telefono or 'N/A' }}</td>
-                                <td>{{ persona.zona_economica.nombre }}</td>
-                                <td>{{ persona.unidad.nombre }}</td>
-                                <td>{{ persona.area.nombre }}</td>
-                                <td>{{ persona.cargo.nombre }}</td>
-                                <td>
+                                <td class="align-middle">{{ persona.nombres_apellidos }}</td>
+                                <td class="align-middle">{{ persona.email or 'N/A' }}</td>
+                                <td class="align-middle">{{ persona.telefono or 'N/A' }}</td>
+                                <td class="align-middle">{{ persona.zona_economica.nombre }}</td>
+                                <td class="align-middle">{{ persona.unidad.nombre }}</td>
+                                <td class="align-middle">{{ persona.area.nombre }}</td>
+                                <td class="align-middle">{{ persona.cargo.nombre }}</td>
+                                <td class="align-middle">
                                     {% if persona.activo %}
                                         <span class="badge bg-success">Activo</span>
                                     {% else %}
                                         <span class="badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="align-middle">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('personas.editar', id=persona.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('personas.toggle_estado', id=persona.id) }}', '{{ persona.nombres_apellidos }}', {{ persona.activo|lower }})" class="btn btn-warning" title="Cambiar estado">
+                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('personas.toggle_estado', id=persona.id) }}', '{{ persona.nombres_apellidos }}', {{ 'true' if persona.activo else 'false' }})" class="btn btn-warning" title="{{ 'Desactivar' if persona.activo else 'Activar' }}">
                                             {% if persona.activo %}
                                                 <i class="fas fa-ban"></i>
                                             {% else %}
                                                 <i class="fas fa-check"></i>
                                             {% endif %}
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarEliminacionSwal('{{ url_for('personas.eliminar', id=persona.id) }}', '{{ persona.nombres_apellidos }}')" class="btn btn-danger" title="Eliminar">
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('personas.eliminar', id=persona.id) }}', '¿Estás seguro de eliminar a {{ persona.nombres_apellidos }} ? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -109,27 +117,20 @@
         {% endif %}
     </div>
 
-<!-- Controles de paginación -->
-{{ render_pagination(pagination) }}
+    <!-- Controles de paginación -->
+    {{ render_pagination(pagination) }}
 
 </div>
 
 <script>
-    function confirmarEliminacion(url, mensaje) {
-        if (confirm(mensaje)) {
-            window.location.href = url;
-        }
-    }
-    
     function confirmarCambioEstado(url, nombre, estaActivo) {
-        const accion = estaActivo ? 'desactivar' : 'activar';
-        const titulo = estaActivo ? 'Desactivar persona' : 'Activar persona';
-        const texto = `¿Estás seguro de ${accion} a ${nombre}?`;
-        const icono = estaActivo ? 'warning' : 'question';
-        
+    const accion = estaActivo ? 'desactivar' : 'activar';
+    const titulo = estaActivo ? 'Desactivar persona' : 'Activar persona';
+    const icono = estaActivo ? 'warning' : 'question';
+    
         Swal.fire({
             title: titulo,
-            text: texto,
+            text: `¿Estás seguro de ${accion} a ${nombre}?`,
             icon: icono,
             showCancelButton: true,
             confirmButtonColor: estaActivo ? '#dc3545' : '#28a745',
@@ -143,21 +144,5 @@
         });
     }
     
-    function confirmarEliminacionSwal(url, nombre) {
-        Swal.fire({
-            title: '¿Eliminar persona?',
-            text: `¿Estás seguro de eliminar a ${nombre}? Esta acción no se puede deshacer.`,
-            icon: 'error',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = url;
-            }
-        });
-    }
 </script>
 {% endblock %}
