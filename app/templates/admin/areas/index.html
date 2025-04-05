@@ -60,17 +60,17 @@
                     </thead>
                     <tbody>
                         {% for area in areas %}
-                            <tr class="text-center">
+                            <tr class="text-left">
                                 <td class="align-middle">{{ area.nombre }}</td>
                                 <td class="align-middle">{{ area.descripcion or 'N/A' }}</td>
-                                <td class="align-middle">
+                                <td class="align-middle text-center">
                                     {% if area.activo %}
                                         <span class="badge bg-success">Activo</span>
                                     {% else %}
                                         <span class="badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </td>
-                                <td class="align-middle">
+                                <td class="align-middle text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('areas.editar', id=area.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>

@@ -67,8 +67,8 @@
                             <th class="align-middle">UNIDAD</th>
                             <th class="align-middle">ÁREA</th>
                             <th class="align-middle">CARGO</th>
-                            <th class="align-middle">ESTADO</th>
-                            <th class="align-middle">ACCIONES</th>
+                            <th class="align-middle text-center">ESTADO</th>
+                            <th class="align-middle text-center">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -81,14 +81,14 @@
                                 <td class="align-middle">{{ persona.unidad.nombre }}</td>
                                 <td class="align-middle">{{ persona.area.nombre }}</td>
                                 <td class="align-middle">{{ persona.cargo.nombre }}</td>
-                                <td class="align-middle">
+                                <td class="align-middle text-center">
                                     {% if persona.activo %}
                                         <span class="badge bg-success">Activo</span>
                                     {% else %}
                                         <span class="badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </td>
-                                <td class="align-middle">
+                                <td class="align-middle text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('personas.editar', id=persona.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
@@ -124,9 +124,9 @@
 
 <script>
     function confirmarCambioEstado(url, nombre, estaActivo) {
-    const accion = estaActivo ? 'desactivar' : 'activar';
-    const titulo = estaActivo ? 'Desactivar persona' : 'Activar persona';
-    const icono = estaActivo ? 'warning' : 'question';
+        const accion = estaActivo ? 'desactivar' : 'activar';
+        const titulo = estaActivo ? 'Desactivar persona' : 'Activar persona';
+        const icono = estaActivo ? 'warning' : 'question';
     
         Swal.fire({
             title: titulo,
@@ -143,6 +143,5 @@
             }
         });
     }
-    
 </script>
 {% endblock %}
