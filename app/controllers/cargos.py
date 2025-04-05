@@ -5,17 +5,21 @@ from app.models.cargo import Cargo
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
 from app.utils.pagination import Pagination
-from wtforms import StringField
+from wtforms import StringField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
 from sqlalchemy import func
 
-# Formulario simple para cargos
+
 class CargoForm(FlaskForm):
     nombre = StringField('Nombre', validators=[
         DataRequired(message='Nombre de cargo obligatorio'),
         Length(max=100, message='Nombre demasiado largo')
     ])
+    descripcion = TextAreaField('Descripción', validators=[
+        Length(max=500, message='Descripción demasiado larga')
+    ])
+    activo = BooleanField('Activo', default=True)
 
 cargos_bp = Blueprint('cargos', __name__, url_prefix='/cargos')
 
@@ -27,9 +31,18 @@ def index():
     # Obtener parámetros de paginación
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
+    search = request.args.get('search', '')
     
     # Crear la consulta base
-    query = Cargo.query.order_by(Cargo.nombre)
+    query = Cargo.query
+
+    # Aplicar filtro de búsqueda si existe
+    if search:
+        query = query.filter(Cargo.nombre.ilike(f'%{search}%'))
+    
+    # Ordenar por nombre
+    query = query.order_by(Cargo.nombre)
+    
     
     # Paginar los resultados
     pagination = Pagination(query, page, per_page, 'cargos.index')
@@ -39,9 +52,10 @@ def index():
     return render_template('admin/cargos/index.html', 
                           cargos=cargos, 
                           pagination=pagination,
-                          form=form)
+                          form=form,
+                          search=search)
 
-@cargos_bp.route('/crear', methods=['POST'])
+@cargos_bp.route('/crear', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def crear():
@@ -59,15 +73,20 @@ def crear():
             return redirect(url_for('cargos.index'))
         
         # Crear el cargo
-        cargo = Cargo(nombre=nombre_normalizado)
+        cargo = Cargo(
+            nombre=nombre_normalizado,
+            descripcion=form.descripcion.data,
+            activo=form.activo.data
+        )
         db.session.add(cargo)
         db.session.commit()
         
         flash('Cargo creado exitosamente.', 'success')
+        return redirect(url_for('cargos.index'))
     else:
         flash_errors(form)
     
-    return redirect(url_for('cargos.index'))
+    return render_template('admin/cargos/crear.html', form=form)
 
 @cargos_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -90,6 +109,8 @@ def editar(id):
             
             # Actualizar el cargo
             cargo.nombre = nombre_normalizado
+            cargo.descripcion = form.descripcion.data
+            cargo.activo = form.activo.data
             db.session.commit()
             
             flash('Cargo actualizado exitosamente.', 'success')
@@ -116,4 +137,19 @@ def eliminar(id):
     db.session.commit()
     
     flash('Cargo eliminado exitosamente.', 'success')
+    return redirect(url_for('cargos.index'))
+
+@cargos_bp.route('/toggle-estado/<int:id>')
+@login_required
+@admin_required
+def toggle_estado(id):
+    """Vista para activar/desactivar un cargo"""
+    cargo = Cargo.query.get_or_404(id)
+    
+    # Cambiar el estado
+    cargo.activo = not cargo.activo
+    db.session.commit()
+    
+    estado = "activado" if cargo.activo else "desactivado"
+    flash(f'Cargo {estado} exitosamente.', 'success')
     return redirect(url_for('cargos.index'))

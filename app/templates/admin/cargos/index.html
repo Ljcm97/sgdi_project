@@ -8,64 +8,81 @@
 <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-id-card me-2"></i> Gestión de Cargos
+            <i class="fas fa-id-card me-2"></i> GESTIÓN DE CARGOS
         </h3>
+        <div>
+            <a href="{{ url_for('cargos.crear') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle"></i> Crear Nuevo Cargo
+            </a>
+        </div>
     </div>
+
+    <!-- Filtro de búsqueda -->
     <div class="card-body">
-        <!-- Formulario de creación -->
-        <div class="row mb-4">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Crear Nuevo Cargo</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('cargos.crear') }}">
-                            {{ form.hidden_tag() }}
-                            
-                            <div class="mb-3">
-                                {{ form.nombre.label(class="form-label") }}
-                                {{ form.nombre(class="form-control") }}
-                                {% if form.nombre.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.nombre.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle me-1"></i> Crear Cargo
+        <!-- Sección de filtros -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buscar Cargos</h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('cargos.index') }}">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Buscar por nombre..." value="{{ search if search else '' }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i> Buscar
                                 </button>
                             </div>
-                        </form>
+                        </div>
+                        <div class="col-md-4">
+                            {% if search %}
+                            <a href="{{ url_for('cargos.index') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-        
-        <!-- Listado de cargos -->
+
         {% if cargos %}
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
+                <table class="table table-hover table-striped table-bordered">
+                    <thead class="bg-light text-center">
                         <tr>
-                            <th>Nombre</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="align-middle">NOMBRE</th>
+                            <th class="align-middle">DESCRIPCIÓN</th>
+                            <th class="align-middle">ESTADO</th>
+                            <th class="align-middle">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for cargo in cargos %}
-                            <tr>
-                                <td>{{ cargo.nombre }}</td>
-                                <td class="text-center">
+                            <tr class="text-left">
+                                <td class="align-middle">{{ cargo.nombre }}</td>
+                                <td class="align-middle">{{ cargo.descripcion or 'N/A' }}</td>
+                                <td class="align-middle text-center">
+                                    {% if cargo.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('cargos.editar', id=cargo.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('cargos.eliminar', id=cargo.id) }}', '¿Estás seguro de eliminar este cargo? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
+                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('cargos.toggle_estado', id=cargo.id) }}', '{{ cargo.nombre }}', {{ 'true' if cargo.activo else 'false' }})" class="btn btn-warning" title="{{ 'Desactivar' if cargo.activo else 'Activar' }}">
+                                            {% if cargo.activo %}
+                                                <i class="fas fa-ban"></i>
+                                            {% else %}
+                                                <i class="fas fa-check"></i>
+                                            {% endif %}
+                                        </a>
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('cargos.eliminar', id=cargo.id) }}', '¿Estás seguro de eliminar el cargo {{ cargo.nombre }}? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -82,21 +99,47 @@
         {% endif %}
     </div>
 
-<!-- Controles de paginación -->
-{{ render_pagination(pagination) }}
-
+    <!-- Controles de paginación -->
+    {{ render_pagination(pagination) }}
 </div>
-{% endblock %}
 
-{% block scripts %}
-
-{{ super() }}
-<!-- Script para confirmación de eliminación -->
 <script>
+    function confirmarCambioEstado(url, nombre, estaActivo) {
+        const accion = estaActivo ? 'desactivar' : 'activar';
+        const titulo = estaActivo ? 'Desactivar cargo' : 'Activar cargo';
+        const icono = estaActivo ? 'warning' : 'question';
+        
+        Swal.fire({
+            title: titulo,
+            text: `¿Estás seguro de ${accion} el cargo ${nombre}?`,
+            icon: icono,
+            showCancelButton: true,
+            confirmButtonColor: estaActivo ? '#dc3545' : '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${accion}`,
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+    
     function confirmarEliminacion(url, mensaje) {
-        if (confirm(mensaje)) {
-            window.location.href = url;
-        }
+        Swal.fire({
+            title: 'Eliminar cargo',
+            text: mensaje,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
     }
 </script>
 {% endblock %}
