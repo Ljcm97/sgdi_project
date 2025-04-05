@@ -112,8 +112,9 @@ def olvido_password():
                 flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
             else:
                 # Dar información al usuario de que puede usar el enlace directamente (sólo para desarrollo)
-                if app.config['FLASK_ENV'] == 'development':
+                if app.debug:
                     flash(f'Error al enviar correo. Usa este enlace para restablecer tu contraseña: {reset_url}', 'warning')
+                    
                 else:
                     flash('Hubo un problema al enviar el correo. Por favor, inténtalo nuevamente más tarde.', 'warning')
             

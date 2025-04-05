@@ -3,6 +3,7 @@ from flask import flash, current_app, render_template
 from app.models.notificacion import Notificacion
 from app import db, mail
 from flask_mail import Message
+from email_validator import validate_email, EmailNotValidError
 
 def generate_radicado():
     """
@@ -133,14 +134,14 @@ def enviar_email_reset_password(email, reset_url):
         reset_url (str): URL para restablecer la contraseña.
     """
     try:
-        # Crear el mensaje con codificación UTF-8 explícita
+        # Crear el mensaje con codificación UTF-8 explícita en el encabezado
         msg = Message(
             subject='SGDI - Restablecer Contraseña',
             recipients=[email],
-            charset="utf-8"  # Asegurar explícitamente la codificación UTF-8
+            charset="utf-8"  # Asegura que el mensaje esté en UTF-8
         )
         
-        # Configurar el contenido del mensaje en texto plano
+        # Contenido del mensaje en texto plano
         msg.body = f"""Para restablecer tu contraseña, visita el siguiente enlace:
 
 {reset_url}
@@ -154,7 +155,7 @@ SGDI - Sistema de Gestión Documental Interna
 Agroindustrial Molino Sonora AP S.A.S
 """
         
-        # HTML version del correo con codificación UTF-8
+        # Contenido del mensaje en HTML
         msg.html = f"""
         <html>
             <head>
