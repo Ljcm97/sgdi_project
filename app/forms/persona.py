@@ -43,7 +43,7 @@ class PersonaForm(FlaskForm):
     
     activo = BooleanField('Activo', default=True)
     
-    submit = SubmitField('Guardar')
+    submit = SubmitField('Crear Persona')
     
     def __init__(self, *args, **kwargs):
         super(PersonaForm, self).__init__(*args, **kwargs)
