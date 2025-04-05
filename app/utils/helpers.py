@@ -1,6 +1,4 @@
 import datetime
-import random
-import string
 from flask import flash, current_app, render_template
 from app.models.notificacion import Notificacion
 from app import db, mail
@@ -48,7 +46,6 @@ def generate_radicado():
     
     return f"{date_str}-{num_secuencial}"
 
-
 def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
     """
     Crea una nueva notificación para un usuario.
@@ -74,7 +71,6 @@ def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
     db.session.commit()
     
     return notificacion
-
 
 def flash_errors(form):
     """
@@ -140,10 +136,11 @@ def enviar_email_reset_password(email, reset_url):
         # Crear el mensaje
         msg = Message(
             'SGDI - Restablecer Contraseña',
-            recipients=[email]
+            recipients=[email],
+            charset="utf-8"  # Asegura que la codificación sea UTF-8
         )
         
-        # Configurar el contenido del mensaje
+        # Configurar el contenido del mensaje en texto plano
         msg.body = f"""Para restablecer tu contraseña, visita el siguiente enlace:
 
 {reset_url}
@@ -157,8 +154,36 @@ SGDI - Sistema de Gestión Documental Interna
 Agroindustrial Molino Sonora AP S.A.S
 """
         
+        # HTML version del correo
+        msg.html = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                    <h2 style="color: #1D2C96;">Restablecer Contraseña - SGDI</h2>
+                    <p>Para restablecer tu contraseña, haz clic en el siguiente botón:</p>
+                    <p style="text-align: center;">
+                        <a href="{reset_url}" style="display: inline-block; background-color: #1D2C96; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+                    </p>
+                    <p>Si el botón no funciona, también puedes copiar y pegar el siguiente enlace en tu navegador:</p>
+                    <p style="word-break: break-all;"><a href="{reset_url}">{reset_url}</a></p>
+                    <p><small>Si no solicitaste el restablecimiento de contraseña, ignora este mensaje.</small></p>
+                    <p><small>Este enlace expirará en 24 horas.</small></p>
+                    <hr>
+                    <p style="font-size: 12px; color: #666; text-align: center;">
+                        SGDI - Sistema de Gestión Documental Interna<br>
+                        Agroindustrial Molino Sonora AP S.A.S
+                    </p>
+                </div>
+            </body>
+        </html>
+        """
+        
         # Enviar el correo electrónico
         mail.send(msg)
+        
+        # Para depuración, imprime que se intentó enviar el correo
+        print(f"Intentando enviar correo a: {email}")
+        print(f"Enlace de restablecimiento: {reset_url}")
         
         return True
     except Exception as e:

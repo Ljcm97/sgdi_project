@@ -27,6 +27,13 @@ def create_app():
     bcrypt.init_app(app)
     mail.init_app(app)
     
+    
+    # Inicializar mail con mensajes de depuración
+    print(f"Configuración de correo: {app.config.get('MAIL_SERVER')}, {app.config.get('MAIL_PORT')}")
+    print(f"Usuario de correo: {app.config.get('MAIL_USERNAME')}")
+    mail.init_app(app)
+
+
     # Configuración del login
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor inicie sesión para acceder a esta página.'

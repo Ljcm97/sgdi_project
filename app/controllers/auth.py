@@ -102,12 +102,17 @@ def olvido_password():
             
             # Enviar email con token
             reset_url = url_for('auth.reset_password', token=token, _external=True)
-            enviar_email_reset_password(usuario.persona.email, reset_url)
+            enviado = enviar_email_reset_password(usuario.persona.email, reset_url)
+            
+            # Log para depuración
+            print(f"Email de restablecimiento para usuario {usuario.id}: {enviado}")
+            print(f"Token almacenado en sesión: reset_token_{token}")
             
             flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
             return redirect(url_for('auth.login'))
         else:
             # Por seguridad, no indicamos si el email existe o no
+            print(f"Intento de recuperación con email no encontrado: {form.email.data}")
             flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
             return redirect(url_for('auth.login'))
     
