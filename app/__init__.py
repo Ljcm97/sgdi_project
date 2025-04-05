@@ -27,12 +27,12 @@ def create_app():
     bcrypt.init_app(app)
     mail.init_app(app)
     
-    
     # Inicializar mail con mensajes de depuración
     print(f"Configuración de correo: {app.config.get('MAIL_SERVER')}, {app.config.get('MAIL_PORT')}")
     print(f"Usuario de correo: {app.config.get('MAIL_USERNAME')}")
-    mail.init_app(app)
-
+    
+    # Eliminar esta línea duplicada que puede estar causando problemas
+    # mail.init_app(app)  # <-- Esta línea se ha eliminado porque ya se encuentra antes
 
     # Configuración del login
     login_manager.login_view = 'auth.login'

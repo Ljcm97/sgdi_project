@@ -19,6 +19,8 @@ class Config:
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
+    MAIL_ASCII_ATTACHMENTS = False
+    MAIL_CHARSET = 'utf-8'
     
     # Configuración de la aplicación
     APP_NAME = "SGDI - Sistema de Gestión Documental Interna"

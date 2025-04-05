@@ -133,11 +133,11 @@ def enviar_email_reset_password(email, reset_url):
         reset_url (str): URL para restablecer la contraseña.
     """
     try:
-        # Crear el mensaje
+        # Crear el mensaje con codificación UTF-8 explícita
         msg = Message(
-            'SGDI - Restablecer Contraseña',
+            subject='SGDI - Restablecer Contraseña',
             recipients=[email],
-            charset="utf-8"  # Asegura que la codificación sea UTF-8
+            charset="utf-8"  # Asegurar explícitamente la codificación UTF-8
         )
         
         # Configurar el contenido del mensaje en texto plano
@@ -154,9 +154,12 @@ SGDI - Sistema de Gestión Documental Interna
 Agroindustrial Molino Sonora AP S.A.S
 """
         
-        # HTML version del correo
+        # HTML version del correo con codificación UTF-8
         msg.html = f"""
         <html>
+            <head>
+                <meta charset="UTF-8">
+            </head>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
                     <h2 style="color: #1D2C96;">Restablecer Contraseña - SGDI</h2>
@@ -182,7 +185,7 @@ Agroindustrial Molino Sonora AP S.A.S
         mail.send(msg)
         
         # Para depuración, imprime que se intentó enviar el correo
-        print(f"Intentando enviar correo a: {email}")
+        print(f"Correo enviado exitosamente a: {email}")
         print(f"Enlace de restablecimiento: {reset_url}")
         
         return True

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, request, session
+from flask import Blueprint, render_template, flash, redirect, url_for, request, session, current_app as app
 from flask_login import login_user, logout_user, current_user, login_required
 from app import db
 from app.models.usuario import Usuario
@@ -108,12 +108,20 @@ def olvido_password():
             print(f"Email de restablecimiento para usuario {usuario.id}: {enviado}")
             print(f"Token almacenado en sesión: reset_token_{token}")
             
-            flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
+            if enviado:
+                flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
+            else:
+                # Dar información al usuario de que puede usar el enlace directamente (sólo para desarrollo)
+                if app.config['FLASK_ENV'] == 'development':
+                    flash(f'Error al enviar correo. Usa este enlace para restablecer tu contraseña: {reset_url}', 'warning')
+                else:
+                    flash('Hubo un problema al enviar el correo. Por favor, inténtalo nuevamente más tarde.', 'warning')
+            
             return redirect(url_for('auth.login'))
         else:
             # Por seguridad, no indicamos si el email existe o no
             print(f"Intento de recuperación con email no encontrado: {form.email.data}")
-            flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
+            flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña (si la dirección existe en nuestro sistema).', 'info')
             return redirect(url_for('auth.login'))
     
     return render_template('auth/olvido_password.html', form=form)
