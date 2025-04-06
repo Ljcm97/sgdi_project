@@ -20,6 +20,11 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
+
+    from app.config import Config
+    app.config.from_object(Config)
+
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key_muy_secreta')
     
     # Cargar configuración desde variables de entorno
     app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
