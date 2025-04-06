@@ -32,22 +32,24 @@ def create_app():
     
     # Cargar configuración de correo desde el archivo .env
     app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-    app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
-    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True' 
+    app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))  # Convertir a entero, con valor predeterminado de 587
+    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ('true', 'yes', '1')  # Ajuste para manejar valores booleanos
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+    app.config['MAIL_ASCII_ATTACHMENTS'] = False  # Desactivar la codificación ASCII para archivos adjuntos
+    app.config['MAIL_CHARSET'] = 'utf-8'  # Establecer la codificación de caracteres
 
+    # Mostrar detalles de configuración para depuración
+    print(f"Configuración de correo: {app.config.get('MAIL_SERVER')}, {app.config.get('MAIL_PORT')}")
+    print(f"Usuario de correo: {app.config.get('MAIL_USERNAME')}")
+    
     # Inicializar extensiones con la aplicación
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
     mail.init_app(app)
-    
-    # Inicialización de mail con mensajes de depuración
-    print(f"Configuración de correo: {app.config.get('MAIL_SERVER')}, {app.config.get('MAIL_PORT')}")
-    print(f"Usuario de correo: {app.config.get('MAIL_USERNAME')}")
     
     # Configuración del login
     login_manager.login_view = 'auth.login'
