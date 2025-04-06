@@ -5,6 +5,8 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 # Inicialización de extensiones
 db = SQLAlchemy()
@@ -13,13 +15,24 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 mail = Mail()
 
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
+
 def create_app():
     app = Flask(__name__)
     
-    # Cargar configuración
-    from app.config import Config
-    app.config.from_object(Config)
+    # Cargar configuración desde variables de entorno
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
+    # Cargar configuración de correo desde el archivo .env
+    app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+    app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True' 
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
     # Inicializar extensiones con la aplicación
     db.init_app(app)
     migrate.init_app(app, db)
@@ -27,13 +40,10 @@ def create_app():
     bcrypt.init_app(app)
     mail.init_app(app)
     
-    # Inicializar mail con mensajes de depuración
+    # Inicialización de mail con mensajes de depuración
     print(f"Configuración de correo: {app.config.get('MAIL_SERVER')}, {app.config.get('MAIL_PORT')}")
     print(f"Usuario de correo: {app.config.get('MAIL_USERNAME')}")
     
-    # Eliminar esta línea duplicada que puede estar causando problemas
-    # mail.init_app(app)  # <-- Esta línea se ha eliminado porque ya se encuentra antes
-
     # Configuración del login
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor inicie sesión para acceder a esta página.'

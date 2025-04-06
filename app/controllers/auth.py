@@ -5,7 +5,7 @@ from app.models.usuario import Usuario
 from app.forms.auth import LoginForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.utils.helpers import flash_errors, enviar_email_reset_password
 import secrets
-from sqlalchemy import func  # Importamos func para poder usar func.lower()
+from sqlalchemy import func
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -104,19 +104,15 @@ def olvido_password():
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             enviado = enviar_email_reset_password(usuario.persona.email, reset_url)
             
-            # Log para depuración
+            # Log para depuración (solo en consola)
             print(f"Email de restablecimiento para usuario {usuario.id}: {enviado}")
             print(f"Token almacenado en sesión: reset_token_{token}")
             
             if enviado:
                 flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
             else:
-                # Dar información al usuario de que puede usar el enlace directamente (sólo para desarrollo)
-                if app.debug:
-                    flash(f'Error al enviar correo. Usa este enlace para restablecer tu contraseña: {reset_url}', 'warning')
-                    
-                else:
-                    flash('Hubo un problema al enviar el correo. Por favor, inténtalo nuevamente más tarde.', 'warning')
+                # Modificación: No mostrar el enlace al usuario, solo informar del problema
+                flash('Hubo un problema al enviar el correo. Por favor, inténtalo nuevamente más tarde o contacta al administrador.', 'warning')
             
             return redirect(url_for('auth.login'))
         else:

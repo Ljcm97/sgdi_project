@@ -128,33 +128,33 @@ def get_personas_por_area(area_id):
 def enviar_email_reset_password(email, reset_url):
     """
     Envía un correo electrónico con el enlace para restablecer la contraseña.
-    
+
     Args:
         email (str): Dirección de correo electrónico del destinatario.
         reset_url (str): URL para restablecer la contraseña.
     """
     try:
-        # Crear el mensaje con codificación UTF-8 explícita en el encabezado
+        # Crear el mensaje con codificación UTF-8 explícita
         msg = Message(
-            subject='SGDI - Restablecer Contraseña',
+            subject='SGDI - Restablecer password',
             recipients=[email],
             charset="utf-8"  # Asegura que el mensaje esté en UTF-8
         )
-        
-        # Contenido del mensaje en texto plano
-        msg.body = f"""Para restablecer tu contraseña, visita el siguiente enlace:
+
+        # Contenido del mensaje en texto plano (sin caracteres especiales para evitar problemas)
+        msg.body = f"""Para restablecer tu password, visita el siguiente enlace:
 
 {reset_url}
 
-Si no solicitaste el restablecimiento de contraseña, ignora este mensaje.
+Si no solicitaste el restablecimiento de password, ignora este mensaje.
 
-Este enlace expirará en 24 horas.
+Este enlace expirara en 24 horas.
 
 Saludos,
-SGDI - Sistema de Gestión Documental Interna
+SGDI - Sistema de Gestion Documental Interna
 Agroindustrial Molino Sonora AP S.A.S
 """
-        
+
         # Contenido del mensaje en HTML
         msg.html = f"""
         <html>
@@ -163,38 +163,33 @@ Agroindustrial Molino Sonora AP S.A.S
             </head>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-                    <h2 style="color: #1D2C96;">Restablecer Contraseña - SGDI</h2>
-                    <p>Para restablecer tu contraseña, haz clic en el siguiente botón:</p>
+                    <h2 style="color: #1D2C96;">Restablecer Contrasena - SGDI</h2>
+                    <p>Para restablecer tu contrasena, haz clic en el siguiente boton:</p>
                     <p style="text-align: center;">
-                        <a href="{reset_url}" style="display: inline-block; background-color: #1D2C96; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+                        <a href="{reset_url}" style="display: inline-block; background-color: #1D2C96; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Restablecer Contrasena</a>
                     </p>
-                    <p>Si el botón no funciona, también puedes copiar y pegar el siguiente enlace en tu navegador:</p>
+                    <p>Si el boton no funciona, tambien puedes copiar y pegar el siguiente enlace en tu navegador:</p>
                     <p style="word-break: break-all;"><a href="{reset_url}">{reset_url}</a></p>
-                    <p><small>Si no solicitaste el restablecimiento de contraseña, ignora este mensaje.</small></p>
-                    <p><small>Este enlace expirará en 24 horas.</small></p>
+                    <p><small>Si no solicitaste el restablecimiento de contrasena, ignora este mensaje.</small></p>
+                    <p><small>Este enlace expirara en 24 horas.</small></p>
                     <hr>
                     <p style="font-size: 12px; color: #666; text-align: center;">
-                        SGDI - Sistema de Gestión Documental Interna<br>
+                        SGDI - Sistema de Gestion Documental Interna<br>
                         Agroindustrial Molino Sonora AP S.A.S
                     </p>
                 </div>
             </body>
         </html>
         """
-        
+
         # Enviar el correo electrónico
         mail.send(msg)
-        
-        # Para depuración, imprime que se intentó enviar el correo
-        print(f"Correo enviado exitosamente a: {email}")
-        print(f"Enlace de restablecimiento: {reset_url}")
-        
         return True
     except Exception as e:
-        # En un entorno de producción, registra el error en un archivo de registro
+        # Registrar el error pero no mostrarlo al usuario
         print(f"Error al enviar correo: {str(e)}")
-        
-        # Para desarrollo, simplemente imprime el enlace en la consola
+
+        # Para desarrollo, imprime el enlace en la consola (no lo muestres al usuario)
         print(f"Enlace de restablecimiento (simulado): {reset_url}")
-        
+
         return False
