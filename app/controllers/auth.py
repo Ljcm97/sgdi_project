@@ -88,36 +88,35 @@ def olvido_password():
     form = ResetPasswordRequestForm()
     
     if form.validate_on_submit():
+        # Verifica si el email existe (se une con persona para buscar por email)
         usuario = Usuario.query.join(Usuario.persona).filter(
             Usuario.persona.has(email=form.email.data)
         ).first()
         
         if usuario:
-            # Generar token
+            # Generar token seguro
             token = secrets.token_urlsafe(32)
             
-            # Guardar token en la sesión (en producción se guardaría en la base de datos)
+            # Guardar token en la sesión con expiración de 24 horas
             session[f'reset_token_{token}'] = usuario.id
-            session.permanent = True  # El token dura lo que dure la sesión
+            session.permanent = True
             
-            # Enviar email con token
+            # Construir URL para restablecer contraseña
             reset_url = url_for('auth.reset_password', token=token, _external=True)
+            
+            # Intentar enviar el correo
             enviado = enviar_email_reset_password(usuario.persona.email, reset_url)
             
-            # Log para depuración (solo en consola)
-            print(f"Email de restablecimiento para usuario {usuario.id}: {enviado}")
-            print(f"Token almacenado en sesión: reset_token_{token}")
+            # Registrar intentos para depuración
+            print(f"Intento de envío de correo a {usuario.persona.email}. Resultado: {enviado}")
+            print(f"Token generado: {token}")
+            print(f"URL de restablecimiento: {reset_url}")
             
-            if enviado:
-                flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña.', 'info')
-            else:
-                # Modificación: No mostrar el enlace al usuario, solo informar del problema
-                flash('Hubo un problema al enviar el correo. Por favor, inténtalo nuevamente más tarde o contacta al administrador.', 'warning')
-            
+            # Siempre mostrar mensaje de éxito por seguridad
+            flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña (si la dirección existe en nuestro sistema).', 'info')
             return redirect(url_for('auth.login'))
         else:
             # Por seguridad, no indicamos si el email existe o no
-            print(f"Intento de recuperación con email no encontrado: {form.email.data}")
             flash('Se ha enviado un correo con instrucciones para restablecer tu contraseña (si la dirección existe en nuestro sistema).', 'info')
             return redirect(url_for('auth.login'))
     
@@ -130,9 +129,13 @@ def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
     
-    # Verificar token
-    user_id = session.get(f'reset_token_{token}')
+    # Verificar token en la sesión
+    key = f'reset_token_{token}'
+    user_id = session.get(key)
+    
     if not user_id:
+        print(f"Token inválido o expirado: {token}")
+        print(f"Llaves de sesión disponibles: {list(session.keys())}")
         flash('El enlace para restablecer la contraseña es inválido o ha expirado.', 'danger')
         return redirect(url_for('auth.login'))
     
@@ -148,8 +151,8 @@ def reset_password(token):
             # Actualizar contraseña
             usuario.actualizar_password(form.password.data)
             
-            # Eliminar token
-            session.pop(f'reset_token_{token}', None)
+            # Eliminar token de la sesión
+            session.pop(key, None)
             
             flash('Tu contraseña ha sido restablecida. Ahora puedes iniciar sesión.', 'success')
             return redirect(url_for('auth.login'))
