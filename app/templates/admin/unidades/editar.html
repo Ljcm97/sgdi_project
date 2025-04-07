@@ -32,6 +32,23 @@
                         {% endif %}
                     </div>
                     
+                    <div class="mb-3">
+                        {{ form.descripcion.label(class="form-label") }}
+                        {{ form.descripcion(class="form-control", rows=3) }}
+                        {% if form.descripcion.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.descripcion.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        {{ form.activo(class="form-check-input") }}
+                        {{ form.activo.label(class="form-check-label") }}
+                    </div>
+                    
                     <div class="text-center mt-4">
                         <a href="{{ url_for('unidades.index') }}" class="btn btn-secondary me-2">
                             <i class="fas fa-times"></i> Cancelar
