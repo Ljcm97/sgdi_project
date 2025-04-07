@@ -113,38 +113,46 @@
 
     <div class="card-footer">
         <div class="d-flex justify-content-center">
-            <!-- Botones para documento en estado "Recibido" con actualización de contadores -->
-            {% if documento.estado_actual.nombre == 'Recibido' %}
-                {% if documento.persona_destino_id == current_user.persona_id %}
-                    <!-- Opciones para aceptar/rechazar si está asignado al usuario actual y está en estado recibido -->
-                    <a href="{{ url_for('documentos.aceptar', id=documento.id) }}" class="btn btn-success me-2">
-                        <i class="fas fa-check-circle"></i> Aceptar Documento
-                    </a>
-                    <a href="javascript:void(0);" onclick="confirmarAccion('{{ url_for('documentos.rechazar', id=documento.id) }}', '¿Estás seguro de rechazar este documento?')" class="btn btn-danger me-2">
-                        <i class="fas fa-times-circle"></i> Rechazar Documento
+            <!-- Si el documento está en estado "Recibido" y está asignado al usuario actual -->
+            {% if documento.estado_actual.nombre == 'Recibido' and documento.persona_destino_id == current_user.persona_id %}
+                <a href="{{ url_for('documentos.aceptar', id=documento.id) }}" class="btn btn-success me-2">
+                    <i class="fas fa-check-circle"></i> Aceptar Documento
+                </a>
+                <a href="{{ url_for('documentos.rechazar', id=documento.id) }}" class="btn btn-danger me-2">
+                    <i class="fas fa-times-circle"></i> Rechazar Documento
+                </a>
+            
+            <!-- Si el documento está en estado "En proceso" y está asignado al usuario actual -->
+            {% elif documento.estado_actual.nombre == 'En proceso' and documento.persona_destino_id == current_user.persona_id %}
+                <!-- Opciones para transferir/finalizar -->
+                {% if check_permission('transferir_documento') or check_permission('Transferir documento') %}
+                    <a href="{{ url_for('documentos.transferir', id=documento.id) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-exchange-alt"></i> Transferir Documento
                     </a>
                 {% endif %}
-            {% endif %}
+                
+                {% if check_permission('transferir_documento') or check_permission('Transferir documento') %}
+                    <a href="{{ url_for('documentos.finalizar', id=documento.id) }}" class="btn btn-info me-2">
+                        <i class="fas fa-check-double"></i> Finalizar
+                    </a>
+                {% endif %}
             
-            <!-- Opción para transferir (disponible para todos con permiso) -->
-            {% if check_permission('transferir_documento') or check_permission('Transferir documento') %}
-                <a href="{{ url_for('documentos.transferir', id=documento.id) }}" class="btn btn-primary me-2">
-                    <i class="fas fa-exchange-alt"></i> Transferir Documento
-                </a>
-            {% endif %}
+            <!-- Si el documento está en estado "Finalizado" -->
+            {% elif documento.estado_actual.nombre == 'Finalizado' %}
+                {% if check_permission('transferir_documento') or check_permission('Transferir documento') %}
+                    <a href="{{ url_for('documentos.archivar', id=documento.id) }}" class="btn btn-secondary me-2">
+                        <i class="fas fa-archive"></i> Archivar
+                    </a>
+                {% endif %}
             
-            <!-- Opción para finalizar (disponible si está en proceso) -->
-            {% if documento.estado_actual.nombre == 'En proceso' and (check_permission('transferir_documento') or check_permission('Transferir documento')) %}
-            <a href="{{ url_for('documentos.finalizar', id=documento.id) }}" class="btn btn-info me-2">
-                <i class="fas fa-check-double"></i> Finalizar
-            </a>
-            {% endif %}
-            
-            <!-- Opción para archivar (disponible si está finalizado) -->
-            {% if documento.estado_actual.nombre == 'Finalizado' and (check_permission('transferir_documento') or check_permission('Transferir documento')) %}
-            <a href="{{ url_for('documentos.archivar', id=documento.id) }}" class="btn btn-secondary me-2">
-                <i class="fas fa-archive"></i> Archivar
-            </a>
+            <!-- Para otros estados o si no está asignado al usuario actual -->
+            {% else %}
+                <!-- Mostrar opciones según permisos -->
+                {% if check_permission('transferir_documento') or check_permission('Transferir documento') %}
+                    <a href="{{ url_for('documentos.transferir', id=documento.id) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-exchange-alt"></i> Transferir Documento
+                    </a>
+                {% endif %}
             {% endif %}
         </div>
     </div>

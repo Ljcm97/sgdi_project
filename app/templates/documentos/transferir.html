@@ -76,17 +76,9 @@
                     {% endif %}
                 </div>
                 
-                <!-- Estado -->
-                <div class="col-md-12 mb-3">
-                    {{ form.estado_id.label(class="form-label") }}
-                    {{ form.estado_id(class="form-select", id="estado_id") }}
-                    {% if form.estado_id.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.estado_id.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                <!-- Estado (oculto, ya que siempre será "Recibido") -->
+                <div class="d-none">
+                    {{ form.estado_id(class="form-select") }}
                 </div>
                 
                 <!-- Observaciones -->
@@ -154,19 +146,8 @@
             cargarPersonas(areaInicial);
         }
         
-        // Cambiar texto del botón según el estado seleccionado
-        $("#estado_id").change(function() {
-            var estadoTexto = $("#estado_id option:selected").text();
-            
-            if (estadoTexto === "Recibido") {
-                $("#btn-text").text("Recibir Documento");
-            } else {
-                $("#btn-text").text("Transferir Documento");
-            }
-        });
-        
         // Inicializar el texto del botón
-        $("#estado_id").trigger("change");
+        $("#btn-text").text("Transferir Documento");
     });
 </script>
 {% endblock %}

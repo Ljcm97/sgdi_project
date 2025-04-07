@@ -390,11 +390,21 @@ def transferir(id):
     documento = Documento.query.get_or_404(id)
     form = TransferirDocumentoForm()
     
+    # En la vista GET, establecer el estado "Recibido" por defecto
+    estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+    if estado_recibido:
+        form.estado_id.data = estado_recibido.id
+    
     if form.validate_on_submit():
         # Obtener los objetos necesarios
         area_destino = Area.query.get(form.area_destino_id.data)
         persona_destino = Persona.query.get(form.persona_destino_id.data)
-        estado_nuevo = EstadoDocumento.query.get(form.estado_id.data)
+        
+        # Si no existe el estado "Recibido", usar el estado seleccionado
+        if not estado_recibido:
+            estado_nuevo = EstadoDocumento.query.get(form.estado_id.data)
+        else:
+            estado_nuevo = estado_recibido
         
         # Transferir el documento
         documento.transferir(
@@ -412,7 +422,7 @@ def transferir(id):
             crear_notificacion(
                 usuario_id=usuario_destino.id,
                 titulo=f'Documento transferido - {documento.radicado}',
-                mensaje=f'Se te ha transferido un documento de tipo {documento.tipo_documento.nombre}.',
+                mensaje=f'Se te ha transferido un documento de tipo {documento.tipo_documento.nombre} por {current_user.persona.nombre_completo}.',
                 documento_id=documento.id
             )
         
@@ -423,9 +433,7 @@ def transferir(id):
     if form.errors:
         flash_errors(form)
     
-    return render_template('documentos/transferir.html', 
-                          documento=documento, 
-                          form=form)
+    return render_template('documentos/transferir.html', documento=documento, form=form)
 
 @documentos_bp.route('/aceptar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -457,12 +465,21 @@ def aceptar(id):
         observaciones='Documento aceptado para procesamiento'
     )
     
-    # Notificar a recepción que se aceptó el documento
-    usuario_recepcion = documento.registrado_por
+    # Determinar a quién notificar cuando se acepta el documento
+    usuario_a_notificar = None
     
-    if usuario_recepcion:
+    # Si fue transferido por alguien, notificar a esa persona
+    if documento.ultimo_transferido_por_id:
+        usuario_a_notificar = Usuario.query.get(documento.ultimo_transferido_por_id)
+    
+    # Si no hay un último transferidor, notificar a quien registró el documento
+    if not usuario_a_notificar:
+        usuario_a_notificar = documento.registrado_por
+    
+    # Notificar que se aceptó el documento
+    if usuario_a_notificar:
         crear_notificacion(
-            usuario_id=usuario_recepcion.id,
+            usuario_id=usuario_a_notificar.id,
             titulo=f'Documento aceptado - {documento.radicado}',
             mensaje=f'El documento ha sido aceptado por {current_user.persona.nombre_completo}.',
             documento_id=documento.id
@@ -479,8 +496,7 @@ def aceptar(id):
     flash('Documento aceptado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
 
-
-@documentos_bp.route('/rechazar/<int:id>')
+@documentos_bp.route('/rechazar/<int:id>', methods=['GET', 'POST'])
 @login_required
 @document_access_required
 @permission_required('Rechazar documento')
@@ -493,44 +509,72 @@ def rechazar(id):
         flash('No puedes rechazar este documento porque no está asignado a ti.', 'danger')
         return redirect(url_for('documentos.detalle', id=documento.id))
     
-    # Transferir el documento de vuelta a recepción
-    area_recepcion = Area.query.filter_by(nombre='RECEPCION').first()
-    persona_recepcion = Persona.query.filter_by(area_id=area_recepcion.id).first()
-    
-    if not area_recepcion or not persona_recepcion:
-        flash('No se pudo encontrar el área o persona de recepción.', 'danger')
-        return redirect(url_for('documentos.detalle', id=documento.id))
-    
-    # Obtener el estado "Rechazado" (si existe) o "Recibido" (como fallback)
-    estado_rechazado = EstadoDocumento.query.filter_by(nombre='Rechazado').first()
-    
-    # Si no existe el estado "Rechazado", usar "Recibido"
-    if not estado_rechazado:
-        estado_rechazado = EstadoDocumento.query.filter_by(nombre='Recibido').first()
-    
-    # Transferir el documento
-    documento.transferir(
-        usuario_origen=current_user,
-        area_destino=area_recepcion,
-        persona_destino=persona_recepcion,
-        estado_nuevo=estado_rechazado,
-        observaciones=f'Documento rechazado por {current_user.persona.nombre_completo}'
-    )
-    
-    # Notificar a recepción que se rechazó el documento
-    usuario_recepcion = Usuario.query.filter_by(persona_id=persona_recepcion.id).first()
-    
-    if usuario_recepcion:
-        crear_notificacion(
-            usuario_id=usuario_recepcion.id,
-            titulo=f'Documento rechazado - {documento.radicado}',
-            mensaje=f'El documento ha sido rechazado por {current_user.persona.nombre_completo}.',
-            documento_id=documento.id
+    # Si es una solicitud POST, procesar el formulario
+    if request.method == 'POST':
+        motivo_rechazo = request.form.get('motivo_rechazo', 'No se especificó motivo')
+        
+        # Transferir el documento de vuelta a recepción o a quien lo transfirió
+        area_destino = None
+        persona_destino = None
+        
+        # Si el documento fue transferido por alguien, devolvérselo a esa persona
+        if documento.ultimo_transferido_por_id:
+            usuario_transferidor = Usuario.query.get(documento.ultimo_transferido_por_id)
+            if usuario_transferidor and usuario_transferidor.persona:
+                area_destino = usuario_transferidor.persona.area
+                persona_destino = usuario_transferidor.persona
+                
+                # Notificar a quien transfirió que su documento fue rechazado
+                crear_notificacion(
+                    usuario_id=usuario_transferidor.id,
+                    titulo=f'Documento rechazado - {documento.radicado}',
+                    mensaje=f'El documento que transferiste ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
+                    documento_id=documento.id
+                )
+        
+        # Si no se encontró a quien transfirió, enviar a recepción
+        if area_destino is None or persona_destino is None:
+            area_recepcion = Area.query.filter_by(nombre='RECEPCION').first()
+            persona_recepcion = Persona.query.filter_by(area_id=area_recepcion.id).first() if area_recepcion else None
+            
+            # Si sigue sin encontrar área/persona destino, mostrar error
+            if not area_recepcion or not persona_recepcion:
+                flash('No se pudo encontrar el destino para devolver el documento rechazado.', 'danger')
+                return redirect(url_for('documentos.detalle', id=documento.id))
+            
+            area_destino = area_recepcion
+            persona_destino = persona_recepcion
+            
+            # Notificar a recepción
+            usuario_recepcion = Usuario.query.filter_by(persona_id=persona_destino.id).first()
+            if usuario_recepcion:
+                crear_notificacion(
+                    usuario_id=usuario_recepcion.id,
+                    titulo=f'Documento rechazado - {documento.radicado}',
+                    mensaje=f'El documento ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
+                    documento_id=documento.id
+                )
+        
+        # Obtener el estado "Rechazado" (si existe) o "Recibido" (como fallback)
+        estado_rechazado = EstadoDocumento.query.filter_by(nombre='Rechazado').first()
+        if not estado_rechazado:
+            estado_rechazado = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+        
+        # Transferir el documento
+        documento.transferir(
+            usuario_origen=current_user,
+            area_destino=area_destino,
+            persona_destino=persona_destino,
+            estado_nuevo=estado_rechazado,
+            observaciones=f'Documento rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}'
         )
+        
+        flash('Documento rechazado exitosamente.', 'success')
+        return redirect(url_for('dashboard.index'))
     
-    flash('Documento rechazado exitosamente.', 'success')
-    # Redirigir al dashboard en lugar del detalle del documento
-    return redirect(url_for('dashboard.index'))
+    # Si es GET, mostrar el formulario de rechazo
+    return render_template('documentos/rechazar.html', documento=documento)
+
 
 @documentos_bp.route('/finalizar/<int:id>')
 @login_required

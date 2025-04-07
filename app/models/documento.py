@@ -24,8 +24,12 @@ class Documento(db.Model, CRUDMixin):
     registrado_por_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relaciones
-    registrado_por = db.relationship('Usuario', backref=db.backref('documentos_registrados', lazy=True))
+    # Nuevo campo para almacenar quien transfirió por última vez
+    ultimo_transferido_por_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    
+    # Relaciones con la columna de clave foránea explícitamente especificada
+    registrado_por = db.relationship('Usuario', foreign_keys=[registrado_por_id], backref=db.backref('documentos_registrados', lazy=True))
+    ultimo_transferido_por = db.relationship('Usuario', foreign_keys=[ultimo_transferido_por_id], backref=db.backref('documentos_transferidos', lazy=True))
     
     # Movimientos del documento
     movimientos = db.relationship('Movimiento', backref='documento', lazy=True, 
@@ -69,6 +73,9 @@ class Documento(db.Model, CRUDMixin):
         self.area_destino_id = area_destino.id
         self.persona_destino_id = persona_destino.id
         self.estado_actual_id = estado_nuevo.id
+        
+        # Guardar quien realizó la transferencia
+        self.ultimo_transferido_por_id = usuario_origen.id
         
         db.session.commit()
         return self

@@ -29,6 +29,7 @@ def marcar_leida(id):
         
         # Verificar si el documento existe y si el usuario tiene acceso
         if documento and has_document_access(documento):
+            # Redirigir al detalle del documento
             return redirect(url_for('documentos.detalle', id=notificacion.documento_id))
         else:
             flash('No tienes acceso al documento relacionado.', 'warning')
