@@ -1,69 +1,88 @@
 {% extends 'base.html' %}
 
+{% from "macros/pagination.html" import render_pagination %}
+
 {% block title %}Gestión de Tipos de Documento - SGDI{% endblock %}
 
 {% block content %}
 <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h3 class="card-title mb-0">
-            <i class="fas fa-file me-2"></i> Gestión de Tipos de Documento
+            <i class="fas fa-file me-2"></i> GESTIÓN DE TIPOS DE DOCUMENTO
         </h3>
+        <div>
+            <a href="{{ url_for('tipos_documento.crear') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-plus-circle"></i> Crear Nuevo Tipo de Documento
+            </a>
+        </div>
     </div>
+
+    <!-- Filtro de búsqueda -->
     <div class="card-body">
-        <!-- Formulario de creación -->
-        <div class="row mb-4">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Crear Nuevo Tipo de Documento</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('tipos_documento.crear') }}">
-                            {{ form.hidden_tag() }}
-                            
-                            <div class="mb-3">
-                                {{ form.nombre.label(class="form-label") }}
-                                {{ form.nombre(class="form-control") }}
-                                {% if form.nombre.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.nombre.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle me-1"></i> Crear Tipo de Documento
+        <!-- Sección de filtros -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buscar Tipos de Documento</h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('tipos_documento.index') }}">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Buscar por nombre..." value="{{ search if search else '' }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i> Buscar
                                 </button>
                             </div>
-                        </form>
+                        </div>
+                        <div class="col-md-4">
+                            {% if search %}
+                            <a href="{{ url_for('tipos_documento.index') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-        
-        <!-- Listado de tipos de documento -->
+
         {% if tipos %}
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
+                <table class="table table-hover table-striped table-bordered">
+                    <thead class="bg-light text-center">
                         <tr>
-                            <th>Nombre</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="align-middle">NOMBRE</th>
+                            <th class="align-middle">DESCRIPCIÓN</th>
+                            <th class="align-middle">ESTADO</th>
+                            <th class="align-middle">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tipo in tipos %}
-                            <tr>
-                                <td>{{ tipo.nombre }}</td>
-                                <td class="text-center">
+                            <tr class="text-left">
+                                <td class="align-middle">{{ tipo.nombre }}</td>
+                                <td class="align-middle">{{ tipo.descripcion or 'N/A' }}</td>
+                                <td class="align-middle text-center">
+                                    {% if tipo.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('tipos_documento.editar', id=tipo.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ url_for('tipos_documento.eliminar', id=tipo.id) }}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar este tipo de documento? Esta acción no se puede deshacer.')">
+                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('tipos_documento.toggle_estado', id=tipo.id) }}', '{{ tipo.nombre }}', {{ 'true' if tipo.activo else 'false' }})" class="btn btn-warning" title="{{ 'Desactivar' if tipo.activo else 'Activar' }}">
+                                            {% if tipo.activo %}
+                                                <i class="fas fa-ban"></i>
+                                            {% else %}
+                                                <i class="fas fa-check"></i>
+                                            {% endif %}
+                                        </a>
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('tipos_documento.eliminar', id=tipo.id) }}', '¿Estás seguro de eliminar el tipo de documento {{ tipo.nombre }}? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -79,5 +98,48 @@
             </div>
         {% endif %}
     </div>
+
+    <!-- Controles de paginación -->
+    {{ render_pagination(pagination) }}
 </div>
+
+<script>
+    function confirmarCambioEstado(url, nombre, estaActivo) {
+        const accion = estaActivo ? 'desactivar' : 'activar';
+        const titulo = estaActivo ? 'Desactivar tipo de documento' : 'Activar tipo de documento';
+        const icono = estaActivo ? 'warning' : 'question';
+        
+        Swal.fire({
+            title: titulo,
+            text: `¿Estás seguro de ${accion} el tipo de documento ${nombre}?`,
+            icon: icono,
+            showCancelButton: true,
+            confirmButtonColor: estaActivo ? '#dc3545' : '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Sí, ${accion}`,
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+    
+    function confirmarEliminacion(url, mensaje) {
+        Swal.fire({
+            title: 'Eliminar tipo de documento',
+            text: mensaje,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+</script>
 {% endblock %}

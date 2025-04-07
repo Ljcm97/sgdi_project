@@ -4,17 +4,22 @@ from app import db
 from app.models.tipo_documento import TipoDocumento
 from app.utils.decorators import admin_required
 from app.utils.helpers import flash_errors
-from wtforms import StringField
+from app.utils.pagination import Pagination
+from wtforms import StringField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, Length
 from flask_wtf import FlaskForm
 from sqlalchemy import func
 
-# Formulario simple para tipos de documento
+# Formulario para tipos de documento
 class TipoDocumentoForm(FlaskForm):
     nombre = StringField('Nombre', validators=[
         DataRequired(message='Nombre de tipo de documento obligatorio'),
         Length(max=100, message='Nombre demasiado largo')
     ])
+    descripcion = TextAreaField('Descripción', validators=[
+        Length(max=500, message='Descripción demasiado larga')
+    ])
+    activo = BooleanField('Activo', default=True)
 
 tipos_documento_bp = Blueprint('tipos_documento', __name__, url_prefix='/tipos-documento')
 
@@ -23,12 +28,33 @@ tipos_documento_bp = Blueprint('tipos_documento', __name__, url_prefix='/tipos-d
 @admin_required
 def index():
     """Vista para listar todos los tipos de documento"""
-    # Obtener tipos ordenados alfabéticamente por nombre
-    tipos = TipoDocumento.query.order_by(TipoDocumento.nombre).all()
+    # Obtener parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search = request.args.get('search', '')
+    
+    # Crear la consulta base
+    query = TipoDocumento.query
+    
+    # Aplicar filtro de búsqueda si existe
+    if search:
+        query = query.filter(TipoDocumento.nombre.ilike(f'%{search}%'))
+    
+    # Ordenar por nombre
+    query = query.order_by(TipoDocumento.nombre)
+    
+    # Paginar los resultados
+    pagination = Pagination(query, page, per_page, 'tipos_documento.index')
+    tipos = pagination.items
+    
     form = TipoDocumentoForm()
-    return render_template('admin/tipos_documento/index.html', tipos=tipos, form=form)
+    return render_template('admin/tipos_documento/index.html', 
+                          tipos=tipos, 
+                          pagination=pagination,
+                          form=form,
+                          search=search)
 
-@tipos_documento_bp.route('/crear', methods=['POST'])
+@tipos_documento_bp.route('/crear', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def crear():
@@ -46,15 +72,20 @@ def crear():
             return redirect(url_for('tipos_documento.index'))
         
         # Crear el tipo de documento
-        tipo = TipoDocumento(nombre=nombre_normalizado)
+        tipo = TipoDocumento(
+            nombre=nombre_normalizado,
+            descripcion=form.descripcion.data,
+            activo=form.activo.data
+        )
         db.session.add(tipo)
         db.session.commit()
         
         flash('Tipo de documento creado exitosamente.', 'success')
+        return redirect(url_for('tipos_documento.index'))
     else:
         flash_errors(form)
     
-    return redirect(url_for('tipos_documento.index'))
+    return render_template('admin/tipos_documento/crear.html', form=form)
 
 @tipos_documento_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -80,6 +111,8 @@ def editar(id):
             
             # Actualizar el tipo de documento
             tipo.nombre = nombre_normalizado
+            tipo.descripcion = form.descripcion.data
+            tipo.activo = form.activo.data
             db.session.commit()
             
             flash('Tipo de documento actualizado exitosamente.', 'success')
@@ -106,4 +139,19 @@ def eliminar(id):
     db.session.commit()
     
     flash('Tipo de documento eliminado exitosamente.', 'success')
+    return redirect(url_for('tipos_documento.index'))
+
+@tipos_documento_bp.route('/toggle-estado/<int:id>')
+@login_required
+@admin_required
+def toggle_estado(id):
+    """Vista para activar/desactivar un tipo de documento"""
+    tipo = TipoDocumento.query.get_or_404(id)
+    
+    # Cambiar el estado
+    tipo.activo = not tipo.activo
+    db.session.commit()
+    
+    estado = "activado" if tipo.activo else "desactivado"
+    flash(f'Tipo de documento {estado} exitosamente.', 'success')
     return redirect(url_for('tipos_documento.index'))
