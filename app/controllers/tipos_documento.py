@@ -63,7 +63,7 @@ def crear():
     
     if form.validate_on_submit():
         # Normalizar el nombre (convertir a mayúsculas para comparación)
-        nombre_normalizado = form.nombre.data.strip().title()
+        nombre_normalizado = form.nombre.data.strip().upper()
         
         # Verificar si ya existe un tipo con el mismo nombre
         existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado.upper()).first()
@@ -98,13 +98,10 @@ def editar(id):
     if request.method == 'POST':
         if form.validate_on_submit():
             # Normalizar el nombre (convertir a mayúsculas para comparación)
-            nombre_normalizado = form.nombre.data.strip().title()
+            nombre_normalizado = form.nombre.data.strip().upper()
             
             # Verificar si ya existe otro tipo con el mismo nombre
-            existente = TipoDocumento.query.filter(
-                func.upper(TipoDocumento.nombre) == nombre_normalizado.upper(), 
-                TipoDocumento.id != id
-            ).first()
+            existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado.upper(), TipoDocumento.id != id).first()
             if existente:
                 flash('Ya existe otro tipo de documento con este nombre.', 'danger')
                 return redirect(url_for('tipos_documento.index'))
