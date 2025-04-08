@@ -66,7 +66,7 @@ def crear():
         # Normalizar el nombre (convertir a mayúsculas para comparación)
         nombre_normalizado = form.nombre.data.strip().upper()
         
-        # Verificar si ya existe una transportadora con el mismo nombre
+        # Verificar si ya existe una transportadora con el mismo nombre (insensible a mayúsculas/minúsculas)
         existente = Transportadora.query.filter(func.upper(Transportadora.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe una transportadora con este nombre.', 'danger')
@@ -102,7 +102,10 @@ def editar(id):
             nombre_normalizado = form.nombre.data.strip().upper()
             
             # Verificar si ya existe otra transportadora con el mismo nombre
-            existente = Transportadora.query.filter(func.upper(Transportadora.nombre) == nombre_normalizado, Transportadora.id != id).first()
+            existente = Transportadora.query.filter(
+                func.upper(Transportadora.nombre) == nombre_normalizado, 
+                Transportadora.id != id
+            ).first()
             if existente:
                 flash('Ya existe otra transportadora con este nombre.', 'danger')
                 return redirect(url_for('transportadoras.index'))

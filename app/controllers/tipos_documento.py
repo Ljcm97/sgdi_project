@@ -66,7 +66,7 @@ def crear():
         nombre_normalizado = form.nombre.data.strip().upper()
         
         # Verificar si ya existe un tipo con el mismo nombre
-        existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado.upper()).first()
+        existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe un tipo de documento con este nombre.', 'danger')
             return redirect(url_for('tipos_documento.index'))
@@ -101,7 +101,7 @@ def editar(id):
             nombre_normalizado = form.nombre.data.strip().upper()
             
             # Verificar si ya existe otro tipo con el mismo nombre
-            existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado.upper(), TipoDocumento.id != id).first()
+            existente = TipoDocumento.query.filter(func.upper(TipoDocumento.nombre) == nombre_normalizado, TipoDocumento.id != id).first()
             if existente:
                 flash('Ya existe otro tipo de documento con este nombre.', 'danger')
                 return redirect(url_for('tipos_documento.index'))

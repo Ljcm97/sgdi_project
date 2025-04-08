@@ -14,14 +14,20 @@ def index():
     estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
     estado_finalizado = EstadoDocumento.query.filter_by(nombre='Finalizado').first()
+    estado_archivado = EstadoDocumento.query.filter_by(nombre='Archivado').first()
     
     # Contar documentos pendientes (recibidos + en proceso)
     pendientes_query = Documento.query.filter(
         Documento.estado_actual_id.in_([estado_recibido.id, estado_en_proceso.id])
     )
     
-    # Contar documentos finalizados
-    finalizados_query = Documento.query.filter_by(estado_actual_id=estado_finalizado.id)
+    # Contar documentos finalizados (incluye los archivados)
+    finalizados_query = Documento.query.filter(
+        Documento.estado_actual_id.in_([
+            estado_finalizado.id if estado_finalizado else None,
+            estado_archivado.id if estado_archivado else None
+        ])
+    )
     
     # Filtrar según el rol del usuario
     if current_user.rol.nombre == 'Superadministrador':
@@ -55,7 +61,15 @@ def index():
     
     # Preparar IDs de estado para filtros en la búsqueda
     estado_pendiente_id = ",".join([str(estado_recibido.id), str(estado_en_proceso.id)])
-    estado_finalizado_id = str(estado_finalizado.id) if estado_finalizado else ""
+    
+    # Incluir estado finalizado y archivado
+    estado_finalizado_ids = []
+    if estado_finalizado:
+        estado_finalizado_ids.append(str(estado_finalizado.id))
+    if estado_archivado:
+        estado_finalizado_ids.append(str(estado_archivado.id))
+    
+    estado_finalizado_id = ",".join(estado_finalizado_ids)
     
     return render_template('dashboard.html',
                           documentos_pendientes=documentos_pendientes,
@@ -72,14 +86,20 @@ def contador_documentos():
     estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
     estado_finalizado = EstadoDocumento.query.filter_by(nombre='Finalizado').first()
+    estado_archivado = EstadoDocumento.query.filter_by(nombre='Archivado').first()
     
     # Contar documentos pendientes (recibidos + en proceso)
     pendientes_query = Documento.query.filter(
         Documento.estado_actual_id.in_([estado_recibido.id, estado_en_proceso.id])
     )
     
-    # Contar documentos finalizados
-    finalizados_query = Documento.query.filter_by(estado_actual_id=estado_finalizado.id)
+    # Contar documentos finalizados (incluye los archivados)
+    finalizados_query = Documento.query.filter(
+        Documento.estado_actual_id.in_([
+            estado_finalizado.id if estado_finalizado else None,
+            estado_archivado.id if estado_archivado else None
+        ])
+    )
     
     # Filtrar según el rol del usuario
     if current_user.rol.nombre == 'Superadministrador':

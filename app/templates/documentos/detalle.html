@@ -167,26 +167,26 @@
     </div>
     <div class="card-body">
         {% if movimientos %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Fecha y Hora</th>
-                            <th>Usuario</th>
-                            <th>Origen</th>
-                            <th>Destino</th>
-                            <th>Estado</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="bg-light text-center">
+                    <tr>
+                        <th class="align-middle">FECHA Y HORA</th>
+                        <th class="align-middle">USUARIO</th>
+                        <th class="align-middle">ORIGEN</th>
+                        <th class="align-middle">DESTINO</th>
+                        <th class="align-middle">ESTADO</th>
+                        <th class="align-middle">OBSERVACIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
                         {% for movimiento in movimientos %}
                             <tr>
                                 <td>{{ movimiento.fecha_hora.strftime('%d/%m/%Y %H:%M') }}</td>
                                 <td>{{ movimiento.usuario_origen.username }}</td>
                                 <td>{{ movimiento.area_origen.nombre }} - {{ movimiento.persona_origen.nombre_completo }}</td>
                                 <td>{{ movimiento.area_destino.nombre }} - {{ movimiento.persona_destino.nombre_completo }}</td>
-                                <td>
+                                <td class="text-center">
                                     <span class="badge" style="background-color: {{ movimiento.estado_documento.color }};">
                                         {{ movimiento.estado_documento.nombre }}
                                     </span>

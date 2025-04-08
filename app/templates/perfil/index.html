@@ -126,15 +126,15 @@
             <div class="tab-pane fade show active" id="documentos" role="tabpanel" aria-labelledby="documentos-tab">
                 {% if current_user.persona.documentos_asignados %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                        <table class="table table-hover table-striped table-bordered">
+                            <thead class="bg-light text-center">
                                 <tr>
-                                    <th>Radicado</th>
-                                    <th>Fecha</th>
-                                    <th>Tipo</th>
-                                    <th>Remitente</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th class="align-middle">RADICADO</th>
+                                    <th class="align-middle">FECHA</th>
+                                    <th class="align-middle">TIPO</th>
+                                    <th class="align-middle">REMITENTE</th>
+                                    <th class="align-middle">ESTADO</th>
+                                    <th class="align-middle">ACCIONES</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -144,12 +144,12 @@
                                         <td>{{ documento.fecha_recepcion.strftime('%d/%m/%Y %H:%M') }}</td>
                                         <td>{{ documento.tipo_documento.nombre }}</td>
                                         <td>{{ documento.remitente }}</td>
-                                        <td>
+                                        <td class="text-center">
                                             <span class="badge" style="background-color: {{ documento.estado_actual.color }};">
                                                 {{ documento.estado_actual.nombre }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <a href="{{ url_for('documentos.detalle', id=documento.id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-eye"></i> Ver
                                             </a>
@@ -168,14 +168,14 @@
             <div class="tab-pane fade" id="notificaciones" role="tabpanel" aria-labelledby="notificaciones-tab">
                 {% if current_user.notificaciones %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                        <table class="table table-hover table-striped table-bordered">
+                            <thead class="bg-light text-center">
                                 <tr>
-                                    <th>Fecha</th>
-                                    <th>Título</th>
-                                    <th>Mensaje</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th class="align-middle">FECHA</th>
+                                    <th class="align-middle">TÍTULO</th>
+                                    <th class="align-middle">MENSAJE</th>
+                                    <th class="align-middle">ESTADO</th>
+                                    <th class="align-middle">ACCIONES</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -184,14 +184,14 @@
                                         <td>{{ notif.creado_en.strftime('%d/%m/%Y %H:%M') }}</td>
                                         <td>{{ notif.titulo }}</td>
                                         <td>{{ notif.mensaje }}</td>
-                                        <td>
+                                        <td class="text-center">
                                             {% if notif.leida %}
                                                 <span class="badge bg-secondary">Leída</span>
                                             {% else %}
                                                 <span class="badge bg-warning text-dark">No leída</span>
                                             {% endif %}
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <a href="{{ url_for('notificaciones.marcar_leida', id=notif.id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-eye"></i> Ver
                                             </a>
