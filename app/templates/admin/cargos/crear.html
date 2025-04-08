@@ -45,6 +45,19 @@
                             {% endif %}
                         </div>
                         
+                        <div class="mb-3">
+                            {{ form.areas.label(class="form-label") }}
+                            {{ form.areas(class="form-select", multiple=true, size=5) }}
+                            <small class="form-text text-muted">Mantenga presionada la tecla Ctrl para seleccionar múltiples áreas</small>
+                            {% if form.areas.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.areas.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
                         <div class="form-check mb-3">
                             {{ form.activo(class="form-check-input") }}
                             {{ form.activo.label(class="form-check-label") }}

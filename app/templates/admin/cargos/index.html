@@ -27,7 +27,7 @@
             <div class="card-body">
                 <form method="GET" action="{{ url_for('cargos.index') }}">
                     <div class="row g-3">
-                        <div class="col-md-8">
+                        <div class="col-md-5">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="search" placeholder="Buscar por nombre..." value="{{ search if search else '' }}">
                                 <button class="btn btn-primary" type="submit">
@@ -35,8 +35,16 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            {% if search %}
+                        <div class="col-md-5">
+                            <select class="form-select" name="area_id" onchange="this.form.submit()">
+                                <option value="0">TODAS LAS ÁREAS</option>
+                                {% for area in areas %}
+                                <option value="{{ area.id }}" {% if area_id and area_id == area.id %}selected{% endif %}>{{ area.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            {% if search or area_id %}
                             <a href="{{ url_for('cargos.index') }}" class="btn btn-secondary w-100">
                                 <i class="fas fa-times"></i> Limpiar
                             </a>
@@ -47,24 +55,26 @@
             </div>
         </div>
 
-        {% if cargos %}
+        {% if cargos_con_areas %}
             <div class="table-responsive">
                 <table class="table table-hover table-striped table-bordered">
                     <thead class="bg-light text-center">
                         <tr>
                             <th class="align-middle">NOMBRE</th>
                             <th class="align-middle">DESCRIPCIÓN</th>
+                            <th class="align-middle">ÁREA</th>
                             <th class="align-middle">ESTADO</th>
                             <th class="align-middle">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for cargo in cargos %}
+                        {% for cargo_info in cargos_con_areas %}
                             <tr class="text-left">
-                                <td class="align-middle">{{ cargo.nombre }}</td>
-                                <td class="align-middle">{{ cargo.descripcion or 'N/A' }}</td>
+                                <td class="align-middle">{{ cargo_info.cargo.nombre }}</td>
+                                <td class="align-middle">{{ cargo_info.cargo.descripcion or 'N/A' }}</td>
+                                <td class="align-middle">{{ cargo_info.areas }}</td>
                                 <td class="align-middle text-center">
-                                    {% if cargo.activo %}
+                                    {% if cargo_info.cargo.activo %}
                                         <span class="badge bg-success">Activo</span>
                                     {% else %}
                                         <span class="badge bg-danger">Inactivo</span>
@@ -72,17 +82,17 @@
                                 </td>
                                 <td class="align-middle text-center">
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ url_for('cargos.editar', id=cargo.id) }}" class="btn btn-primary" title="Editar">
+                                        <a href="{{ url_for('cargos.editar', id=cargo_info.cargo.id) }}" class="btn btn-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('cargos.toggle_estado', id=cargo.id) }}', '{{ cargo.nombre }}', {{ 'true' if cargo.activo else 'false' }})" class="btn btn-warning" title="{{ 'Desactivar' if cargo.activo else 'Activar' }}">
-                                            {% if cargo.activo %}
+                                        <a href="javascript:void(0);" onclick="confirmarCambioEstado('{{ url_for('cargos.toggle_estado', id=cargo_info.cargo.id) }}', '{{ cargo_info.cargo.nombre }}', {{ 'true' if cargo_info.cargo.activo else 'false' }})" class="btn btn-warning" title="{{ 'Desactivar' if cargo_info.cargo.activo else 'Activar' }}">
+                                            {% if cargo_info.cargo.activo %}
                                                 <i class="fas fa-ban"></i>
                                             {% else %}
                                                 <i class="fas fa-check"></i>
                                             {% endif %}
                                         </a>
-                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('cargos.eliminar', id=cargo.id) }}', '¿Estás seguro de eliminar el cargo {{ cargo.nombre }}? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
+                                        <a href="javascript:void(0);" onclick="confirmarEliminacion('{{ url_for('cargos.eliminar', id=cargo_info.cargo.id) }}', '¿Estás seguro de eliminar el cargo {{ cargo_info.cargo.nombre }}? Esta acción no se puede deshacer.')" class="btn btn-danger" title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>

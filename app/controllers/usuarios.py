@@ -95,7 +95,11 @@ def editar(id):
         usuario.activo = form.activo.data
 
         if form.password.data:
-            usuario.actualizar_password(form.password.data)
+            try:
+                usuario.actualizar_password(form.password.data)
+            except ValueError as e:
+                flash(str(e), 'danger')
+                return redirect(url_for('usuarios.editar', id=id))
 
         db.session.commit()
         

@@ -73,7 +73,6 @@ def create_app():
     from app.controllers.reportes import reportes_bp
     from app.controllers.notificaciones import notificaciones_bp
     from app.controllers.perfil import perfil_bp
-    from app.controllers.area_cargos import area_cargos_bp  # Nuevo blueprint
     from app.controllers.exportacion import exportacion_bp
     from app.utils.template_filters import template_filters_bp
 
@@ -93,7 +92,6 @@ def create_app():
     app.register_blueprint(reportes_bp)
     app.register_blueprint(notificaciones_bp)
     app.register_blueprint(perfil_bp)
-    app.register_blueprint(area_cargos_bp)  # Registro del nuevo blueprint
     app.register_blueprint(exportacion_bp)
     app.register_blueprint(template_filters_bp)
 

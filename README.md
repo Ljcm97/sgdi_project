@@ -114,9 +114,12 @@ La aplicación estará disponible en `http://localhost:5000`
 - `requirements.txt`: Dependencias del proyecto
 - `run.py`: Script para ejecutar la aplicación
 
-## Autor
+## Autores
 
-- Ricardo Alexander Bohórquez Méndez - Analista de Sistemas
+- Lina Julieth Carvajal Mendoza - Aprendiz ADSO (Analista y desarrollador de software)
+- Oscar Alejandro Herrera Gualtero - Aprendiz ADSI 
+- Edward Orlando Gaitan Castro - Aprendiz ADSI 
+- Ricardo Alexander Bohórquez Méndez - Analista de Sistemas (Ingeniero de Sistemas)
 
 ## Licencia
 
