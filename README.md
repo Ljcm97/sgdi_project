@@ -38,13 +38,11 @@ cd sgdi_project
 2. Crear y activar un entorno virtual:
 
 ```bash
+
 # En Windows
 python -m venv venv
 venv\Scripts\activate
 
-# En macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
 ```
 
 3. Instalar las dependencias:
@@ -80,9 +78,9 @@ flask db upgrade
 Para ejecutar la aplicación en modo desarrollo:
 
 ```bash
-flask run
-# o
-python run.py
+
+flask run --host=0.0.0.0
+
 ```
 
 La aplicación estará disponible en `http://localhost:5000`
