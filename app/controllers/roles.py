@@ -60,11 +60,11 @@ def crear():
     form = RolForm()
     
     if form.validate_on_submit():
-        # Normalizar nombre (trim y pasar a mayúsculas para comparar)
-        nombre_normalizado = form.nombre.data.strip()
+        # Normalizar nombre (trim y convertir a mayúsculas para comparar)
+        nombre_normalizado = form.nombre.data.strip().upper()
         
         # Verificar si ya existe un rol con el mismo nombre (case insensitive)
-        existente = Rol.query.filter(func.upper(Rol.nombre) == nombre_normalizado.upper()).first()
+        existente = Rol.query.filter(func.upper(Rol.nombre) == nombre_normalizado).first()
         if existente:
             flash('Ya existe un rol con este nombre.', 'danger')
             return redirect(url_for('roles.crear'))
@@ -115,12 +115,12 @@ def editar(id):
         form.permisos.data = permiso_ids
     
     if form.validate_on_submit():
-        # Normalizar nombre (trim y pasar a mayúsculas para comparar)
-        nombre_normalizado = form.nombre.data.strip()
+        # Normalizar nombre (trim y convertir a mayúsculas para comparar)
+        nombre_normalizado = form.nombre.data.strip().upper()
         
         # Verificar si ya existe otro rol con el mismo nombre
         existente = Rol.query.filter(
-            func.upper(Rol.nombre) == nombre_normalizado.upper(), 
+            func.upper(Rol.nombre) == nombre_normalizado, 
             Rol.id != id
         ).first()
         
