@@ -28,7 +28,7 @@
                                 <span class="fw-bold">Radicado:</span> {{ documento.radicado }}
                             </div>
                             <div class="col-md-3 mb-2">
-                                <span class="fw-bold">Tipo:</span> {{ documento.tipo_documento.nombre }}
+                                <span class="fw-bold">Tipo de documento:</span> {{ documento.tipo_documento.nombre }}
                             </div>
                             <div class="col-md-3 mb-2">
                                 <span class="fw-bold">Remitente:</span> {{ documento.remitente }}
@@ -50,6 +50,7 @@
             <div class="mb-3">
                 <label for="motivo_rechazo" class="form-label">Motivo del Rechazo</label>
                 <textarea class="form-control" id="motivo_rechazo" name="motivo_rechazo" rows="4" required placeholder="Indique el motivo por el cual rechaza este documento..."></textarea>
+                <small class="form-text text-muted">Este motivo será visible en el historial de movimientos y se notificará a la persona que transfirió el documento.</small>
             </div>
             
             <div class="text-center mt-4">

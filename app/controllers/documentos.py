@@ -153,8 +153,8 @@ def procesar():
     buscar_form = BuscarDocumentoForm()
     
     if form.validate_on_submit():
-        # Obtener el estado inicial (Recibido)
-        estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+        # Obtener el estado inicial (Recepcionado)
+        estado_recepcionado = EstadoDocumento.query.filter_by(nombre='Recepcionado').first()
         
         # La fecha de recepción del formulario
         fecha_recepcion = form.fecha_recepcion.data
@@ -170,7 +170,7 @@ def procesar():
             observaciones=form.observaciones.data,
             area_destino_id=form.area_destino_id.data,
             persona_destino_id=form.persona_destino_id.data,
-            estado_actual_id=estado_recibido.id,
+            estado_actual_id=estado_recepcionado.id,
             tipo=form.tipo.data,
             registrado_por_id=current_user.id,
             creado_en=fecha_recepcion  # ¡Establecer explícitamente la fecha de creación!
@@ -185,7 +185,7 @@ def procesar():
             persona_origen_id=current_user.persona_id,
             area_destino_id=documento.area_destino_id,
             persona_destino_id=documento.persona_destino_id,
-            estado_documento_id=estado_recibido.id,
+            estado_documento_id=estado_recepcionado.id,
             observaciones='Documento registrado en recepción'
         )
         db.session.add(movimiento)
@@ -301,8 +301,8 @@ def registrar():
         form.fecha_recepcion.data = datetime.now()
     
     if form.validate_on_submit():
-        # Obtener el estado inicial (Recibido)
-        estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+        # Obtener el estado inicial (Recepcionado)
+        estado_recepcionado = EstadoDocumento.query.filter_by(nombre='Recepcionado').first()
         
         # La fecha de recepción del formulario
         fecha_recepcion = form.fecha_recepcion.data
@@ -318,7 +318,7 @@ def registrar():
             observaciones=form.observaciones.data,
             area_destino_id=form.area_destino_id.data,
             persona_destino_id=form.persona_destino_id.data,
-            estado_actual_id=estado_recibido.id,
+            estado_actual_id=estado_recepcionado.id,
             tipo=form.tipo.data,
             registrado_por_id=current_user.id,
             creado_en=fecha_recepcion  
@@ -333,7 +333,7 @@ def registrar():
             persona_origen_id=current_user.persona_id,
             area_destino_id=documento.area_destino_id,
             persona_destino_id=documento.persona_destino_id,
-            estado_documento_id=estado_recibido.id,
+            estado_documento_id=estado_recepcionado.id,
             observaciones='Documento registrado en recepción'
         )
         db.session.add(movimiento)
@@ -390,34 +390,48 @@ def transferir(id):
     documento = Documento.query.get_or_404(id)
     form = TransferirDocumentoForm()
     
-    # En la vista GET, establecer el estado "Recibido" por defecto
-    estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
-    if estado_recibido:
-        form.estado_id.data = estado_recibido.id
+    # En la vista GET, buscar el estado "Documento Transferido" por defecto
+    estado_transferido = EstadoDocumento.query.filter_by(nombre='Documento Transferido').first()
     
+    # Si no existe, usar el estado "Recepcionado" como alternativa
+    if not estado_transferido:
+        estado_transferido = EstadoDocumento.query.filter_by(nombre='Recepcionado').first()
+    
+    if estado_transferido:
+        form.estado_id.data = estado_transferido.id
+
     if form.validate_on_submit():
         # Obtener los objetos necesarios
         area_destino = Area.query.get(form.area_destino_id.data)
         persona_destino = Persona.query.get(form.persona_destino_id.data)
+
+        # Validaciones de existencia
+        if not area_destino or not persona_destino:
+            flash('El área o la persona seleccionada no existen.', 'danger')
+            return redirect(url_for('documentos.transferir', id=documento.id))
         
-        # Si no existe el estado "Recibido", usar el estado seleccionado
-        if not estado_recibido:
+        # Validación de transferencia a mismo destino
+        if area_destino.id == documento.area_destino_id and persona_destino.id == documento.persona_destino_id:
+            flash('No puedes transferir el documento a la misma área y persona.', 'danger')
+            return redirect(url_for('documentos.transferir', id=documento.id))
+        
+        # Usar estado seleccionado si no se encontró el estado por defecto
+        if not estado_transferido:
             estado_nuevo = EstadoDocumento.query.get(form.estado_id.data)
         else:
-            estado_nuevo = estado_recibido
-        
+            estado_nuevo = estado_transferido
+
         # Transferir el documento
         documento.transferir(
             usuario_origen=current_user,
             area_destino=area_destino,
             persona_destino=persona_destino,
             estado_nuevo=estado_nuevo,
-            observaciones=form.observaciones.data
+            observaciones=form.observaciones.data or "Documento transferido"
         )
-        
+
         # Crear notificación para la persona destino
         usuario_destino = Usuario.query.filter_by(persona_id=persona_destino.id).first()
-        
         if usuario_destino:
             crear_notificacion(
                 usuario_id=usuario_destino.id,
@@ -425,14 +439,23 @@ def transferir(id):
                 mensaje=f'Se te ha transferido un documento de tipo {documento.tipo_documento.nombre} por {current_user.persona.nombre_completo}.',
                 documento_id=documento.id
             )
-        
+
+        # Notificar también al registrador original
+        if documento.registrado_por_id and documento.registrado_por_id != current_user.id:
+            crear_notificacion(
+                usuario_id=documento.registrado_por_id,
+                titulo=f'Documento transferido - {documento.radicado}',
+                mensaje=f'El documento ha sido transferido por {current_user.persona.nombre_completo} a {persona_destino.nombre_completo}.',
+                documento_id=documento.id
+            )
+
         flash('Documento transferido exitosamente.', 'success')
         return redirect(url_for('documentos.detalle', id=documento.id))
-    
+
     # Si hay errores de validación, mostrarlos
     if form.errors:
         flash_errors(form)
-    
+
     return render_template('documentos/transferir.html', documento=documento, form=form)
 
 @documentos_bp.route('/aceptar/<int:id>', methods=['GET', 'POST'])
@@ -442,7 +465,7 @@ def transferir(id):
 def aceptar(id):
     """Vista para aceptar un documento"""
     documento = Documento.query.get_or_404(id)
-    
+
     # Verificar si el documento está asignado al usuario actual
     if documento.persona_destino_id != current_user.persona_id:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -452,11 +475,43 @@ def aceptar(id):
             }), 403
         flash('No puedes aceptar este documento porque no está asignado a ti.', 'danger')
         return redirect(url_for('documentos.detalle', id=documento.id))
-    
+
+    # Obtener el estado "Recibido" primero
+    estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
+
+    # Si no existe el estado "Recibido", crearlo
+    if not estado_recibido:
+        estado_recibido = EstadoDocumento(
+            nombre='Recibido',
+            descripcion='Documento en proceso de recibirse',
+            color='#3498db'  # Azul
+        )
+        db.session.add(estado_recibido)
+        db.session.commit()
+
+    # Crear un movimiento para "Recibido"
+    movimiento_recibido = Movimiento(
+        documento_id=documento.id,
+        fecha_hora=datetime.utcnow(),
+        usuario_origen_id=current_user.id,
+        area_origen_id=current_user.persona.area_id,
+        persona_origen_id=current_user.persona_id,
+        area_destino_id=current_user.persona.area_id,
+        persona_destino_id=current_user.persona_id,
+        estado_documento_id=estado_recibido.id,
+        observaciones='Recibido del documento'
+    )
+    db.session.add(movimiento_recibido)
+    db.session.commit()
+
+    # Pequeña pausa para asegurar que los timestamps sean diferentes
+    import time
+    time.sleep(0.5)
+
     # Obtener el estado "En proceso"
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
-    
-    # Transferir el documento al mismo usuario pero cambiar el estado
+
+    # Transferir el documento al mismo usuario pero cambiar el estado a "En proceso"
     documento.transferir(
         usuario_origen=current_user,
         area_destino=current_user.persona.area,
@@ -464,27 +519,29 @@ def aceptar(id):
         estado_nuevo=estado_en_proceso,
         observaciones='Documento aceptado para procesamiento'
     )
-    
-    # Determinar a quién notificar cuando se acepta el documento
-    usuario_a_notificar = None
-    
-    # Si fue transferido por alguien, notificar a esa persona
-    if documento.ultimo_transferido_por_id:
-        usuario_a_notificar = Usuario.query.get(documento.ultimo_transferido_por_id)
-    
-    # Si no hay un último transferidor, notificar a quien registró el documento
-    if not usuario_a_notificar:
-        usuario_a_notificar = documento.registrado_por
-    
-    # Notificar que se aceptó el documento
-    if usuario_a_notificar:
+
+    # Notificar al registrador original si no es el actual
+    if documento.registrado_por_id and documento.registrado_por_id != current_user.id:
         crear_notificacion(
-            usuario_id=usuario_a_notificar.id,
+            usuario_id=documento.registrado_por_id,
             titulo=f'Documento aceptado - {documento.radicado}',
             mensaje=f'El documento ha sido aceptado por {current_user.persona.nombre_completo}.',
             documento_id=documento.id
         )
-    
+
+    # Notificar al último transferidor si no es el actual ni el registrador
+    if (
+        documento.ultimo_transferido_por_id 
+        and documento.ultimo_transferido_por_id != current_user.id 
+        and documento.ultimo_transferido_por_id != documento.registrado_por_id
+    ):
+        crear_notificacion(
+            usuario_id=documento.ultimo_transferido_por_id,
+            titulo=f'Documento aceptado - {documento.radicado}',
+            mensaje=f'El documento ha sido aceptado por {current_user.persona.nombre_completo}.',
+            documento_id=documento.id
+        )
+
     # Responder según el tipo de solicitud
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
@@ -492,9 +549,10 @@ def aceptar(id):
             'message': 'Documento aceptado exitosamente.',
             'redirect': url_for('documentos.detalle', id=documento.id)
         })
-    
+
     flash('Documento aceptado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
+
 
 @documentos_bp.route('/rechazar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -503,63 +561,60 @@ def aceptar(id):
 def rechazar(id):
     """Vista para rechazar un documento"""
     documento = Documento.query.get_or_404(id)
-    
+
     # Verificar si el documento está asignado al usuario actual
     if documento.persona_destino_id != current_user.persona_id:
         flash('No puedes rechazar este documento porque no está asignado a ti.', 'danger')
         return redirect(url_for('documentos.detalle', id=documento.id))
-    
+
     # Si es una solicitud POST, procesar el formulario
     if request.method == 'POST':
         motivo_rechazo = request.form.get('motivo_rechazo', 'No se especificó motivo')
-        
-        # Transferir el documento de vuelta a recepción o a quien lo transfirió
+
+        # Lógica más robusta para determinar el destino del documento rechazado
         area_destino = None
         persona_destino = None
-        
-        # Si el documento fue transferido por alguien, devolvérselo a esa persona
+        usuario_a_notificar = None
+
+        # 1. Si el documento fue transferido por alguien, devolvérselo a esa persona
         if documento.ultimo_transferido_por_id:
             usuario_transferidor = Usuario.query.get(documento.ultimo_transferido_por_id)
-            if usuario_transferidor and usuario_transferidor.persona:
+            if usuario_transferidor and usuario_transferidor.persona and usuario_transferidor.activo:
                 area_destino = usuario_transferidor.persona.area
                 persona_destino = usuario_transferidor.persona
-                
-                # Notificar a quien transfirió que su documento fue rechazado
-                crear_notificacion(
-                    usuario_id=usuario_transferidor.id,
-                    titulo=f'Documento rechazado - {documento.radicado}',
-                    mensaje=f'El documento que transferiste ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
-                    documento_id=documento.id
-                )
-        
-        # Si no se encontró a quien transfirió, enviar a recepción
+                usuario_a_notificar = usuario_transferidor
+
+        # 2. Si no se puede devolver al transferidor, intentar con el registrador original
+        if area_destino is None or persona_destino is None:
+            if documento.registrado_por and documento.registrado_por.persona and documento.registrado_por.activo:
+                area_destino = documento.registrado_por.persona.area
+                persona_destino = documento.registrado_por.persona
+                usuario_a_notificar = documento.registrado_por
+
+        # 3. Si aún no hay destino, buscar a alguien en recepción
         if area_destino is None or persona_destino is None:
             area_recepcion = Area.query.filter_by(nombre='RECEPCION').first()
-            persona_recepcion = Persona.query.filter_by(area_id=area_recepcion.id).first() if area_recepcion else None
-            
-            # Si sigue sin encontrar área/persona destino, mostrar error
-            if not area_recepcion or not persona_recepcion:
-                flash('No se pudo encontrar el destino para devolver el documento rechazado.', 'danger')
-                return redirect(url_for('documentos.detalle', id=documento.id))
-            
-            area_destino = area_recepcion
-            persona_destino = persona_recepcion
-            
-            # Notificar a recepción
-            usuario_recepcion = Usuario.query.filter_by(persona_id=persona_destino.id).first()
-            if usuario_recepcion:
-                crear_notificacion(
-                    usuario_id=usuario_recepcion.id,
-                    titulo=f'Documento rechazado - {documento.radicado}',
-                    mensaje=f'El documento ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
-                    documento_id=documento.id
-                )
-        
-        # Obtener el estado "Rechazado" (si existe) o "Recibido" (como fallback)
+            usuario_recepcion = Usuario.query.join(Usuario.persona).join(Usuario.rol).filter(
+                Persona.area_id == area_recepcion.id if area_recepcion else 0,
+                Usuario.activo == True,
+                Rol.nombre == 'Recepción'
+            ).first()
+
+            if usuario_recepcion and usuario_recepcion.persona:
+                area_destino = area_recepcion
+                persona_destino = usuario_recepcion.persona
+                usuario_a_notificar = usuario_recepcion
+
+        # Si sigue sin encontrar área/persona destino, mostrar error
+        if not area_destino or not persona_destino:
+            flash('No se pudo encontrar el destino para devolver el documento rechazado.', 'danger')
+            return redirect(url_for('documentos.detalle', id=documento.id))
+
+        # Obtener el estado "Rechazado" (si existe) o "Recepcionado" (como fallback)
         estado_rechazado = EstadoDocumento.query.filter_by(nombre='Rechazado').first()
         if not estado_rechazado:
-            estado_rechazado = EstadoDocumento.query.filter_by(nombre='Recibido').first()
-        
+            estado_rechazado = EstadoDocumento.query.filter_by(nombre='Recepcionado').first()
+
         # Transferir el documento
         documento.transferir(
             usuario_origen=current_user,
@@ -568,10 +623,19 @@ def rechazar(id):
             estado_nuevo=estado_rechazado,
             observaciones=f'Documento rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}'
         )
-        
+
+        # Notificar a la persona destinataria
+        if usuario_a_notificar:
+            crear_notificacion(
+                usuario_id=usuario_a_notificar.id,
+                titulo=f'Documento rechazado - {documento.radicado}',
+                mensaje=f'El documento ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
+                documento_id=documento.id
+            )
+
         flash('Documento rechazado exitosamente.', 'success')
         return redirect(url_for('dashboard.index'))
-    
+
     # Si es GET, mostrar el formulario de rechazo
     return render_template('documentos/rechazar.html', documento=documento)
 
@@ -584,8 +648,41 @@ def finalizar(id):
     """Vista para finalizar un documento"""
     documento = Documento.query.get_or_404(id)
     
-    # Finalizar el documento
-    documento.finalizar(current_user)
+    # Obtener el estado "Finalizado"
+    estado_finalizado = EstadoDocumento.query.filter_by(nombre='Finalizado').first()
+    
+    # Si no existe el estado, mostrar error
+    if not estado_finalizado:
+        flash('No se puede finalizar el documento porque no existe el estado "Finalizado".', 'danger')
+        return redirect(url_for('documentos.detalle', id=documento.id))
+    
+    # Transferir el documento al mismo usuario pero cambiar el estado
+    documento.transferir(
+        usuario_origen=current_user,
+        area_destino=documento.area_destino,
+        persona_destino=documento.persona_destino,
+        estado_nuevo=estado_finalizado,
+        observaciones='Documento finalizado'
+    )
+    
+    # MEJORA: Enviar notificaciones a todos los involucrados
+    # Notificar al registrador original si es diferente del usuario actual
+    if documento.registrado_por_id and documento.registrado_por_id != current_user.id:
+        crear_notificacion(
+            usuario_id=documento.registrado_por_id,
+            titulo=f'Documento finalizado - {documento.radicado}',
+            mensaje=f'El documento ha sido finalizado por {current_user.persona.nombre_completo}.',
+            documento_id=documento.id
+        )
+    
+    # Notificar al último transferidor si es diferente del usuario actual y del registrador
+    if documento.ultimo_transferido_por_id and documento.ultimo_transferido_por_id != current_user.id and documento.ultimo_transferido_por_id != documento.registrado_por_id:
+        crear_notificacion(
+            usuario_id=documento.ultimo_transferido_por_id,
+            titulo=f'Documento finalizado - {documento.radicado}',
+            mensaje=f'El documento ha sido finalizado por {current_user.persona.nombre_completo}.',
+            documento_id=documento.id
+        )
     
     flash('Documento finalizado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
@@ -599,8 +696,47 @@ def archivar(id):
     """Vista para archivar un documento"""
     documento = Documento.query.get_or_404(id)
     
-    # Archivar el documento
-    documento.archivar(current_user)
+    # Verificar que el documento esté en estado Finalizado
+    estado_finalizado = EstadoDocumento.query.filter_by(nombre='Finalizado').first()
+    if documento.estado_actual_id != estado_finalizado.id:
+        flash('Solo se pueden archivar documentos que estén en estado "Finalizado".', 'danger')
+        return redirect(url_for('documentos.detalle', id=documento.id))
+    
+    # Obtener el estado "Archivado"
+    estado_archivado = EstadoDocumento.query.filter_by(nombre='Archivado').first()
+    
+    # Si no existe el estado, mostrar error
+    if not estado_archivado:
+        flash('No se puede archivar el documento porque no existe el estado "Archivado".', 'danger')
+        return redirect(url_for('documentos.detalle', id=documento.id))
+    
+    # Transferir el documento al mismo usuario pero cambiar el estado
+    documento.transferir(
+        usuario_origen=current_user,
+        area_destino=documento.area_destino,
+        persona_destino=documento.persona_destino,
+        estado_nuevo=estado_archivado,
+        observaciones='Documento archivado'
+    )
+    
+    # MEJORA: Enviar notificaciones a todos los involucrados
+    # Notificar al registrador original si es diferente del usuario actual
+    if documento.registrado_por_id and documento.registrado_por_id != current_user.id:
+        crear_notificacion(
+            usuario_id=documento.registrado_por_id,
+            titulo=f'Documento archivado - {documento.radicado}',
+            mensaje=f'El documento ha sido archivado por {current_user.persona.nombre_completo}.',
+            documento_id=documento.id
+        )
+    
+    # Notificar al último transferidor si es diferente del usuario actual y del registrador
+    if documento.ultimo_transferido_por_id and documento.ultimo_transferido_por_id != current_user.id and documento.ultimo_transferido_por_id != documento.registrado_por_id:
+        crear_notificacion(
+            usuario_id=documento.ultimo_transferido_por_id,
+            titulo=f'Documento archivado - {documento.radicado}',
+            mensaje=f'El documento ha sido archivado por {current_user.persona.nombre_completo}.',
+            documento_id=documento.id
+        )
     
     flash('Documento archivado exitosamente.', 'success')
     return redirect(url_for('documentos.detalle', id=documento.id))
@@ -612,15 +748,15 @@ def buscar():
     """Vista para buscar documentos"""
     form = BuscarDocumentoForm()
     documentos = []
-    
+
     # Obtener parámetros de paginación
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    
+
     # Manejar estado_id que podría ser una lista separada por comas
     estado_id = request.args.get('estado_id')
     estados_ids = []
-    
+
     if request.method == 'GET' and estado_id:
         if ',' in estado_id:
             form.estado_id.data = '0'  # Mostrar "Todos" en la interfaz
@@ -642,7 +778,7 @@ def buscar():
             query = query.filter(Documento.radicado.like(f'%{form.radicado.data}%'))
         elif request.args.get('radicado'):
             query = query.filter(Documento.radicado.like(f'%{request.args.get("radicado")}%'))
-        
+
         if form.fecha_desde.data:
             query = query.filter(Documento.fecha_recepcion >= form.fecha_desde.data)
         elif request.args.get('fecha_desde'):
@@ -662,7 +798,7 @@ def buscar():
                 query = query.filter(Documento.fecha_recepcion <= fecha_hasta)
             except ValueError:
                 pass
-        
+
         # Filtrar por estado_id múltiple o único
         if estados_ids:
             query = query.filter(Documento.estado_actual_id.in_(estados_ids))
@@ -670,7 +806,7 @@ def buscar():
             query = query.filter_by(estado_actual_id=form.estado_id.data)
         elif request.args.get('estado_id') and request.args.get('estado_id') != '0':
             query = query.filter_by(estado_actual_id=request.args.get('estado_id'))
-        
+
         if form.transportadora_id.data and int(form.transportadora_id.data) > 0:
             query = query.filter_by(transportadora_id=form.transportadora_id.data)
         elif request.args.get('transportadora_id') and int(request.args.get('transportadora_id')) > 0:
@@ -700,7 +836,8 @@ def buscar():
             query = query.filter(
                 or_(
                     Documento.area_destino_id == current_user.persona.area_id,
-                    Documento.persona_destino_id == current_user.persona_id
+                    Documento.persona_destino_id == current_user.persona_id,
+                    Documento.ultimo_transferido_por_id == current_user.id  # Incluir documentos transferidos por el usuario
                 )
             )
 
@@ -725,26 +862,31 @@ def buscar():
                         except:
                             pass
 
-        return render_template('documentos/buscar.html', 
-                              form=form, 
-                              documentos=documentos,
-                              pagination=pagination,
-                              is_search=True)
-    
-    return render_template('documentos/buscar.html', 
-                          form=form, 
-                          documentos=[],
-                          pagination=None,
-                          is_search=False)
+        return render_template('documentos/buscar.html',
+                               form=form,
+                               documentos=documentos,
+                               pagination=pagination,
+                               is_search=True)
+
+    return render_template('documentos/buscar.html',
+                           form=form,
+                           documentos=[],
+                           pagination=None,
+                           is_search=False)@documentos_bp.route('/get_personas/<int:area_id>')
 
 
 @documentos_bp.route('/get_personas/<int:area_id>')
 @login_required
 def get_personas(area_id):
     """API para obtener las personas de un área específica"""
-    personas = Persona.query.filter_by(area_id=area_id, activo=True).order_by(Persona.nombres_apellidos).all()
-    personas_json = [{'id': p.id, 'nombre': p.nombre_completo, 'nombres_apellidos': p.nombres_apellidos} for p in personas]
-    return jsonify(personas_json)
+    try:
+        personas = Persona.query.filter_by(area_id=area_id, activo=True).order_by(Persona.nombres_apellidos).all()
+        personas_json = [{'id': p.id, 'nombre': p.nombre_completo} for p in personas]
+        return jsonify(personas_json)
+    except Exception as e:
+        # Registrar el error
+        print(f"Error al obtener personas del área {area_id}: {str(e)}")
+        return jsonify([]), 500
 
 @documentos_bp.route('/exportar/<formato>')
 @login_required

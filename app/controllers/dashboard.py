@@ -13,32 +13,44 @@ def index():
     # Obtener estados para filtrar
     estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
+    estado_transferido = EstadoDocumento.query.filter_by(nombre='Documento Transferido').first()
+    estado_rechazado = EstadoDocumento.query.filter_by(nombre='Rechazado').first()
     estado_finalizado = EstadoDocumento.query.filter_by(nombre='Finalizado').first()
     estado_archivado = EstadoDocumento.query.filter_by(nombre='Archivado').first()
-    
-    # Contar documentos pendientes (recibidos + en proceso)
+
+    # Crear lista de IDs de estados pendientes
+    estados_pendientes = []
+    if estado_recibido:
+        estados_pendientes.append(estado_recibido.id)
+    if estado_en_proceso:
+        estados_pendientes.append(estado_en_proceso.id)
+    if estado_transferido:
+        estados_pendientes.append(estado_transferido.id)
+    if estado_rechazado:
+        estados_pendientes.append(estado_rechazado.id)
+
     pendientes_query = Documento.query.filter(
-        Documento.estado_actual_id.in_([estado_recibido.id, estado_en_proceso.id])
+        Documento.estado_actual_id.in_(estados_pendientes)
     )
-    
-    # Contar documentos finalizados (incluye los archivados)
+
+    # Crear lista de IDs de estados finalizados
+    estados_finalizados = []
+    if estado_finalizado:
+        estados_finalizados.append(estado_finalizado.id)
+    if estado_archivado:
+        estados_finalizados.append(estado_archivado.id)
+
     finalizados_query = Documento.query.filter(
-        Documento.estado_actual_id.in_([
-            estado_finalizado.id if estado_finalizado else None,
-            estado_archivado.id if estado_archivado else None
-        ])
+        Documento.estado_actual_id.in_(estados_finalizados)
     )
-    
+
     # Filtrar según el rol del usuario
     if current_user.rol.nombre == 'Superadministrador':
-        # Superadministrador ve todos los documentos
         pass
     elif current_user.rol.nombre == 'Recepción':
-        # Recepción ve los documentos que ha registrado
         pendientes_query = pendientes_query.filter_by(registrado_por_id=current_user.id)
         finalizados_query = finalizados_query.filter_by(registrado_por_id=current_user.id)
     else:
-        # Usuario regular ve los documentos de su área o asignados a él
         pendientes_query = pendientes_query.filter(
             or_(
                 Documento.area_destino_id == current_user.persona.area_id,
@@ -51,32 +63,38 @@ def index():
                 Documento.persona_destino_id == current_user.persona_id
             )
         )
-    
-    # Contar los documentos
+
     documentos_pendientes = pendientes_query.count()
     documentos_finalizados = finalizados_query.count()
-    
-    # Obtener documentos recientes (últimos 5)
-    documentos_recientes = pendientes_query.order_by(Documento.creado_en.desc()).limit(5).all()
-    
+
+    # Obtener documentos recientes (últimos 5) con los filtros aplicados correctamente
+    recientes_query = Documento.query
+
+    if current_user.rol.nombre == 'Superadministrador':
+        pass
+    elif current_user.rol.nombre == 'Recepción':
+        recientes_query = recientes_query.filter_by(registrado_por_id=current_user.id)
+    else:
+        recientes_query = recientes_query.filter(
+            or_(
+                Documento.area_destino_id == current_user.persona.area_id,
+                Documento.persona_destino_id == current_user.persona_id,
+                Documento.ultimo_transferido_por_id == current_user.id
+            )
+        )
+
+    documentos_recientes = recientes_query.order_by(Documento.creado_en.desc()).limit(5).all()
+
     # Preparar IDs de estado para filtros en la búsqueda
-    estado_pendiente_id = ",".join([str(estado_recibido.id), str(estado_en_proceso.id)])
-    
-    # Incluir estado finalizado y archivado
-    estado_finalizado_ids = []
-    if estado_finalizado:
-        estado_finalizado_ids.append(str(estado_finalizado.id))
-    if estado_archivado:
-        estado_finalizado_ids.append(str(estado_archivado.id))
-    
-    estado_finalizado_id = ",".join(estado_finalizado_ids)
-    
+    estado_pendiente_id = ",".join([str(id) for id in estados_pendientes])
+    estado_finalizado_id = ",".join([str(id) for id in estados_finalizados])
+
     return render_template('dashboard.html',
-                          documentos_pendientes=documentos_pendientes,
-                          documentos_finalizados=documentos_finalizados,
-                          documentos_recientes=documentos_recientes,
-                          estado_pendiente_id=estado_pendiente_id,
-                          estado_finalizado_id=estado_finalizado_id)
+                           documentos_pendientes=documentos_pendientes,
+                           documentos_finalizados=documentos_finalizados,
+                           documentos_recientes=documentos_recientes,
+                           estado_pendiente_id=estado_pendiente_id,
+                           estado_finalizado_id=estado_finalizado_id)
 
 @dashboard_bp.route('/contador-documentos')
 @login_required
@@ -85,32 +103,44 @@ def contador_documentos():
     # Obtener estados para filtrar
     estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
+    estado_transferido = EstadoDocumento.query.filter_by(nombre='Documento Transferido').first()
+    estado_rechazado = EstadoDocumento.query.filter_by(nombre='Rechazado').first()
     estado_finalizado = EstadoDocumento.query.filter_by(nombre='Finalizado').first()
     estado_archivado = EstadoDocumento.query.filter_by(nombre='Archivado').first()
-    
-    # Contar documentos pendientes (recibidos + en proceso)
+
+    # Crear lista de IDs de estados pendientes
+    estados_pendientes = []
+    if estado_recibido:
+        estados_pendientes.append(estado_recibido.id)
+    if estado_en_proceso:
+        estados_pendientes.append(estado_en_proceso.id)
+    if estado_transferido:
+        estados_pendientes.append(estado_transferido.id)
+    if estado_rechazado:
+        estados_pendientes.append(estado_rechazado.id)
+
     pendientes_query = Documento.query.filter(
-        Documento.estado_actual_id.in_([estado_recibido.id, estado_en_proceso.id])
+        Documento.estado_actual_id.in_(estados_pendientes)
     )
-    
-    # Contar documentos finalizados (incluye los archivados)
+
+    # Crear lista de IDs de estados finalizados
+    estados_finalizados = []
+    if estado_finalizado:
+        estados_finalizados.append(estado_finalizado.id)
+    if estado_archivado:
+        estados_finalizados.append(estado_archivado.id)
+
     finalizados_query = Documento.query.filter(
-        Documento.estado_actual_id.in_([
-            estado_finalizado.id if estado_finalizado else None,
-            estado_archivado.id if estado_archivado else None
-        ])
+        Documento.estado_actual_id.in_(estados_finalizados)
     )
-    
+
     # Filtrar según el rol del usuario
     if current_user.rol.nombre == 'Superadministrador':
-        # Superadministrador ve todos los documentos
         pass
     elif current_user.rol.nombre == 'Recepción':
-        # Recepción ve los documentos que ha registrado
         pendientes_query = pendientes_query.filter_by(registrado_por_id=current_user.id)
         finalizados_query = finalizados_query.filter_by(registrado_por_id=current_user.id)
     else:
-        # Usuario regular ve los documentos de su área o asignados a él
         pendientes_query = pendientes_query.filter(
             or_(
                 Documento.area_destino_id == current_user.persona.area_id,
@@ -123,12 +153,10 @@ def contador_documentos():
                 Documento.persona_destino_id == current_user.persona_id
             )
         )
-    
-    # Contar los documentos
+
     documentos_pendientes = pendientes_query.count()
     documentos_finalizados = finalizados_query.count()
-    
-    # Devolver los datos en formato JSON
+
     return jsonify({
         'documentos_pendientes': documentos_pendientes,
         'documentos_finalizados': documentos_finalizados

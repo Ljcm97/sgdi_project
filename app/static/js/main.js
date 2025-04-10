@@ -35,49 +35,44 @@ function setupAutoCloseAlerts() {
     });
 }
 
-// Función para manejar el cambio dinámico del selector de personas según el área
-function setupDynamicPersonaSelector() {
-    const areaSelect = document.getElementById('area_destino_id');
-    const personaSelect = document.getElementById('persona_destino_id');
-    
-    if (areaSelect && personaSelect) {
-        areaSelect.addEventListener('change', function() {
-            const areaId = this.value;
-            if (areaId) {
-                fetch(`/documentos/get_personas/${areaId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpiar select actual
-                        personaSelect.innerHTML = '';
-                        
-                        // Agregar nuevas opciones
-                        data.forEach(persona => {
-                            const option = document.createElement('option');
-                            option.value = persona.id;
-                            option.textContent = persona.nombre;
-                            personaSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error al cargar personas:', error));
-            }
-        });
+// Función para cargar personas de un área (usando jQuery)
+function cargarPersonasArea() {
+    var areaId = $('#area_destino_id').val();
+    if (!areaId) {
+        // Si no hay área seleccionada, limpiar y deshabilitar el selector de personas
+        $("#persona_destino_id").html('<option value="">Seleccione persona</option>');
+        $("#persona_destino_id").prop('disabled', true);
+        return;
     }
-}
 
-// Inicializar todas las funciones cuando el DOM está listo
-document.addEventListener('DOMContentLoaded', function() {
-    initTooltips();
-    setupConfirmations();
-    setupAutoCloseAlerts();
-    setupDynamicPersonaSelector();
-});
+    // Habilitar el selector de personas
+    $("#persona_destino_id").prop('disabled', false);
+
+    // Cargar personas del área seleccionada
+    $.ajax({
+        url: "/documentos/get_personas/" + areaId,
+        type: "GET",
+        dataType: "json",
+        cache: false,
+        success: function(data) {
+            var options = '<option value="">Seleccione persona</option>';
+            $.each(data, function(index, persona) {
+                options += '<option value="' + persona.id + '">' + persona.nombre + '</option>';
+            });
+            $("#persona_destino_id").html(options);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al cargar personas:", error);
+            $("#persona_destino_id").html('<option value="">Error al cargar personas</option>');
+        }
+    });
+}
 
 // Función para actualizar los contadores del dashboard si están presentes en la página
 function actualizarContadoresDashboard() {
-    // Verificar si estamos en la página del dashboard
     const contadorPendientes = document.getElementById('contador-pendientes');
     const contadorFinalizados = document.getElementById('contador-finalizados');
-    
+
     if (contadorPendientes && contadorFinalizados) {
         fetch('/contador-documentos')
             .then(response => response.json())
@@ -89,15 +84,23 @@ function actualizarContadoresDashboard() {
     }
 }
 
-// Agregar al DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
+// Inicializar cuando el DOM esté listo
+$(document).ready(function() {
+    // Tooltips, confirmaciones, alertas
     initTooltips();
     setupConfirmations();
     setupAutoCloseAlerts();
-    setupDynamicPersonaSelector();
-    
-    // Configurar actualización periódica de contadores si estamos en el dashboard
-    if (document.getElementById('contador-pendientes')) {
+
+    // Selector dinámico de personas según área
+    $("#area_destino_id").on('change', cargarPersonasArea);
+
+    // Si ya hay un área seleccionada al cargar, traer sus personas
+    if ($("#area_destino_id").length > 0 && $("#area_destino_id").val()) {
+        cargarPersonasArea();
+    }
+
+    // Actualización periódica de contadores si estamos en dashboard
+    if ($('#contador-pendientes').length > 0) {
         setInterval(actualizarContadoresDashboard, 30000); // Cada 30 segundos
     }
 });

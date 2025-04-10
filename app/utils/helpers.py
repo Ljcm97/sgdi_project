@@ -47,6 +47,7 @@ def generate_radicado():
     
     return f"{date_str}-{num_secuencial}"
 
+
 def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
     """
     Crea una nueva notificación para un usuario.
@@ -60,19 +61,47 @@ def crear_notificacion(usuario_id, titulo, mensaje, documento_id=None):
     Returns:
         Notificacion: La notificación creada.
     """
-    # Usar datetime.now() para asegurar que tiene la hora correcta
+    from app.models.notificacion import Notificacion
+    from app.models.usuario import Usuario
+    
+    # Verificar que el usuario exista y esté activo
+    usuario = Usuario.query.get(usuario_id)
+    if not usuario or not usuario.activo:
+        print(f"No se pudo crear notificación para usuario ID {usuario_id}: Usuario no existe o está inactivo")
+        return None
+    
+    # Evitar notificaciones duplicadas en un corto periodo (5 minutos)
+    tiempo_limite = datetime.datetime.now() - datetime.timedelta(minutes=5)
+    existe_notificacion = Notificacion.query.filter(
+        Notificacion.usuario_id == usuario_id,
+        Notificacion.titulo == titulo,
+        Notificacion.documento_id == documento_id,
+        Notificacion.creado_en >= tiempo_limite
+    ).first()
+    
+    if existe_notificacion:
+        print(f"No se creó notificación duplicada para usuario ID {usuario_id}: '{titulo}'")
+        return existe_notificacion
+    
+    # Crear la notificación
     notificacion = Notificacion(
         usuario_id=usuario_id,
         titulo=titulo,
         mensaje=mensaje,
         documento_id=documento_id,
-        creado_en=datetime.datetime.now()  # Asegurar que se usa la hora actual
+        creado_en=datetime.datetime.now()
     )
     db.session.add(notificacion)
-    db.session.commit()
     
-    return notificacion
-
+    try:
+        db.session.commit()
+        return notificacion
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al crear notificación: {str(e)}")
+        return None
+    
+    
 def flash_errors(form):
     """
     Muestra todos los errores de validación de un formulario como mensajes flash.

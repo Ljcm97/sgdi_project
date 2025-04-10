@@ -51,17 +51,22 @@ class Documento(db.Model, CRUDMixin):
         
         return cls.create(**kwargs)
     
+
     def transferir(self, usuario_origen, area_destino, persona_destino, estado_nuevo, observaciones=None):
         """Transfiere el documento a otra área/persona"""
         from app.models.movimiento import Movimiento
+        
+        # Guardar el área y persona origen antes de actualizar
+        area_origen_id = self.area_destino_id
+        persona_origen_id = self.persona_destino_id
         
         # Crear un nuevo movimiento
         movimiento = Movimiento(
             documento_id=self.id,
             fecha_hora=datetime.utcnow(),
             usuario_origen_id=usuario_origen.id,
-            area_origen_id=self.area_destino_id,
-            persona_origen_id=self.persona_destino_id,
+            area_origen_id=area_origen_id,
+            persona_origen_id=persona_origen_id,
             area_destino_id=area_destino.id,
             persona_destino_id=persona_destino.id,
             estado_documento_id=estado_nuevo.id,
@@ -75,10 +80,12 @@ class Documento(db.Model, CRUDMixin):
         self.estado_actual_id = estado_nuevo.id
         
         # Guardar quien realizó la transferencia
-        self.ultimo_transferido_por_id = usuario_origen.id
+        if usuario_origen.id != self.registrado_por_id:  # No registrar al creador como transferidor
+            self.ultimo_transferido_por_id = usuario_origen.id
         
         db.session.commit()
         return self
+    
     
     def finalizar(self, usuario):
         """Marca el documento como finalizado"""
