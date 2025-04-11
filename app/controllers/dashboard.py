@@ -11,6 +11,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def index():
     """Vista del dashboard principal"""
     # Obtener estados para filtrar
+    estado_recepcionado = EstadoDocumento.query.filter_by(nombre='Recepcionado').first()
     estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
     estado_transferido = EstadoDocumento.query.filter_by(nombre='Documento Transferido').first()
@@ -20,6 +21,8 @@ def index():
 
     # Crear lista de IDs de estados pendientes
     estados_pendientes = []
+    if estado_recepcionado:
+        estados_pendientes.append(estado_recepcionado.id)
     if estado_recibido:
         estados_pendientes.append(estado_recibido.id)
     if estado_en_proceso:
@@ -101,6 +104,7 @@ def index():
 def contador_documentos():
     """API para obtener contador de documentos pendientes y finalizados"""
     # Obtener estados para filtrar
+    estado_recepcionado = EstadoDocumento.query.filter_by(nombre='Recepcionado').first()
     estado_recibido = EstadoDocumento.query.filter_by(nombre='Recibido').first()
     estado_en_proceso = EstadoDocumento.query.filter_by(nombre='En proceso').first()
     estado_transferido = EstadoDocumento.query.filter_by(nombre='Documento Transferido').first()
@@ -110,6 +114,8 @@ def contador_documentos():
 
     # Crear lista de IDs de estados pendientes
     estados_pendientes = []
+    if estado_recepcionado:
+        estados_pendientes.append(estado_recepcionado.id)
     if estado_recibido:
         estados_pendientes.append(estado_recibido.id)
     if estado_en_proceso:
