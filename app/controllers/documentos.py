@@ -458,6 +458,7 @@ def transferir(id):
 
     return render_template('documentos/transferir.html', documento=documento, form=form)
 
+
 @documentos_bp.route('/aceptar/<int:id>', methods=['GET', 'POST'])
 @login_required
 @document_access_required
@@ -504,7 +505,7 @@ def aceptar(id):
     db.session.add(movimiento_recibido)
     db.session.commit()
 
-    # Pequeña pausa para asegurar que los timestamps sean diferentes
+    # Pausa para asegurar timestamps distintos
     import time
     time.sleep(0.5)
 
@@ -529,12 +530,8 @@ def aceptar(id):
             documento_id=documento.id
         )
 
-    # Notificar al último transferidor si no es el actual ni el registrador
-    if (
-        documento.ultimo_transferido_por_id 
-        and documento.ultimo_transferido_por_id != current_user.id 
-        and documento.ultimo_transferido_por_id != documento.registrado_por_id
-    ):
+    # Notificar al último transferidor si no es el actual
+    if documento.ultimo_transferido_por_id and documento.ultimo_transferido_por_id != current_user.id:
         crear_notificacion(
             usuario_id=documento.ultimo_transferido_por_id,
             titulo=f'Documento aceptado - {documento.radicado}',
@@ -574,7 +571,8 @@ def rechazar(id):
         # Lógica más robusta para determinar el destino del documento rechazado
         area_destino = None
         persona_destino = None
-        usuario_a_notificar = None
+        usuario_destino = None
+        usuario_transferidor = None
 
         # 1. Si el documento fue transferido por alguien, devolvérselo a esa persona
         if documento.ultimo_transferido_por_id:
@@ -582,14 +580,14 @@ def rechazar(id):
             if usuario_transferidor and usuario_transferidor.persona and usuario_transferidor.activo:
                 area_destino = usuario_transferidor.persona.area
                 persona_destino = usuario_transferidor.persona
-                usuario_a_notificar = usuario_transferidor
+                usuario_destino = usuario_transferidor
 
         # 2. Si no se puede devolver al transferidor, intentar con el registrador original
         if area_destino is None or persona_destino is None:
             if documento.registrado_por and documento.registrado_por.persona and documento.registrado_por.activo:
                 area_destino = documento.registrado_por.persona.area
                 persona_destino = documento.registrado_por.persona
-                usuario_a_notificar = documento.registrado_por
+                usuario_destino = documento.registrado_por
 
         # 3. Si aún no hay destino, buscar a alguien en recepción
         if area_destino is None or persona_destino is None:
@@ -603,7 +601,7 @@ def rechazar(id):
             if usuario_recepcion and usuario_recepcion.persona:
                 area_destino = area_recepcion
                 persona_destino = usuario_recepcion.persona
-                usuario_a_notificar = usuario_recepcion
+                usuario_destino = usuario_recepcion
 
         # Si sigue sin encontrar área/persona destino, mostrar error
         if not area_destino or not persona_destino:
@@ -624,10 +622,19 @@ def rechazar(id):
             observaciones=f'Documento rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}'
         )
 
-        # Notificar a la persona destinataria
-        if usuario_a_notificar:
+        # Notificar al usuario destino
+        if usuario_destino:
             crear_notificacion(
-                usuario_id=usuario_a_notificar.id,
+                usuario_id=usuario_destino.id,
+                titulo=f'Documento rechazado - {documento.radicado}',
+                mensaje=f'El documento ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
+                documento_id=documento.id
+            )
+
+        # También notificar al transferidor si es diferente del usuario destino
+        if usuario_transferidor and (not usuario_destino or usuario_transferidor.id != usuario_destino.id):
+            crear_notificacion(
+                usuario_id=usuario_transferidor.id,
                 titulo=f'Documento rechazado - {documento.radicado}',
                 mensaje=f'El documento ha sido rechazado por {current_user.persona.nombre_completo}. Motivo: {motivo_rechazo}',
                 documento_id=documento.id

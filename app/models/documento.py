@@ -79,9 +79,8 @@ class Documento(db.Model, CRUDMixin):
         self.persona_destino_id = persona_destino.id
         self.estado_actual_id = estado_nuevo.id
         
-        # Guardar quien realizó la transferencia
-        if usuario_origen.id != self.registrado_por_id:  # No registrar al creador como transferidor
-            self.ultimo_transferido_por_id = usuario_origen.id
+        # Guardar quien realizó la transferencia (siempre se actualiza)
+        self.ultimo_transferido_por_id = usuario_origen.id
         
         db.session.commit()
         return self
