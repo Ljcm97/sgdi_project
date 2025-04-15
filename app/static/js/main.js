@@ -39,16 +39,13 @@ function setupAutoCloseAlerts() {
 function cargarPersonasArea() {
     var areaId = $('#area_destino_id').val();
     if (!areaId) {
-        // Si no hay área seleccionada, limpiar y deshabilitar el selector de personas
         $("#persona_destino_id").html('<option value="">Seleccione persona</option>');
         $("#persona_destino_id").prop('disabled', true);
         return;
     }
 
-    // Habilitar el selector de personas
     $("#persona_destino_id").prop('disabled', false);
 
-    // Cargar personas del área seleccionada
     $.ajax({
         url: "/documentos/get_personas/" + areaId,
         type: "GET",
@@ -84,6 +81,81 @@ function actualizarContadoresDashboard() {
     }
 }
 
+// Inicializar Select2 para todos los selectores
+function inicializarSelect2() {
+    $('select.form-select').select2({
+        placeholder: "Seleccione una opción",
+        allowClear: true,
+        width: '100%',
+        language: {
+            noResults: function() {
+                return "No se encontraron resultados";
+            },
+            searching: function() {
+                return "Buscando...";
+            }
+        }
+    });
+}
+
+// Validar formulario antes de enviar
+function validarFormulario(form) {
+    let esValido = true;
+    let primerInvalido = null;
+
+    // Validar inputs requeridos
+    $(form).find('input, select, textarea').each(function() {
+        const esRequerido = $(this).prop('required');
+        const tipo = $(this).attr('type');
+        const valor = $(this).val();
+
+        if (esRequerido && (!valor || valor === "")) {
+            $(this).addClass('is-invalid');
+            if (!primerInvalido) primerInvalido = this;
+            esValido = false;
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    // Validar campos Select2 que son requeridos
+    $(form).find('select.form-select[required]').each(function() {
+        const valor = $(this).val();
+        const $select2Container = $(this).next('.select2-container');
+
+        if (!valor || valor === "") {
+            $select2Container.addClass('is-invalid');
+            if (!primerInvalido) primerInvalido = this;
+            esValido = false;
+        } else {
+            $select2Container.removeClass('is-invalid');
+        }
+    });
+
+    if (!esValido && primerInvalido) {
+        primerInvalido.focus();
+    }
+
+    return esValido;
+}
+
+// Asegurarse de que Select2 sincronice sus valores antes de enviar el formulario
+$('form').on('submit', function(e) {
+    const form = this;
+
+    // Sincronizar select2
+    $(form).find('select.form-select').each(function() {
+        const val = $(this).val();
+        $(this).val(val).trigger('change');
+    });
+
+    // Validar antes de enviar
+    if (!validarFormulario(form)) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+});
+
 // Inicializar cuando el DOM esté listo
 $(document).ready(function() {
     // Tooltips, confirmaciones, alertas
@@ -103,4 +175,37 @@ $(document).ready(function() {
     if ($('#contador-pendientes').length > 0) {
         setInterval(actualizarContadoresDashboard, 30000); // Cada 30 segundos
     }
+
+    // Inicializar Select2
+    inicializarSelect2();
+});
+
+// Reinicializar Select2 después de mostrar modales o acordeones
+$('.accordion-button, [data-bs-toggle="modal"]').on('click', function() {
+    setTimeout(function() {
+        inicializarSelect2();
+    }, 200);
+});
+
+// Asegurarse de que Select2 se ajuste al tamaño del contenedor en resize
+$(window).on('resize', function() {
+    $('select.form-select').each(function() {
+        $(this).select2({
+            placeholder: "Seleccione una opción",
+            allowClear: true,
+            width: '100%'
+        });
+    });
+});
+
+// Inicializar todos los selectores después de cargar la página (extra por seguridad)
+$(document).ready(function() {
+    // Pequeña pausa para asegurarse de que todo está listo
+    setTimeout(function() {
+        $('select.form-select').select2({
+            placeholder: "Seleccione una opción",
+            allowClear: true,
+            width: '100%'
+        });
+    }, 100);
 });

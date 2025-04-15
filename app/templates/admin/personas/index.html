@@ -27,7 +27,7 @@
             <div class="card-body">
                 <form method="GET" action="{{ url_for('personas.index') }}">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="search" placeholder="Buscar por nombre, apellido o email..." value="{{ search if search else '' }}">
                                 <button class="btn btn-primary" type="submit">
