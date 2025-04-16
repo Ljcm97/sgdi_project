@@ -34,11 +34,12 @@ def index():
     
     for estado in estados:
         count = Documento.query.filter_by(estado_actual_id=estado.id).count()
-        stats_estados[estado.nombre] = {
-            'count': count,
-            'color': estado.color,
-            'percentage': round((count / total_documentos * 100) if total_documentos > 0 else 0, 1)
-        }
+        if count > 0:  # Solo incluir estados con documentos
+            stats_estados[estado.nombre] = {
+                'count': count,
+                'color': estado.color,
+                'percentage': round((count / total_documentos * 100) if total_documentos > 0 else 0, 1)
+            }
     
     # Documentos procesados en el último mes
     fecha_inicio = datetime.now() - timedelta(days=30)

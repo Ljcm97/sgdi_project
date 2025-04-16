@@ -183,4 +183,70 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 <script src="{{ url_for('static', filename='js/reportes.js') }}"></script>
+
+{% if resultados %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const labels = [{% for resultado in resultados %}'{{ resultado.area }}',{% endfor %}];
+        const data = [{% for resultado in resultados %}{{ resultado.total }},{% endfor %}];
+        const colors = [
+            '#1D2C96', '#28a745', '#ffc107', '#dc3545', '#17a2b8', 
+            '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#6c757d'
+        ];
+        
+        const ctx = document.getElementById('chartAreas').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Documentos por Área',
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        {% for resultado in resultados %}
+        const ctxArea{{ loop.index }} = document.getElementById('chart{{ loop.index }}');
+        if (ctxArea{{ loop.index }}) {
+            const estadosData = {{ resultado.estados|tojson }};
+            new Chart(ctxArea{{ loop.index }}.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: estadosData.map(d => d.estado),
+                    datasets: [{
+                        data: estadosData.map(d => d.cantidad),
+                        backgroundColor: estadosData.map(d => d.color),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        {% endfor %}
+    });
+</script>
+{% endif %}
 {% endblock %}

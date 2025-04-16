@@ -100,15 +100,20 @@ function inicializarDashboardChart(container) {
     
     if (!datos) return;
     
+    // Extraer labels, data y colors de los datos
+    const labels = Object.keys(datos);
+    const data = labels.map(key => datos[key].count);
+    const colors = labels.map(key => datos[key].color);
+    
     // Crear el gráfico
     const ctx = container.getContext('2d');
     chartPrincipal = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: datos.map(d => d.estado),
+            labels: labels,
             datasets: [{
-                data: datos.map(d => d.cantidad),
-                backgroundColor: datos.map(d => d.color),
+                data: data,
+                backgroundColor: colors,
                 borderWidth: 1
             }]
         },

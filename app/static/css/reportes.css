@@ -119,7 +119,7 @@
 
 /* Corrección: Asegurar que los encabezados sean blancos */
 .data-table thead th {
-    color: rgb(255, 255, 255) !important;
+    color: #212529 !important;
     font-weight: bold;
     text-align: center;
 }
